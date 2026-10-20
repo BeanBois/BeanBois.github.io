@@ -263,6 +263,7 @@ def panel_art(kind):
 
 # What the music proxy will return (stage 3: a small worker holding Kai Shun's Spotify token). Until then the
 # cover plays this sample, and a prototype-only switch shows the offline state.
+MUSIC_API = ""   # the now-playing worker (worker/); empty: the cover plays SAMPLE_MUSIC
 SAMPLE_MUSIC = {"sample": True, "is_playing": True, "title": "Sample track", "artist": "Sample artist", "url": None,
                 "duration_ms": 214000, "progress_ms": 61000, "bpm": 96, "played_at": None}
 
@@ -451,14 +452,16 @@ def colophon_page(n_entries, n_public, n_vols):
 
 def cover_page(data, vols, chapters):
     t = (SRC / "cover.html").read_text()
-    data = dict(data, chapters={i: {"href": f"vol-{i}.html", "vol": vols[i]} for i in chapters}, vols=vols, music=SAMPLE_MUSIC,
+    data = dict(data, chapters={i: {"href": f"vol-{i}.html", "vol": vols[i]} for i in chapters}, vols=vols, musicApi=MUSIC_API or None,
+                music=SAMPLE_MUSIC if not MUSIC_API else {"is_playing": False, "title": None},
                 playlists=sample_playlists(data["nodes"]), topInset=110)
     music_js = """<script>
 /* the line under the record: what's playing, or what played last */
 const npEl = document.getElementById("np");
 const ago = ms => { const m = Math.round(ms / 60000); return m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} d ago`; };
 function renderNp() {
-  if (!music) { npEl.hidden = true; return; }
+  if (!music || !music.title) { npEl.hidden = true; return; }
+  npEl.hidden = false;
   const what = `<b>${esc(music.title)}</b> · ${esc(music.artist)}`;
   const line = music.playlist ? `from the ${esc(music.playlist)} playlist: ${what}${music.bpm ? ` · ${music.bpm} bpm` : ""}`
     : music.is_playing ? `<span class="dot" aria-hidden="true"></span>now playing ${what}${music.bpm ? ` · ${music.bpm} bpm` : ""}`
@@ -475,6 +478,24 @@ function renderNp() {
 }
 renderNp();
 window.addEventListener("record", renderNp);
+
+/* the real thing: ask the worker what's playing, every 20 s while the page is open and visible */
+async function poll() {
+  if (!D.musicApi || document.hidden) return;
+  try {
+    const r = await fetch(D.musicApi + "/now", { cache: "no-store" });
+    if (!r.ok) return;
+    const j = await r.json();
+    if (!j.title) return;
+    const changed = j.title !== homeMusic.title || j.is_playing !== homeMusic.is_playing || j.art !== homeMusic.art;
+    const late = j.is_playing ? Math.max(0, Date.now() - j.fetched_at) : 0;   // the worker's answer can be up to 15 s old
+    Object.assign(homeMusic, j, { key: "me", progress_ms: (j.progress_ms || 0) + late, at: performance.now(), sample: false });
+    if (rec.on === ME) { if (changed) rec.art = artFor(homeMusic); renderNp(); }
+  } catch {}
+}
+poll();
+setInterval(poll, 20000);
+document.addEventListener("visibilitychange", poll);
 </script>"""
     if t.count("/*__DATA__*/null") != 1:
         raise SystemExit("src/cover.html: the data placeholder is missing")

@@ -723,14 +723,15 @@ function standInCover(g, N, key) {
 }
 // one track's art: the cover in colour (shown big and faint behind the grooves) and the label (the cover as screentone)
 function artFor(m) {
-  const key = m.key + (m.is_playing ? ":on" : ":off");
+  const key = m.key + "|" + (m.art || m.title || "") + (m.is_playing ? ":on" : ":off");
   if (rec.cache.has(key)) return rec.cache.get(key);
   const N = 320, cover = document.createElement("canvas"); cover.width = cover.height = N;
   const cg = cover.getContext("2d");
-  const img = m.art ? Object.assign(new Image(), { src: m.art }) : null;
+  const img = m.art ? Object.assign(new Image(), { crossOrigin: "anonymous", src: m.art }) : null;   // the cover is re-served with CORS so it can be read
   const paint = () => {
     if (img && img.complete && img.naturalWidth) cg.drawImage(img, 0, 0, N, N); else standInCover(cg, N, m.key);
-    out.label = halftoneLabel(cover, N, m.is_playing);
+    try { out.label = halftoneLabel(cover, N, m.is_playing); }
+    catch { standInCover(cg, N, m.key); out.label = halftoneLabel(cover, N, m.is_playing); }   // an unreadable image: fall back
   };
   const out = { cover, label: null };
   paint();
@@ -969,28 +970,6 @@ if (wantId === "me" || byId.has(wantId)) setTimeout(() => select(wantId === "me"
 readColours();
 requestAnimationFrame(loop);
 </script>
-<script>
-/* the line under the record: what's playing, or what played last */
-const npEl = document.getElementById("np");
-const ago = ms => { const m = Math.round(ms / 60000); return m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} d ago`; };
-function renderNp() {
-  if (!music) { npEl.hidden = true; return; }
-  const what = `<b>${esc(music.title)}</b> · ${esc(music.artist)}`;
-  const line = music.playlist ? `from the ${esc(music.playlist)} playlist: ${what}${music.bpm ? ` · ${music.bpm} bpm` : ""}`
-    : music.is_playing ? `<span class="dot" aria-hidden="true"></span>now playing ${what}${music.bpm ? ` · ${music.bpm} bpm` : ""}`
-    : `last played ${ago(Date.now() - music.played_at)} ${what}`;
-  npEl.innerHTML = (music.url ? `<a href="${esc(music.url)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">${line}</a>` : line)
-    + (music.sample ? `<br>sample data, not live${music === homeMusic ? `<button type="button" id="npdemo">${music.is_playing ? "stop the music" : "play it"}</button>` : ""}` : "");
-  const b = document.getElementById("npdemo");
-  if (b) b.onclick = () => {
-    const now = performance.now();
-    if (music.is_playing) Object.assign(music, { is_playing: false, progress_ms: songAt(now) * 1000, played_at: Date.now() - 2 * 3600e3 });
-    else Object.assign(music, { is_playing: true, at: now });
-    rec.art = artFor(music); renderNp();
-  };
-}
-renderNp();
-window.addEventListener("record", renderNp);
-</script>
+
 </body>
 </html>

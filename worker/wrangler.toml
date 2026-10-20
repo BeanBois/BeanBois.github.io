@@ -1,0 +1,12 @@
+name = "kaishun-now-playing"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+
+# Artists that never show on the site, comma separated
+[vars]
+HIDE_ARTISTS = ""
+
+# id filled in after `wrangler kv namespace create MUSIC`
+[[kv_namespaces]]
+binding = "MUSIC"
+id = "TO_BE_CREATED"
