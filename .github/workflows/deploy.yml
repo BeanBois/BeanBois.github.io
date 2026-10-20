@@ -1,8 +1,10 @@
 name: Deploy
 
+# main is the site. Every design/<name> branch is built too, as a preview at /preview/<name>/.
 on:
   push:
-    branches: [main]
+    branches: [main, "design/**"]
+  delete:
   workflow_dispatch:
 
 permissions:
@@ -25,11 +27,24 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install pyyaml
-      - run: python build.py
+      - name: Build main and every design branch
+        run: |
+          git fetch -q origin '+refs/heads/*:refs/remotes/origin/*'
+          mkdir site
+          git worktree add -q "$RUNNER_TEMP/main" origin/main
+          (cd "$RUNNER_TEMP/main" && python build.py)
+          cp -r "$RUNNER_TEMP/main/dist/." site/
+          for b in $(git branch -r --format='%(refname:short)' | grep '^origin/design/' || true); do
+            slug="${b#origin/design/}"
+            git worktree add -q "$RUNNER_TEMP/b-$slug" "$b"
+            (cd "$RUNNER_TEMP/b-$slug" && PREVIEW="$slug" python build.py)
+            mkdir -p "site/preview/$slug"
+            cp -r "$RUNNER_TEMP/b-$slug/dist/." "site/preview/$slug/"
+          done
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: site
 
   deploy:
     needs: build
