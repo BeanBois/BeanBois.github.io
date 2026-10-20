@@ -4,7 +4,7 @@ Teoh Kai Shun's personal site: every project, big or small, laid out as a manga 
 
 | Page | What it is |
 |---|---|
-| `index.html` (表紙, cover) | The record. Projects sit in a Poincaré ball, placed by their mix of four skills. Clicking one flies there and puts that project's playlist on the turntable. |
+| `index.html` (表紙, cover) | The record, half out of its sleeve. Projects sit on the record (a Poincaré ball, placed by their mix of four skills), and what's playing is printed round its rim. The sleeve carries the intro, or a project's liner notes once you click one. |
 | `contents.html` (目次) | Every project as a volume spine on a shelf |
 | `vol-<id>.html` | A project's volume: cover, spine, and its story as panels |
 | `author.html` (作者紹介) | About, the years, contact, the CV per lens |
@@ -19,6 +19,8 @@ portfolio/bank/*.md  (private)
              └─ build.py → dist/       plain HTML, no framework
                   └─ GitHub Actions → GitHub Pages
 ```
+
+Design drafts: push a `design/<name>` branch and it deploys as a preview at `/preview/<name>/`; `LAYOUT` in `build.py` picks the cover's layout.
 
 ```sh
 pip install pyyaml
