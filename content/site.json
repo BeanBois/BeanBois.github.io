@@ -1,0 +1,965 @@
+{
+ "profile": {
+  "name": "Teoh Kai Shun",
+  "email": "ks.teoh001@gmail.com",
+  "github": "https://github.com/BeanBois",
+  "linkedin": "https://www.linkedin.com/in/kai-shun-teoh-839860180/",
+  "oneliner": "Engineer in Malaysia. Day job: keeping GPUs busy at Tencent. Nights: too many side projects. This is all of them.",
+  "summary": "ML Engineer at Tencent, building the platform that deploys and scales 1,000+ GPUs of model serving. First-Class CS (King's College London) and MSc Computing (AI & ML) from Imperial College London. Research in imitation learning and hyperbolic graph networks; builds models from the paper up (Transformer, SRGAN, AlphaZero-style chess) and takes them to production on Kubernetes."
+ },
+ "anchors": [
+  "ml",
+  "backend",
+  "infra",
+  "product"
+ ],
+ "nodes": [
+  {
+   "id": "9loop",
+   "title": "9Loop",
+   "role": "Software Engineer Intern",
+   "tagline": "",
+   "period": "2024",
+   "status": "shipped",
+   "kind": "job",
+   "track": "work",
+   "group": null,
+   "size": "small",
+   "mix": {
+    "product": 0.6,
+    "backend": 0.4
+   },
+   "stack": [
+    "TypeScript",
+    "Svelte"
+   ],
+   "repo": null,
+   "what": "Internship on a Svelte page generator and a game-API integration.",
+   "bullets": [
+    "Learnt TypeScript in a week to refactor and extend a Svelte page generator, improving component reuse and cutting render latency by 30%.",
+    "Integrated a third-party game API and built an automated integration-test suite, raising test coverage from 40% to 85%."
+   ],
+   "story": "",
+   "playlist": null
+  },
+  {
+   "id": "robocup",
+   "title": "RoboCup@Home (King's)",
+   "role": "Volunteer",
+   "tagline": "",
+   "period": "2022",
+   "status": "shipped",
+   "kind": "job",
+   "track": "side",
+   "group": null,
+   "size": "small",
+   "mix": {
+    "ml": 0.8,
+    "backend": 0.2
+   },
+   "stack": [
+    "ROS",
+    "rospy",
+    "Dialogflow",
+    "Python"
+   ],
+   "repo": null,
+   "what": "",
+   "bullets": [
+    "Implemented the speech-recognition module (Dialogflow) for natural-language commands on a service robot.",
+    "Worked on robot perception: person identification and room detection with ROS/rospy."
+   ],
+   "story": "",
+   "playlist": null
+  },
+  {
+   "id": "tencent-autoscaler",
+   "title": "Time-of-day GPU autoscaler",
+   "role": null,
+   "tagline": "GPUs that scale with the clock, fire exactly once, and never starve the cluster",
+   "period": "2026-03 – 2026-06",
+   "status": "shipped",
+   "kind": "job",
+   "track": "work",
+   "group": "tencent",
+   "size": "big",
+   "mix": {
+    "infra": 0.6,
+    "backend": 0.4
+   },
+   "stack": [
+    "Go",
+    "MySQL",
+    "Kubernetes"
+   ],
+   "repo": null,
+   "what": "Built from scratch on Tencent's model-serving platform: model-serving services scale their GPUs up and down on a daily schedule, on a platform 1,000+ GPUs' worth of serving runs through.",
+   "bullets": [
+    "Designed and built time-of-day GPU autoscaling: schedules with conflict validation, a scheduler/executor that fires multiple configs per tick, staged two-phase scale-up, a database-enforced lock against concurrent fires, and reconciliation that auto-disables schedules whose services have gone.",
+    "Built GPU usage history (30-minute snapshots) and fixed the GPU accounting behind resource reports."
+   ],
+   "story": "**Exactly-once without new infrastructure.** The scheduler runs on every replica. Redis or ZooKeeper would have been a new dependency for one feature, so a UNIQUE constraint on the execution log is the lock: one INSERT wins, the rest skip. **Scale up in two steps.** Asking a shared cluster for every GPU at once can starve other workloads or fail on the last few replicas, so scale-up takes 80% first, then the rest.",
+   "playlist": null
+  },
+  {
+   "id": "tencent-cloning",
+   "title": "Cross-environment service cloning",
+   "role": null,
+   "tagline": "A copy replays the service; it doesn't copy the row",
+   "period": "2026-08 – 2026-09",
+   "status": "shipped",
+   "kind": "job",
+   "track": "work",
+   "group": "tencent",
+   "size": "small",
+   "mix": {
+    "backend": 0.6,
+    "infra": 0.4
+   },
+   "stack": [
+    "Go",
+    "Kubernetes"
+   ],
+   "repo": null,
+   "what": "",
+   "bullets": [
+    "Hardened cross-environment service cloning so a copy never carries the source's models, resets values on unsupported GPU types, and refuses copies made stale by a template change."
+   ],
+   "story": "**The copy that broke everything.** One version refused any copy whose saved config held values the template no longer declared. Correct in principle, it broke every real copy within 24 hours. Reverted to *report* those values instead, and kept the principle.",
+   "playlist": null
+  },
+  {
+   "id": "tencent-conversation-service",
+   "title": "Gameplay conversation query service",
+   "role": null,
+   "tagline": "A new service for querying conversation data from game sessions",
+   "period": "2026-10 – present",
+   "status": "active",
+   "kind": "job",
+   "track": "work",
+   "group": "tencent",
+   "size": "small",
+   "mix": {
+    "backend": 0.55,
+    "ml": 0.3,
+    "infra": 0.15
+   },
+   "stack": [
+    "Go",
+    "tRPC",
+    "Protobuf",
+    "MySQL"
+   ],
+   "repo": null,
+   "what": "",
+   "bullets": [
+    "Since Oct 2026, second-in-command on a new Go/tRPC/Protobuf query service for gameplay-session conversation data; first fixes: timezone-wrong MySQL DATETIME writes (with a tested migration runbook) and LLM worker timeouts."
+   ],
+   "story": "",
+   "playlist": null
+  },
+  {
+   "id": "tencent-multitenancy",
+   "title": "Multi-tenant model deployment",
+   "role": null,
+   "tagline": "One platform, several business units, nobody rendering anyone else's config",
+   "period": "2026-07 – 2026-09",
+   "status": "shipped",
+   "kind": "job",
+   "track": "work",
+   "group": "tencent",
+   "size": "big",
+   "mix": {
+    "backend": 0.55,
+    "infra": 0.45
+   },
+   "stack": [
+    "Go",
+    "tRPC",
+    "MySQL"
+   ],
+   "repo": null,
+   "what": "Turned a single-tenant deployment platform into a multi-tenant one.",
+   "bullets": [
+    "Made the platform multi-tenant: every query scoped by business unit with ownership checks, configuration resolved per tenant from a shared base layer, and environment tags bound to the clusters each tenant may deploy into."
+   ],
+   "story": "**Don't guess who the tenant is.** Joining two request labels into a config directory resolved to a directory that doesn't exist on live traffic, and nothing reported it. Tenancy now comes from an explicit table keyed on IDs every request carries; an undeclared tenant is refused. **Don't rebuild what the platform has:** a server-side config-merge layer was rejected because the company's config system already does it, with per-tenant version pinning as a bonus.",
+   "playlist": null
+  },
+  {
+   "id": "tencent-reliability",
+   "title": "Platform reliability",
+   "role": null,
+   "tagline": "Tracing, self-healing cluster clients, and the guards that stop bad deploys",
+   "period": "2026-04 – 2026-09",
+   "status": "shipped",
+   "kind": "job",
+   "track": "work",
+   "group": "tencent",
+   "size": "small",
+   "mix": {
+    "infra": 0.65,
+    "backend": 0.35
+   },
+   "stack": [
+    "Go",
+    "tRPC",
+    "Kubernetes"
+   ],
+   "repo": null,
+   "what": "",
+   "bullets": [
+    "Request-ID tracing across every RPC, automatic rebuild of the Kubernetes client when its token expires, namespace guards before deploys, bounded cluster-probe budgets, and a migration for 29 stuck orphaned records.",
+    "Replaced N per-service detail calls with one batch call, made DAO writes transactional, removed hard-coded object-storage credentials, and led a four-phase refactor splitting monolith handlers into packages.",
+    "Wrote the platform's bilingual (English/Chinese) handover: runtime view, release and rollback, eleven recorded design decisions, runbook, known debt."
+   ],
+   "story": "",
+   "playlist": null
+  },
+  {
+   "id": "aki-predictor",
+   "title": "Acute kidney injury predictor",
+   "role": null,
+   "tagline": "Flagging kidney injury from NHS blood tests, deployed and monitored on Kubernetes",
+   "period": "2024",
+   "status": "shipped",
+   "kind": "research",
+   "track": "academic",
+   "group": null,
+   "size": "small",
+   "mix": {
+    "ml": 0.5,
+    "infra": 0.4,
+    "backend": 0.1
+   },
+   "stack": [
+    "Python",
+    "gradient boosting",
+    "Kubernetes",
+    "Prometheus"
+   ],
+   "repo": null,
+   "what": "Imperial coursework (ML systems): train a model on NHS creatinine test data, then run it as a monitored service, and handle a real failure.",
+   "bullets": [
+    "Trained a gradient-boosted classifier on NHS creatinine blood-test data, reaching 87% AUC for early AKI detection.",
+    "Deployed the inference pipeline on Kubernetes with Prometheus monitoring, alerting and automated rollback on model degradation.",
+    "Wrote the postmortem for a model failure during live deployment: impact, root cause, resolution."
+   ],
+   "story": "",
+   "playlist": null
+  },
+  {
+   "id": "icl-hyperbolic",
+   "title": "In-context imitation learning with non-Euclidean methods",
+   "role": null,
+   "tagline": "Teaching a robot a task from a few demonstrations, embedding them in hyperbolic space",
+   "period": "2024 – 2025",
+   "status": "shipped",
+   "kind": "research",
+   "track": "academic",
+   "group": null,
+   "size": "big",
+   "mix": {
+    "ml": 1.0
+   },
+   "stack": [
+    "Python",
+    "PyTorch",
+    "graph neural networks",
+    "hyperbolic geometry"
+   ],
+   "repo": "https://github.com/BeanBois/instant_policy_pp",
+   "what": "MSc research project at Imperial. It builds on Instant Policy (in-context imitation learning with graphs) and asks whether hyperbolic geometry, which suits hierarchical data, represents demonstrations better.",
+   "bullets": [
+    "Designed a dual-channel architecture that embeds actions and observations separately, improving representational efficiency for few-shot imitation learning.",
+    "Developed a Hyperbolic Graph Attention Network on the Poincaré ball to capture hierarchical temporal dependencies across demonstration actions.",
+    "Proposed a Product Manifold Attention module that combines Euclidean and hyperbolic channels while keeping each geometry's relational bias.",
+    "Used Sarkar's construction for training-free hyperbolic embeddings, conditioning predictions on both demonstrations and the current observation without embedding fine-tuning.",
+    "Benchmarked against Instant Policy on robotic manipulation tasks: the baseline scored higher, and the work showed non-Euclidean methods are feasible here."
+   ],
+   "story": "An honest negative result. The hyperbolic model lost to the baseline, and the write-up says so. Good material for the website: what the geometry bought, what it cost, and what I'd try next.",
+   "playlist": null
+  },
+  {
+   "id": "kurf",
+   "title": "KURF research programme (King's)",
+   "role": null,
+   "tagline": "Robot simulation and reinforcement learning",
+   "period": "2022",
+   "status": "shipped",
+   "kind": "research",
+   "track": "academic",
+   "group": null,
+   "size": "small",
+   "mix": {
+    "ml": 0.85,
+    "backend": 0.15
+   },
+   "stack": [
+    "CoppeliaSim",
+    "PyRep",
+    "PyTorch",
+    "TensorFlow"
+   ],
+   "repo": null,
+   "what": "",
+   "bullets": [
+    "Built robotic manipulation simulations in CoppeliaSim/PyRep and integrated RL agents (PyTorch, TensorFlow).",
+    "Ran training, evaluation and ablations across agent architectures."
+   ],
+   "story": "",
+   "playlist": null
+  },
+  {
+   "id": "neuromorphic",
+   "title": "Neuromorphic computing (independent study)",
+   "role": null,
+   "tagline": "Spiking neural networks on Intel's Loihi stack, for edge devices",
+   "period": "2024",
+   "status": "shipped",
+   "kind": "research",
+   "track": "academic",
+   "group": null,
+   "size": "small",
+   "mix": {
+    "ml": 0.85,
+    "infra": 0.15
+   },
+   "stack": [
+    "Python",
+    "Lava",
+    "Loihi 2",
+    "SNN"
+   ],
+   "repo": null,
+   "what": "",
+   "bullets": [
+    "Reviewed hardware and software advances in neuromorphic computing (Intel Loihi 2, Lava) for edge inference.",
+    "Implemented a winner-take-all spiking neural network in Lava for face-mask classification."
+   ],
+   "story": "",
+   "playlist": null
+  },
+  {
+   "id": "blockhub",
+   "title": "BlockHub",
+   "role": null,
+   "tagline": "Open-source collaboration where contributors vote on-chain. Won its hackathon.",
+   "period": "2023",
+   "status": "shipped",
+   "kind": "product",
+   "track": "side",
+   "group": null,
+   "size": "small",
+   "mix": {
+    "backend": 0.5,
+    "product": 0.5
+   },
+   "stack": [
+    "Polygon",
+    "full-stack web"
+   ],
+   "repo": null,
+   "what": "",
+   "bullets": [
+    "Co-designed and built a decentralised open-source collaboration platform with on-chain contributor voting and reputation; built backend and frontend. 1st place of 50+ teams at the Polygon × EasyA hackathon."
+   ],
+   "story": "",
+   "playlist": null
+  },
+  {
+   "id": "car-designer",
+   "title": "CarDesigner",
+   "role": null,
+   "tagline": "Scan a real car with LiDAR, repaint it in 3D, park the result in your driveway in AR",
+   "period": "2026-06",
+   "status": "paused",
+   "kind": "product",
+   "track": "side",
+   "group": null,
+   "size": "small",
+   "mix": {
+    "product": 0.8,
+    "ml": 0.2
+   },
+   "stack": [
+    "Swift",
+    "ARKit",
+    "RealityKit",
+    "LiDAR"
+   ],
+   "repo": null,
+   "what": "",
+   "bullets": [
+    "Building a fully offline iOS app that scans a car with LiDAR (photogrammetry fallback), lets you design paint and livery in 3D, and shows it at real scale in AR."
+   ],
+   "story": "",
+   "playlist": null
+  },
+  {
+   "id": "chess-ai",
+   "title": "chessAI",
+   "role": null,
+   "tagline": "AlphaZero-style chess: self-play, MCTS, and a lot of GPU tuning",
+   "period": "2026-03",
+   "status": "paused",
+   "kind": "model-from-scratch",
+   "track": "side",
+   "group": null,
+   "size": "small",
+   "mix": {
+    "ml": 0.85,
+    "infra": 0.15
+   },
+   "stack": [
+    "Python",
+    "PyTorch"
+   ],
+   "repo": "https://github.com/BeanBois/chessAI",
+   "what": "",
+   "bullets": [
+    "Implemented an AlphaZero-style chess agent from scratch: CNN board encoder, Monte-Carlo tree search, replay buffer, parallel self-play and an evaluator, then optimised self-play for the GPU."
+   ],
+   "story": "",
+   "playlist": null
+  },
+  {
+   "id": "data-terminal",
+   "title": "Data terminal",
+   "role": null,
+   "tagline": "A C++ market-data feed, streamed over a socket to a Python plotter",
+   "period": "2026-01",
+   "status": "archived",
+   "kind": "tool",
+   "track": "side",
+   "group": null,
+   "size": "small",
+   "mix": {
+    "backend": 0.8,
+    "infra": 0.2
+   },
+   "stack": [
+    "C++",
+    "CMake",
+    "WebSockets",
+    "Finnhub",
+    "Yahoo Finance",
+    "Python"
+   ],
+   "repo": null,
+   "what": "",
+   "bullets": [
+    "Wrote a C++ market-data terminal that streams live ticks from Finnhub (with a Yahoo Finance source), re-serves them over a TCP socket server, and feeds a Python live plotter."
+   ],
+   "story": "",
+   "playlist": null
+  },
+  {
+   "id": "expense-tracker",
+   "title": "expense-tracker",
+   "role": null,
+   "tagline": "A keyboard-driven budget tracker in the terminal",
+   "period": "2026-03",
+   "status": "shipped",
+   "kind": "tool",
+   "track": "side",
+   "group": null,
+   "size": "small",
+   "mix": {
+    "product": 0.5,
+    "backend": 0.5
+   },
+   "stack": [
+    "Go",
+    "Bubble Tea",
+    "SQLite"
+   ],
+   "repo": null,
+   "what": "",
+   "bullets": [
+    "Wrote a personal-finance TUI in Go (Bubble Tea) on pure-Go SQLite, with monthly trackings that carry budgets forward."
+   ],
+   "story": "",
+   "playlist": null
+  },
+  {
+   "id": "fps-rl-agent",
+   "title": "RL agent for an FPS game",
+   "role": null,
+   "tagline": "An actor-critic agent learning a 3D shooter, trained across three machines",
+   "period": "2023",
+   "status": "shipped",
+   "kind": "model-from-scratch",
+   "track": "side",
+   "group": null,
+   "size": "small",
+   "mix": {
+    "ml": 0.7,
+    "infra": 0.3
+   },
+   "stack": [
+    "Python",
+    "PyTorch"
+   ],
+   "repo": null,
+   "what": "",
+   "bullets": [
+    "Built an RNN actor-critic agent in PyTorch for a partially observable 3D first-person environment with continuous actions.",
+    "Distributed training across 3 machines with asynchronous (A3C-style) updates, cutting wall-clock training time by about 60%.",
+    "Evaluated quantitatively (reward, episode length, policy entropy) and qualitatively (emergent behaviours)."
+   ],
+   "story": "",
+   "playlist": null
+  },
+  {
+   "id": "irecognise",
+   "title": "iRecognise",
+   "role": null,
+   "tagline": "Face recognition from motion, the neuromorphic way",
+   "period": "2025-02",
+   "status": "archived",
+   "kind": "model-from-scratch",
+   "track": "side",
+   "group": "neuromorphic",
+   "size": "small",
+   "mix": {
+    "ml": 0.8,
+    "backend": 0.2
+   },
+   "stack": [
+    "Python",
+    "spiking neural networks",
+    "R-STDP"
+   ],
+   "repo": "https://github.com/BeanBois/iRecognise-",
+   "what": "",
+   "bullets": [
+    "Built a motion-based facial-recognition model in the neuromorphic paradigm: spiking network with reward-modulated STDP learning, plus a federated training server."
+   ],
+   "story": "",
+   "playlist": null
+  },
+  {
+   "id": "kkp-wallet",
+   "title": "Wallet",
+   "role": null,
+   "tagline": "Personal finance for Malaysia, read from your own bank statements, on your phone",
+   "period": "2026-08 – present",
+   "status": "active",
+   "kind": "product",
+   "track": "side",
+   "group": null,
+   "size": "big",
+   "mix": {
+    "backend": 0.5,
+    "product": 0.45,
+    "ml": 0.05
+   },
+   "stack": [
+    "Kotlin Multiplatform",
+    "Swift",
+    "SwiftUI",
+    "Gradle",
+    "SQLite"
+   ],
+   "repo": null,
+   "what": "An iOS app that parses Malaysian bank and card statements **on the phone**, builds a ledger, and shows what you hold and what you spent. Nothing leaves the device. Card recommendation is a later phase.",
+   "bullets": [
+    "Building a Kotlin Multiplatform finance app with a SwiftUI front end; statements are parsed on-device into a local ledger and nothing leaves the phone.",
+    "The balance sheet is reconciled by replaying every movement against each statement's closing balance. A screen that can't reconcile says so instead of drawing a zero.",
+    "Enforced module boundaries in the build (Gradle rules that fail if the phone links a forbidden module), with 600+ unit tests across JVM and iOS targets.",
+    "Money is integer minor units end to end, decided and recorded on day one."
+   ],
+   "story": "Statements are monthly and retrospective, so the roadmap splits into what works from statements alone and what needs live capture (bank notifications). Phase 1 shipped from real statements, and live capture is now running on an iPhone. Also: a docs tree where each leaf names the code it covers, queryable by a script, so every session reads only what it touches.",
+   "playlist": null
+  },
+  {
+   "id": "mybudixc",
+   "title": "myBudiXc",
+   "role": null,
+   "tagline": "An exchange matching engine with a batch matcher for orders that can't fill now",
+   "period": "2025-11",
+   "status": "archived",
+   "kind": "tool",
+   "track": "side",
+   "group": null,
+   "size": "small",
+   "mix": {
+    "backend": 0.9,
+    "product": 0.1
+   },
+   "stack": [
+    "Go",
+    "WebSockets"
+   ],
+   "repo": null,
+   "what": "",
+   "bullets": [
+    "Built a Go exchange engine: a price-time-priority order book for instant matches, and a deadline-aware batch matcher that globally pairs unmatched orders every N minutes to maximise volume, with a WebSocket market feed."
+   ],
+   "story": "",
+   "playlist": null
+  },
+  {
+   "id": "ollama-home-lab",
+   "title": "Ollama home lab",
+   "role": null,
+   "tagline": "My own GPU box serving local LLMs to my laptops over Tailscale",
+   "period": "2026-06 – present",
+   "status": "active",
+   "kind": "tool",
+   "track": "side",
+   "group": null,
+   "size": "small",
+   "mix": {
+    "infra": 0.9,
+    "backend": 0.1
+   },
+   "stack": [
+    "Ollama",
+    "WSL",
+    "Tailscale",
+    "Windows"
+   ],
+   "repo": null,
+   "what": "",
+   "bullets": [
+    "Run a private LLM serving box (Ollama on Windows + WSL) reachable from my devices over a Tailscale mesh, the default inference backend for RE-News (qwen3:32b)."
+   ],
+   "story": "",
+   "playlist": null
+  },
+  {
+   "id": "plate-recognition",
+   "title": "Malaysian licence plate recognition",
+   "role": null,
+   "tagline": "YOLOv8 finds the plate, a small CNN reads it",
+   "period": "2025",
+   "status": "shipped",
+   "kind": "product",
+   "track": "side",
+   "group": null,
+   "size": "small",
+   "mix": {
+    "ml": 0.8,
+    "backend": 0.2
+   },
+   "stack": [
+    "Python",
+    "YOLOv8",
+    "PyTorch"
+   ],
+   "repo": null,
+   "what": "",
+   "bullets": [
+    "Built an end-to-end OCR pipeline for Malaysian plates: YOLOv8 detection plus a custom CNN character recogniser, 94% character-level accuracy on 2,000+ self-collected images in varied lighting."
+   ],
+   "story": "",
+   "playlist": null
+  },
+  {
+   "id": "polyarb",
+   "title": "polyarb",
+   "role": null,
+   "tagline": "Complete-set arbitrage on Polymarket's order book",
+   "period": "2026-03",
+   "status": "paused",
+   "kind": "trading",
+   "track": "side",
+   "group": null,
+   "size": "small",
+   "mix": {
+    "backend": 0.85,
+    "infra": 0.15
+   },
+   "stack": [
+    "Python",
+    "SQLite",
+    "Polymarket CLOB API"
+   ],
+   "repo": null,
+   "what": "",
+   "bullets": [
+    "Built a Polymarket complete-set arbitrage engine: depth-aware VWAP-at-size bundle costing, live opportunity detection from the order book, and paper trading by default.",
+    "Added risk controls for non-atomic multi-leg execution, with live trading behind an explicit safety flag, plus SQLite persistence and metrics."
+   ],
+   "story": "",
+   "playlist": null
+  },
+  {
+   "id": "re-news",
+   "title": "RE-News",
+   "role": null,
+   "tagline": "What is Malaysia worried about right now, ranked and cited",
+   "period": "2026-06 – 2026-07",
+   "status": "paused",
+   "kind": "product",
+   "track": "side",
+   "group": null,
+   "size": "big",
+   "mix": {
+    "ml": 0.45,
+    "backend": 0.35,
+    "infra": 0.2
+   },
+   "stack": [
+    "Python",
+    "PostgreSQL",
+    "LLMs (Ollama qwen3",
+    "Claude)",
+    "TypeScript frontend"
+   ],
+   "repo": "https://github.com/BeanBois/RE-News-",
+   "what": "Scans news, government, economic and public-opinion sources, compresses each into a common citable \"signal\", and has an LLM fuse only those signals into ranked, cited causal chains: \"policy X led to Y, so Z feels W.\"",
+   "bullets": [
+    "Designed a pipeline of per-source encoders (news, government, CPI/OPR/fiscal data, public opinion, search trends) that compress raw data into one citable signal schema.",
+    "Restricted the LLM to a fusion layer over signals, never raw documents, so every claim in a report resolves to its evidence.",
+    "Made the model backend switchable per stage: a local qwen3:32b on the home-lab GPU by default, Claude as an opt-in."
+   ],
+   "story": "\"Grey is correct\": the system shows nothing rather than an extrapolation. Ties to the home lab, which the LLM runs on.",
+   "playlist": null
+  },
+  {
+   "id": "sales-signatures",
+   "title": "Sales signatures",
+   "role": null,
+   "tagline": "Predicting a product's sales from products that behave like it",
+   "period": "2025-10",
+   "status": "idea",
+   "kind": "model-from-scratch",
+   "track": "side",
+   "group": null,
+   "size": "small",
+   "mix": {
+    "ml": 1.0
+   },
+   "stack": [
+    "Python"
+   ],
+   "repo": null,
+   "what": "Early notes and code borrowing the Instant Policy idea: learn signature-to-signature mappings so similar products' sales histories predict a new one's.",
+   "bullets": [],
+   "story": "",
+   "playlist": null
+  },
+  {
+   "id": "srgan",
+   "title": "SRGAN from scratch",
+   "role": null,
+   "tagline": "4× super-resolution, reproducing the paper on a Windows GPU",
+   "period": "2025",
+   "status": "shipped",
+   "kind": "model-from-scratch",
+   "track": "side",
+   "group": null,
+   "size": "small",
+   "mix": {
+    "ml": 0.9,
+    "infra": 0.1
+   },
+   "stack": [
+    "Python",
+    "PyTorch",
+    "DirectML"
+   ],
+   "repo": null,
+   "what": "",
+   "bullets": [
+    "Implemented SRGAN from scratch in PyTorch (ResNet generator, VGG perceptual loss, adversarial training) and trained it on DIV2K at 4× upscaling, reaching 29.3 dB PSNR and 0.82 SSIM on validation.",
+    "Worked around DirectML gaps for Windows GPU training with custom replacements for unsupported operations.",
+    "Ran ablations of pixel-wise MSE vs. perceptual loss, quantifying the perceptual-quality/PSNR trade-off."
+   ],
+   "story": "",
+   "playlist": null
+  },
+  {
+   "id": "tradingjoe",
+   "title": "TradingJoe",
+   "role": null,
+   "tagline": "A multi-strategy portfolio system, and the red team that retracted its own results",
+   "period": "2026-04 – 2026-07",
+   "status": "paused",
+   "kind": "trading",
+   "track": "side",
+   "group": null,
+   "size": "big",
+   "mix": {
+    "ml": 0.5,
+    "backend": 0.4,
+    "infra": 0.1
+   },
+   "stack": [
+    "Python",
+    "PyTorch (GNN)",
+    "LLMs",
+    "yfinance",
+    "Moomoo API"
+   ],
+   "repo": null,
+   "what": "A modular portfolio system for Bursa Malaysia and US equities: Black-Litterman, Fama-French (FF3/Carhart), momentum and mean-reversion, views from analyst targets, SEC insider buys and LLM signals, and a meta-strategy blending them. Walk-forward backtests, paper and live trading via Moomoo.",
+   "bullets": [
+    "Built a multi-strategy portfolio system (Black-Litterman, Fama-French, momentum, mean-reversion, a blended meta-strategy) with walk-forward backtesting and paper or live execution through Moomoo.",
+    "Added GNN and LLM view generators feeding Black-Litterman, using SEC Form 4 insider buys and analyst targets as views.",
+    "Ran a five-agent red team over my own results (leakage, finance, ML, LLM, execution), found no demonstrated out-of-sample edge, retracted the claims in writing, and disabled the affected strategy pending fixes."
+   ],
+   "story": "The best story in the bank. A backtest said \"5/5 beats MinVar\". The red team found leakage and an LLM citing documents that had never been ingested. I published the retraction in the repo and replaced fabricated citations with an honest \"no documents found\". This is the one for the website.",
+   "playlist": null
+  },
+  {
+   "id": "transformer-from-scratch",
+   "title": "Attention Is All You Need, from scratch",
+   "role": null,
+   "tagline": "The original Transformer, rebuilt and trained on every season of Archer",
+   "period": "2026-02",
+   "status": "shipped",
+   "kind": "model-from-scratch",
+   "track": "side",
+   "group": null,
+   "size": "small",
+   "mix": {
+    "ml": 1.0
+   },
+   "stack": [
+    "Python",
+    "PyTorch"
+   ],
+   "repo": "https://github.com/BeanBois/All-You-Need-Is-Attention",
+   "what": "",
+   "bullets": [
+    "Reimplemented the original Transformer (encoder, decoder, attention) from the paper in PyTorch, with training and evaluation scripts, and trained it on a subtitle corpus."
+   ],
+   "story": "The training data is fourteen seasons of Archer subtitles. Lead with that on the website.",
+   "playlist": null
+  }
+ ],
+ "groups": {
+  "tencent": {
+   "title": "Tencent",
+   "role": "ML Engineer",
+   "period": "2026-03 – present",
+   "what": "The team's model-serving platform deploys, scales, health-checks and tears down GPU model-serving services on Kubernetes for several business units, safely over 1,000 GPUs' worth. I build the platform; other teams run the GPUs and the services on it. The codebase dates from 2024. I joined in March 2026, and by October I had written about 450 of its 550 commits: the GPU autoscaler, multi-tenancy, most of the reliability work and the handover. In October 2026 I started on a second service, a query service for gameplay-session conversation data."
+  }
+ },
+ "log": [
+  [
+   "2026-10-14",
+   "kkp-wallet",
+   "frontend paused; live capture moves onto the iPhone"
+  ],
+  [
+   "2026-10-12",
+   "tencent-conversation-service",
+   "first fix on the new service"
+  ],
+  [
+   "2026-09-10",
+   "kkp-wallet",
+   "phase 1 closed, 9 of 9, on real statements"
+  ],
+  [
+   "2026-09-10",
+   "tencent-multitenancy",
+   "tenant table moves into per-environment config"
+  ],
+  [
+   "2026-09-07",
+   "tencent-cloning",
+   "strict copy check reverted after breaking every real copy"
+  ],
+  [
+   "2026-07-28",
+   "re-news",
+   "rescoped to a public issue ranking for Malaysia"
+  ],
+  [
+   "2026-06-28",
+   "tradingjoe",
+   "red team finds no out-of-sample edge; claims retracted"
+  ],
+  [
+   "2026-06-13",
+   "re-news",
+   "first commit"
+  ],
+  [
+   "2026-06-10",
+   "ollama-home-lab",
+   "first commit"
+  ],
+  [
+   "2026-05-07",
+   "tencent-autoscaler",
+   "staged two-phase scale-up lands"
+  ],
+  [
+   "2026-04-07",
+   "tradingjoe",
+   "first commit"
+  ],
+  [
+   "2026-04-03",
+   "tencent-autoscaler",
+   "scheduler and executor implemented"
+  ],
+  [
+   "2026-03-26",
+   "chess-ai",
+   "first commit"
+  ],
+  [
+   "2026-03-26",
+   "expense-tracker",
+   "first commit"
+  ],
+  [
+   "2026-03-24",
+   "tencent-autoscaler",
+   "first commit at Tencent"
+  ],
+  [
+   "2026-02-04",
+   "transformer-from-scratch",
+   "first commit"
+  ],
+  [
+   "2025-09-10",
+   "icl-hyperbolic",
+   "first commit"
+  ],
+  [
+   "2025-02-04",
+   "irecognise",
+   "first commit"
+  ]
+ ],
+ "years": [
+  {
+   "period": "2020 – 2023",
+   "what": "BSc Computer Science with Intelligent Systems, King's College London · First Class"
+  },
+  {
+   "period": "2022",
+   "what": "Volunteer, RoboCup@Home (King's)"
+  },
+  {
+   "period": "2024 – 2025",
+   "what": "MSc Computing (Artificial Intelligence & Machine Learning), Imperial College London"
+  },
+  {
+   "period": "2024",
+   "what": "Software Engineer Intern, 9Loop"
+  },
+  {
+   "period": "2026-03 – present",
+   "what": "ML Engineer, Tencent: the platform that deploys and scales model serving"
+  },
+  {
+   "period": "2026-10 – present",
+   "what": "Second-in-command on a new query service"
+  }
+ ],
+ "counts": {
+  "entries": 35,
+  "public": 29
+ }
+}

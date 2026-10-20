@@ -1,0 +1,996 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Teoh Kai Shun</title>
+<meta name="description" content="Teoh Kai Shun, ML engineer. Every project, big or small, on one record.">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=IBM+Plex+Mono:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* Layout: a blank page and the Poincaré ball, nothing else. Kai Shun is the centre; four skill anchors sit at the
+   corners of a tetrahedron and every project is placed by its skill mix. Clicking a point opens a speech bubble
+   beside it, and the ball slides aside to make room. Ink on paper, one red spot colour for flows. */
+:root {
+  --paper: #ffffff;
+  --ink: #111111;
+  --tone: #8a8a8a;
+  --soft: #e2e2e2;
+  --muted: #555555;
+  --spot: #d7262e;
+  --font-display: "Dela Gothic One", "Arial Black", Impact, system-ui, sans-serif;
+  --font-body: "Zen Kaku Gothic New", "Hiragino Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0d0d0d; --ink: #f1f1f1; --tone: #6d6d6d; --soft: #262626; --muted: #a9a9a9; --spot: #ff4b52;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0d0d0d; --ink: #f1f1f1; --tone: #6d6d6d; --soft: #262626; --muted: #a9a9a9; --spot: #ff4b52;
+  color-scheme: dark;
+}
+
+html, body { height: 100%; overflow: hidden; margin: 0; }
+[hidden] { display: none !important; }
+* { box-sizing: border-box; }
+body {
+  background: var(--paper); color: var(--ink);
+  font: 15px/1.6 var(--font-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0;
+}
+canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+canvas.dragging { cursor: grabbing; }
+button:focus-visible, a:focus-visible, canvas:focus-visible { outline: 3px solid var(--spot); outline-offset: 2px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.sr:focus-within { position: fixed; left: 16px; top: 16px; width: auto; height: auto; clip: auto; z-index: 5; background: var(--paper); border: 2px solid var(--ink); padding: 8px; max-height: 80vh; overflow: auto; }
+
+/* the speech bubble: positioned by script beside the selected point, tail aimed at it */
+.say {
+  position: fixed; z-index: 3;
+  background: var(--paper); border: 3px solid var(--ink); border-radius: 26px;
+  padding: 22px 26px 26px; overflow: auto; overscroll-behavior: contain;
+  animation: pop 0.22s cubic-bezier(.2, 1.4, .4, 1);
+}
+@keyframes pop { from { transform: scale(0.92); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .say { animation: none; } }
+.pick { position: fixed; z-index: 4; background: var(--paper); border: 2.5px solid var(--ink); border-radius: 16px; padding: 6px; min-width: 220px; max-width: min(340px, calc(100vw - 24px)); max-height: 50vh; overflow: auto; animation: pop 0.16s ease-out; }
+.pick button { display: grid; grid-template-columns: 12px minmax(0, 1fr); gap: 10px; align-items: start; width: 100%; text-align: left; font: inherit; color: var(--ink); background: none; border: 0; border-radius: 10px; padding: 7px 10px; cursor: pointer; }
+.pick button:hover, .pick button:focus-visible { background: var(--soft); }
+.pick .glyph { width: 12px; height: 12px; margin-top: 5px; }
+.pick b { font: 500 13px var(--font-mono); display: block; }
+.pick small { display: block; color: var(--muted); font-size: 12px; line-height: 1.4; }
+.close { float: right; margin: -8px -10px 6px 10px; width: 34px; height: 34px; border-radius: 50%; font: 400 15px var(--font-display); color: var(--paper); background: var(--ink); border: 0; cursor: pointer; }
+.path { font: 12px var(--font-mono); color: var(--muted); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.path button { font: inherit; color: var(--ink); background: none; border: 0; border-bottom: 2px solid var(--spot); padding: 0; cursor: pointer; }
+.stamps { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+.stamp { font: 400 12px var(--font-display); letter-spacing: 0.06em; text-transform: uppercase; padding: 0 9px; border: 2.5px solid currentColor; transform: rotate(-4deg); white-space: nowrap; }
+.stamp.draft { font-size: 10px; color: var(--muted); transform: rotate(3deg); border-style: dashed; }
+.say h2 { margin: 8px 0 6px; font: 400 clamp(24px, 3vw, 32px)/1.1 var(--font-display); text-wrap: balance; }
+.say .tag { margin: 0 0 12px; font-size: 16px; }
+dl.meta { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; margin: 0; font: 12px var(--font-mono); }
+dl.meta dt { color: var(--muted); }
+dl.meta dd { margin: 0; min-width: 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.chip { font: 11px var(--font-mono); padding: 0 6px; border: 1.5px solid var(--ink); }
+.sec { margin-top: 20px; }
+.sec h4 { display: inline-block; margin: 0 0 8px; font: 500 12px var(--font-mono); background: var(--ink); color: var(--paper); padding: 2px 10px 2px 8px; }
+.sec h4::before { content: "$ "; color: var(--spot); }
+.sec p { margin: 0 0 8px; max-width: 62ch; }
+.sec ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.sec li { padding-left: 16px; position: relative; }
+.sec li::before { content: "■"; position: absolute; left: 0; top: 1px; font-size: 9px; }
+.story { font-size: 16px; border-left: 3px solid var(--ink); padding-left: 14px; }
+.story p:last-child { margin-bottom: 0; }
+.calc { font: 12px/1.7 var(--font-mono); font-variant-numeric: tabular-nums; border: 2px solid var(--ink); padding: 10px 12px; overflow-x: auto; }
+.calc .mixrow { display: grid; grid-template-columns: 64px 40px minmax(0, 1fr); gap: 8px; align-items: center; }
+.calc .bar { height: 8px; border: 1.5px solid var(--ink); }
+.calc .bar i { display: block; height: 100%; background: var(--ink); }
+.calc .eq { margin-top: 8px; white-space: pre; }
+.calc .eq b { font-weight: 600; }
+.calc .eq .c { color: var(--muted); }
+.kids { display: grid; gap: 2px; }
+.kids button { display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; gap: 10px; align-items: start; text-align: left; font: inherit; color: var(--ink); background: none; border: 0; padding: 6px 4px; cursor: pointer; }
+.kids button:hover { background: var(--soft); }
+.kids .glyph, .legend .glyph { width: 12px; height: 12px; margin-top: 5px; }
+.kids b { font-weight: 700; }
+.kids small { display: block; color: var(--muted); font-size: 13px; }
+.kids .d { font: 12px var(--font-mono); color: var(--muted); }
+.legend { display: grid; grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr); gap: 4px 10px; align-items: start; font-size: 14px; }
+.legend .glyph { margin-top: 5px; }
+.contact { display: grid; gap: 6px; font: 13px var(--font-mono); }
+.contact a { color: var(--ink); text-decoration-thickness: 2px; text-decoration-color: var(--spot); text-underline-offset: 3px; }
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.btn { font: 12px var(--font-mono); color: var(--ink); background: var(--paper); border: 2px solid var(--ink); padding: 3px 10px; cursor: pointer; }
+.btn:hover:not([disabled]) { background: var(--ink); color: var(--paper); }
+.btn[disabled] { cursor: not-allowed; color: var(--muted); border-color: var(--tone); }
+.select { user-select: all; }
+.note { color: var(--muted); font-size: 12px; margin-top: 6px; }
+.events { list-style: none; margin: 0; padding: 0; font: 12px var(--font-mono); display: grid; gap: 2px; }
+.events button { font: inherit; text-align: left; background: none; border: 0; padding: 3px 4px; color: var(--ink); cursor: pointer; width: 100%; }
+.events button:hover { background: var(--soft); }
+.events .ep { font: 400 12px var(--font-display); margin-right: 6px; }
+.events time { color: var(--muted); margin-right: 6px; font-variant-numeric: tabular-nums; }
+.events .svc { color: var(--spot); margin-right: 6px; font-weight: 600; }
+
+.mast { position: fixed; z-index: 2; left: max(20px, calc(env(safe-area-inset-left, 0px) + 12px)); top: calc(env(safe-area-inset-top, 0px) + 18px); display: grid; gap: 2px; pointer-events: none; }
+.mast a { pointer-events: auto; font: 400 20px var(--font-display); color: var(--ink); text-decoration: none; letter-spacing: 0.02em; }
+.mast span { font: 12px var(--font-mono); color: var(--muted); }
+.mastnav { position: fixed; z-index: 2; left: max(20px, calc(env(safe-area-inset-left, 0px) + 12px)); bottom: calc(env(safe-area-inset-bottom, 0px) + 18px); display: flex; gap: 18px; flex-wrap: wrap; font: 12px var(--font-mono); }
+.mastnav a { color: var(--ink); text-decoration: none; }
+.mastnav a b { font: 700 13px var(--font-body); margin-right: 4px; }
+.mastnav a:hover { text-decoration: underline; text-decoration-color: var(--spot); text-decoration-thickness: 2px; }
+.np { margin: 6px 0 0; max-width: min(60ch, calc(100vw - 40px)); font: 12px/1.5 var(--font-mono); color: var(--muted); pointer-events: auto; }
+.np b { font: 400 13px var(--font-display); color: var(--ink); }
+.np .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--spot); margin-right: 6px; vertical-align: 1px; }
+.np button { font: inherit; color: var(--muted); background: none; border: 0; border-bottom: 1px dashed var(--tone); padding: 0; margin-left: 8px; cursor: pointer; }
+.chap { display: inline-block; margin-top: 14px; font: 400 15px var(--font-display); color: var(--paper); background: var(--ink); padding: 6px 14px 5px; text-decoration: none; }
+.chap:hover { background: var(--spot); }
+</style>
+</head>
+<body>
+
+<canvas id="ball" tabindex="0" aria-label="Kai Shun's projects, placed in a Poincaré ball by skill mix. Drag to spin it, arrow keys to turn it, click a point for details."></canvas>
+<header class="mast"><a href="author.html">TEOH KAI SHUN</a><span>ML Engineer · AI infra at Tencent · Malaysia</span><p class="np" id="np" aria-live="polite"></p></header>
+<nav class="mastnav" aria-label="Volume"><a href="contents.html"><b>目次</b>contents</a><a href="author.html"><b>作者</b>author &amp; CV</a><a href="colophon.html"><b>奥付</b>colophon</a></nav>
+<nav class="sr" aria-label="All projects" id="srlist"></nav>
+<div class="pick" id="pick" role="dialog" aria-label="Projects here" hidden></div>
+<aside class="say" id="say" aria-live="polite" hidden>
+  <button type="button" class="close" id="close" aria-label="Close">×</button>
+  <div id="saybody"></div>
+</aside>
+
+<script>
+const D = /*__DATA__*/null;
+
+/* ---------- vectors and the Poincaré ball ---------- */
+const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+const plus = (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
+const minus = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+const times = (a, k) => [a[0] * k, a[1] * k, a[2] * k];
+const len = a => Math.hypot(a[0], a[1], a[2]);
+const unit = a => { const l = len(a); return l < 1e-12 ? [0, 0, 1] : times(a, 1 / l); };
+const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+const neg = a => times(a, -1);
+// Möbius addition in the ball: the hyperbolic translation taking 0 to a, applied to x
+function madd(a, x) {
+  const ax = dot(a, x), a2 = dot(a, a), x2 = dot(x, x);
+  const den = 1 + 2 * ax + a2 * x2;
+  return times(plus(times(a, 1 + 2 * ax + x2), times(x, 1 - a2)), 1 / den);
+}
+// point at fraction s along the geodesic p → q
+function geo(p, q, s) {
+  const d = madd(neg(p), q), m = len(d);
+  if (m < 1e-9) return p;
+  return madd(p, times(d, Math.tanh(s * Math.atanh(Math.min(m, 0.999999))) / m));
+}
+const dH = (x, y) => Math.acosh(1 + (2 * dot(minus(x, y), minus(x, y))) / ((1 - dot(x, x)) * (1 - dot(y, y))));
+// 3×3 rotation matrices, row-major
+const mmul = (A, B) => { const C = []; for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) C.push(A[i * 3] * B[j] + A[i * 3 + 1] * B[3 + j] + A[i * 3 + 2] * B[6 + j]); return C; };
+const mv = (M, v) => [M[0] * v[0] + M[1] * v[1] + M[2] * v[2], M[3] * v[0] + M[4] * v[1] + M[5] * v[2], M[6] * v[0] + M[7] * v[1] + M[8] * v[2]];
+const mtv = (M, v) => [M[0] * v[0] + M[3] * v[1] + M[6] * v[2], M[1] * v[0] + M[4] * v[1] + M[7] * v[2], M[2] * v[0] + M[5] * v[1] + M[8] * v[2]];
+const rotX = a => { const c = Math.cos(a), s = Math.sin(a); return [1, 0, 0, 0, c, s, 0, -s, c]; };
+const rotY = a => { const c = Math.cos(a), s = Math.sin(a); return [c, 0, s, 0, 1, 0, -s, 0, c]; };
+// rotation by angle a about a unit axis (Rodrigues, right-handed). Note rotX(a) is the right-handed rotation by −a.
+function rotAxis(k, a) {
+  const [x, y, z] = k, c = Math.cos(a), s = Math.sin(a), t = 1 - c;
+  return [t * x * x + c, t * x * y - s * z, t * x * z + s * y,
+          t * x * y + s * z, t * y * y + c, t * y * z - s * x,
+          t * x * z - s * y, t * y * z + s * x, t * z * z + c];
+}
+
+/* ---------- anchors and placement ---------- */
+// Four skills at the corners of a tetrahedron: every pair is equally far apart.
+const S3 = 1 / Math.sqrt(3);
+const ANCHOR = { ml: [S3, S3, S3], backend: [S3, -S3, -S3], infra: [-S3, S3, -S3], product: [-S3, -S3, S3] };
+const ANAME = { ml: "ML", backend: "BACKEND", infra: "INFRA", product: "PRODUCT" };
+const DEPTH = 0.9;      // r = 0.9·|p|, so a single-skill project sits deep but not on the boundary
+
+const nodes = D.nodes.map(n => ({ ...n }));
+const byId = new Map(nodes.map(n => [n.id, n]));
+const placed = [];
+for (const n of nodes) {
+  let p = [0, 0, 0];
+  for (const [k, w] of Object.entries(n.mix)) p = plus(p, times(ANCHOR[k], w));
+  const L = len(p), dir = unit(p), r = DEPTH * L;
+  let pos = times(dir, r);
+  // projects with the same mix would sit on one point: fan them out tangentially, golden-angle steps
+  const twins = placed.filter(q => len(minus(q.base, pos)) < 0.04).length;
+  let spread = 0;
+  if (twins) {
+    const ref = Math.abs(dir[1]) < 0.9 ? [0, 1, 0] : [1, 0, 0];
+    const t1 = unit(cross(ref, dir)), t2 = cross(dir, t1);
+    const a = twins * 2.39996, m = 0.085 * Math.sqrt(twins);
+    pos = plus(pos, plus(times(t1, Math.cos(a) * m), times(t2, Math.sin(a) * m)));
+    if (len(pos) > 0.94) pos = times(unit(pos), 0.94);
+    spread = m;
+  }
+  n.calc = { p, L, r, spread, twins };
+  n.z = pos;
+  placed.push({ base: times(dir, r) });
+}
+// Kai Shun, at the origin
+const ME = { id: "me", me: true, title: D.profile.name, z: [0, 0, 0] };
+// group headers (a job) and group members
+const groups = {};
+for (const n of nodes) if (n.group) (groups[n.group] ||= { id: n.group, members: [] }).members.push(n);
+for (const g of Object.values(groups)) {
+  const head = D.groups[g.id];
+  const lead = byId.get(g.id);
+  g.title = head ? head.title : lead.title;
+  g.header = head || null;
+  if (lead && !g.members.includes(lead)) g.members.unshift(lead);
+  let c = [0, 0, 0];
+  for (const m of g.members) c = plus(c, m.z);
+  g.z = times(c, 1 / g.members.length);
+}
+
+/* ---------- state ---------- */
+let centre = [0, 0, 0];
+let rot = mmul(rotX(-0.45), rotY(0.65));
+// the spin: the ball always turns slowly; a flick throws it, and it settles back to the idle spin
+const IDLE = times(unit([0.18, 1, 0.08]), 0.14);          // rad/s, a tilted axis like a thrown steel ball
+let omega = [...IDLE], lastFrame = performance.now();
+let anim = null;           // a rotation in progress (unused for now)
+let trip = null, queue = [];   // a flight through the ball in progress; every flight goes by way of the centre
+let sel = null;            // a node, ME, or a group
+let hover = null;
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+// the record: when the page knows what Kai Shun is listening to (D.music), the ball is also a vinyl.
+// The label at the centre turns at 33⅓ rpm while a song plays, the tonearm follows the song's progress,
+// and each beat sends one faint ring out through the grooves. No music data: the plain steel ball.
+const RPM = 100 / 3;
+// Every project can carry a playlist (D.playlists). Clicking it changes the record: the needle lifts and the record
+// fades while the ball travels, then that playlist goes on at the point (now the centre) and its cover spreads out
+// from there as a faint circle. Home is Kai Shun's own listening (D.music).
+const homeMusic = D.music ? { ...D.music, key: "me", at: performance.now() } : null;
+let music = homeMusic;
+// a visitor arrives mid-song: the platter is already turning and the needle already down
+const rec = { phase: 0, speed: music && music.is_playing && !reduce ? RPM * Math.PI / 30 : 0, arm: music && music.is_playing ? 1 : 0,
+              vis: 1, on: ME, target: ME, art: null, revealAt: -1e9, cache: new Map() };
+const songAt = now => !music ? 0 : Math.min(music.duration_ms, music.progress_ms + (music.is_playing ? now - music.at : 0)) / 1000;
+
+/* ---------- colours and fonts from tokens ---------- */
+let col = {}, fonts = {}, toneFill = null;
+const cv = document.getElementById("ball");
+const ctx = cv.getContext("2d");
+function readColours() {
+  const cs = getComputedStyle(document.documentElement);
+  for (const t of ["--paper", "--ink", "--tone", "--soft", "--muted", "--spot"]) col[t] = cs.getPropertyValue(t).trim();
+  for (const t of ["--font-display", "--font-mono"]) fonts[t] = cs.getPropertyValue(t).trim();
+  const p = document.createElement("canvas"); p.width = p.height = 5;
+  const pc = p.getContext("2d");
+  pc.fillStyle = col["--paper"]; pc.fillRect(0, 0, 5, 5);
+  pc.fillStyle = col["--ink"]; pc.beginPath(); pc.arc(2.5, 2.5, 1.1, 0, Math.PI * 2); pc.fill();
+  toneFill = ctx.createPattern(p, "repeat");
+  if (music) { rec.cache.clear(); rec.art = artFor(music); }
+  draw();
+}
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", readColours);
+new MutationObserver(readColours).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+document.fonts?.ready.then(() => draw());
+
+/* ---------- layout: the ball alone, or the ball beside a speech bubble ---------- */
+const sayEl = document.getElementById("say");
+let W = 0, H = 0, dpr = 1;
+let cx = 0, cy = 0, R = 0;          // drawn
+let tx = 0, ty = 0, tR = 0;         // target
+const CAM = 3.2, K = Math.sqrt(CAM * CAM - 1);   // camera distance; K makes the ball's silhouette exactly R
+const wide = () => W >= 760;
+const GAP = 56;                     // blank paper between the ball and the bubble
+function layout() {
+  const open = !sayEl.hidden;
+  if (!open) { tx = W / 2; ty = H / 2; tR = Math.min(W, H) / 2 - 28; }
+  else if (wide()) {
+    // ball on the left, bubble on the right, never overlapping; keep the bubble at least 340px wide.
+    // D.topInset keeps the ball under anything the page pins to its top left corner.
+    const top = D.topInset || 0;
+    tR = Math.max(80, Math.min((H - top) / 2 - 36, (W - 24 - GAP - 340 - 24) / 2, W * 0.3));
+    tx = 24 + tR; ty = top + (H - top) / 2;
+  } else {
+    tR = Math.max(70, Math.min(W / 2 - 20, H * 0.19));
+    tx = W / 2; ty = tR + 20;
+  }
+  placeSay();
+}
+function placeSay() {
+  if (sayEl.hidden) return;
+  const s = sayEl.style;
+  if (wide()) {
+    const left = tx + tR + GAP, w = Math.min(500, W - left - 24);
+    Object.assign(s, { left: left + "px", width: w + "px", right: "auto", top: "24px", bottom: "24px", height: "auto" });
+  } else {
+    Object.assign(s, { left: "12px", right: "12px", width: "auto", top: (ty + tR + GAP * 0.6) + "px", bottom: "12px", height: "auto" });
+  }
+}
+function resize() {
+  const r = cv.getBoundingClientRect();
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  W = r.width; H = r.height;
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  layout();
+  if (!R) { cx = tx; cy = ty; R = tR; }
+  draw();
+}
+new ResizeObserver(resize).observe(cv);
+
+const view = x => mv(rot, madd(neg(centre), x));
+const proj = v => { const s = CAM / (CAM - v[2]); return { x: cx + (R * K * v[0]) / (CAM - v[2]), y: cy + (R * K * v[1]) / (CAM - v[2]), s }; };
+const conf = v => 1 - dot(v, v);
+const fade = v => 0.3 + 0.7 * Math.min(1, Math.max(0, (v[2] + 1) / 2));
+
+/* ---------- drawing ---------- */
+const STATUS = {
+  active: { label: "running", style: "solid" }, paused: { label: "paused", style: "tone" },
+  shipped: { label: "completed", style: "outline" }, archived: { label: "archived", style: "faint" },
+  idea: { label: "pending", style: "dashed" }, learning: { label: "pending", style: "dashed" },
+};
+function shapePath(shape, x, y, r) {
+  ctx.beginPath();
+  if (shape === "work") ctx.rect(x - r * 0.88, y - r * 0.88, r * 1.76, r * 1.76);
+  else if (shape === "academic") { ctx.moveTo(x, y - r * 1.15); ctx.lineTo(x + r * 1.15, y); ctx.lineTo(x, y + r * 1.15); ctx.lineTo(x - r * 1.15, y); ctx.closePath(); }
+  else ctx.arc(x, y, r, 0, Math.PI * 2);
+}
+function drawNode(n, x, y, r, time) {
+  const st = (STATUS[n.status] || STATUS.archived).style;
+  ctx.lineWidth = Math.max(1, r * 0.17);
+  shapePath(n.track, x, y, r);
+  if (st === "solid") { ctx.fillStyle = col["--ink"]; ctx.fill(); }
+  else if (st === "tone") { ctx.fillStyle = toneFill; ctx.fill(); ctx.strokeStyle = col["--ink"]; ctx.stroke(); }
+  else if (st === "faint") { ctx.fillStyle = col["--paper"]; ctx.fill(); ctx.strokeStyle = col["--tone"]; ctx.stroke(); }
+  else {
+    ctx.fillStyle = col["--paper"]; ctx.fill();
+    if (st === "dashed") ctx.setLineDash([3, 3]);
+    ctx.strokeStyle = col["--ink"]; ctx.stroke(); ctx.setLineDash([]);
+    if (st === "outline") { ctx.fillStyle = col["--ink"]; ctx.beginPath(); ctx.arc(x, y, r * 0.36, 0, Math.PI * 2); ctx.fill(); }
+  }
+  if (st === "solid") {
+    const lr = r * 0.38 * (reduce ? 1 : 0.8 + 0.3 * Math.sin(time * 3.2 + n.z[0] * 10));
+    ctx.fillStyle = col["--spot"]; ctx.beginPath(); ctx.arc(x, y, Math.max(1, lr), 0, Math.PI * 2); ctx.fill();
+  }
+}
+// a geodesic drawn segment by segment, each segment faded by its depth
+function geodesic(p, q, steps, width, alpha, dash) {
+  let prev = null;
+  if (dash) ctx.setLineDash(dash);
+  for (let i = 0; i <= steps; i++) {
+    const v = view(geo(p, q, i / steps)), s = proj(v);
+    if (prev) {
+      ctx.globalAlpha = alpha * fade(v);
+      ctx.lineWidth = typeof width === "function" ? width(v, s) : width;
+      ctx.beginPath(); ctx.moveTo(prev.x, prev.y); ctx.lineTo(s.x, s.y); ctx.stroke();
+    }
+    prev = s;
+  }
+  ctx.setLineDash([]); ctx.globalAlpha = 1;
+}
+let seed = 11;
+const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+const flowSeed = new Map(nodes.map(n => [n.id, rnd()]));
+let hits = [];
+let clusters = null, clusteredAt = 0, clusterOf = new Map(), meBox = null, touched = false;
+const short = t => (t.length > 26 ? t.slice(0, 25) + "…" : t);
+// the tag's width at the current font: icon, name, and room for a count badge
+const tagWidth = (n, k) => ctx.measureText(short(n.title)).width + 32 + (k > 1 ? 26 : 0);
+function recluster(pos, now) {
+  const prio = n => { const { v, s } = pos.get(n); return (n === sel ? 1e6 : 0) + (hover && (hover === n || hover.lead === n) ? 1e5 : 0) + (n.size === "big" ? 40 : 0) + 60 * conf(v) * s.s + 20 * v[2]; };
+  const near = nodes.filter(n => n === sel || pos.get(n).v[2] > -0.12).sort((a, b) => prio(b) - prio(a));
+  const overlap = (a, b) => a.x < b.x + b.w + 6 && b.x < a.x + a.w + 6 && a.y < b.y + b.h + 4 && b.y < a.y + a.h + 4;
+  clusters = []; clusterOf = new Map();
+  let labelBox = null;
+  if (music && rec.on !== ME && rec.vis > 0.5) { const { v, s } = pos.get(rec.on), r = labelR(v, s); labelBox = { x: s.x - r - 6, y: s.y - r - 6, w: 2 * r + 12, h: 2 * r + 12 }; }
+  for (const n of near) {
+    const { s } = tagAt(n, pos), w = tagWidth(n, 2), box = { x: s.x - w / 2, y: s.y - 11, w, h: 22 };
+    if (n !== sel && meBox && overlap(box, meBox)) continue;                      // don't bury Kai Shun's name
+    if (n !== rec.on && labelBox && overlap(box, labelBox)) continue;             // or the record's label
+    const c = clusters.find(c => overlap(c.box, box));
+    if (!c) { const nc = { lead: n, members: [n], box }; clusters.push(nc); clusterOf.set(n, nc); }
+    else if (c.lead !== sel) { c.members.push(n); clusterOf.set(n, c); }        // the open project keeps its own tag
+  }
+  clusteredAt = now;
+}
+function drawTag(c, { v, s }, time) {
+  const n = c.lead, k = c.members.length, w = tagWidth(n, k), h = 22, x = s.x - w / 2, y = s.y - h / 2;
+  const on = sel === n || hover === n || hover === c;
+  ctx.globalAlpha = Math.max(0.55, fade(v));
+  ctx.fillStyle = col["--paper"]; ctx.strokeStyle = col["--ink"]; ctx.lineWidth = sel === n ? 2.5 : on ? 2 : 1.3;
+  ctx.beginPath(); ctx.roundRect(x, y, w, h, 11); ctx.fill(); ctx.stroke();
+  drawNode(n, x + 13, s.y, 4.5, time);
+  ctx.fillStyle = col["--ink"]; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+  ctx.fillText(short(n.title), x + 24, s.y + 1);
+  if (k > 1) {
+    ctx.beginPath(); ctx.arc(x + w - 13, s.y, 9, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = col["--paper"]; ctx.font = `600 10px ${fonts["--font-mono"]}`; ctx.textAlign = "center";
+    ctx.fillText("+" + (k - 1), x + w - 13, s.y + 0.5);
+    ctx.font = `500 12px ${fonts["--font-mono"]}`;
+  }
+  ctx.globalAlpha = 1;
+  hits.push({ it: k > 1 ? c : n, x: s.x, y: s.y, rect: { x, y, w, h }, z: v[2] + 0.5 });
+}
+
+let t0 = performance.now();
+function draw(now = performance.now()) {
+  if (!W || !toneFill) return;
+  const time = (now - t0) / 1000;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.fillStyle = col["--paper"]; ctx.fillRect(0, 0, W, H);
+  if (music) drawGrooves(now);
+
+  // the steel ball: three grooves on its surface, turning with it (a record has its own grooves instead)
+  if (!music) for (const plane of [[1, 0, 0], [0, 1, 0], [0, 0, 1]]) {
+    const u = unit(cross(plane, [0.3, 0.5, 0.8])), w2 = cross(plane, u);
+    let prev = null;
+    ctx.strokeStyle = col["--tone"];
+    for (let i = 0; i <= 96; i++) {
+      const a = (i / 96) * Math.PI * 2;
+      const v = view(times(plus(times(u, Math.cos(a)), times(w2, Math.sin(a))), 0.995)), p = proj(v);
+      if (prev) { ctx.globalAlpha = v[2] > 0 ? 0.55 : 0.18; ctx.lineWidth = v[2] > 0 ? 1.4 : 1; ctx.beginPath(); ctx.moveTo(prev.x, prev.y); ctx.lineTo(p.x, p.y); ctx.stroke(); }
+      prev = p;
+    }
+    ctx.globalAlpha = 1;
+  }
+  ctx.strokeStyle = col["--ink"]; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+
+  // the tetrahedron: geodesics between the four skill anchors
+  const keys = Object.keys(ANCHOR), A = k => times(ANCHOR[k], 0.985);
+  ctx.strokeStyle = col["--tone"];
+  for (let i = 0; i < 4; i++) for (let j = i + 1; j < 4; j++) geodesic(A(keys[i]), A(keys[j]), 40, 1, 0.55, [3, 6]);
+
+  // the selected project's mix: one pipe in from each anchor, width and traffic by weight
+  if (sel && sel.mix) {
+    for (const [k, w] of Object.entries(sel.mix)) {
+      ctx.strokeStyle = col["--ink"];
+      geodesic(A(k), sel.z, 36, (v, s) => Math.max(1, 1 + 6 * w * conf(v) * s.s), 0.9);
+      if (!reduce) {
+        ctx.fillStyle = col["--spot"];
+        const n = Math.max(1, Math.round(w * 6));
+        for (let i = 0; i < n; i++) {
+          const t = (time * 0.35 + i / n + flowSeed.get(sel.id)) % 1;
+          const v = view(geo(A(k), sel.z, t)), s = proj(v);
+          ctx.globalAlpha = fade(v);
+          ctx.beginPath(); ctx.arc(s.x, s.y, Math.max(1, 3.4 * conf(v) * s.s), 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+      }
+    }
+  }
+  // a selected group: ties from its centre to each member
+  if (sel && sel.members) {
+    ctx.strokeStyle = col["--ink"];
+    for (const m of sel.members) geodesic(sel.z, m.z, 14, 1.2, 0.7, [2, 4]);
+  }
+
+  // anchors, groups and Kai Shun, far to near
+  hits = [];
+  const mono = fonts["--font-mono"], disp = fonts["--font-display"];
+  const items = [];
+  for (const k of keys) { const v = view(A(k)); items.push({ type: "anchor", k, v, s: proj(v) }); }
+  { const v = view(ME.z); items.push({ type: "me", v, s: proj(v) }); }
+  for (const g of Object.values(groups)) if (g.header) { const v = view(g.z); items.push({ type: "group", g, v, s: proj(v) }); }
+  items.sort((a, b) => a.v[2] - b.v[2]);
+  for (const it of items) {
+    const { v, s } = it;
+    if (it.type === "anchor") {
+      const label = ANAME[it.k], fs = 11 + 4 * fade(v);
+      ctx.font = `${fs}px ${disp}`;
+      ctx.globalAlpha = 0.25 + 0.6 * fade(v);
+      ctx.fillStyle = col["--ink"]; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.lineJoin = "round"; ctx.lineWidth = 5; ctx.strokeStyle = col["--paper"];
+      ctx.strokeText(label, s.x, s.y); ctx.fillText(label, s.x, s.y);
+    } else if (it.type === "group") {
+      const r = Math.max(4, 9 * conf(v) * s.s);
+      ctx.globalAlpha = fade(v);
+      ctx.strokeStyle = col["--ink"]; ctx.lineWidth = 1.5; ctx.setLineDash([2, 3]);
+      ctx.beginPath(); ctx.arc(s.x, s.y, r, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+      if (sel === it.g || hover === it.g) {
+        ctx.font = `${Math.max(11, 14 * conf(v) * s.s)}px ${disp}`; ctx.textAlign = "center"; ctx.textBaseline = "top";
+        ctx.lineJoin = "round"; ctx.lineWidth = 5; ctx.strokeStyle = col["--paper"]; ctx.strokeText(it.g.title, s.x, s.y + r + 4);
+        ctx.fillStyle = col["--ink"]; ctx.fillText(it.g.title, s.x, s.y + r + 4);
+      }
+      hits.push({ it: it.g, x: s.x, y: s.y, r: r + 4, z: v[2] });
+    } else {
+      const onMe = music && rec.on === ME && rec.vis > 0.02;
+      const r = onMe ? labelR(v, s) : Math.max(6, 24 * conf(v) * s.s);
+      ctx.globalAlpha = fade(v);
+      if (sel === ME) { ctx.strokeStyle = col["--ink"]; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(s.x, s.y, r + 7, 0, Math.PI * 2); ctx.stroke(); }
+      if (onMe && rec.art) drawLabel(s.x, s.y, r);
+      else {
+        ctx.fillStyle = col["--ink"]; ctx.beginPath(); ctx.arc(s.x, s.y, r, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = col["--paper"]; ctx.font = `${Math.max(8, r * 0.72)}px ${disp}`;
+        ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("ks", s.x, s.y + 1);
+      }
+      const fs = Math.max(12, Math.min(17, r * 0.7));
+      ctx.font = `${fs}px ${disp}`; ctx.textBaseline = "top";
+      ctx.lineJoin = "round"; ctx.lineWidth = 5; ctx.strokeStyle = col["--paper"]; ctx.strokeText(ME.title, s.x, s.y + r + 6);
+      ctx.fillStyle = col["--ink"]; ctx.fillText(ME.title, s.x, s.y + r + 6);
+      meBox = { x: s.x - Math.max(r, ctx.measureText(ME.title).width / 2) - 4, y: s.y - r - 4, w: 2 * Math.max(r, ctx.measureText(ME.title).width / 2) + 8, h: 2 * r + fs + 14 };
+      hits.push({ it: ME, x: s.x, y: s.y, r, z: v[2] + 0.001 });
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // projects: the near side gets name tags, the far side stays as faint dots, and tags that would overlap
+  // merge into a cluster (lead name + a count), like pins on a map
+  const pos = new Map();
+  for (const n of nodes) { const v = view(n.z); pos.set(n, { v, s: proj(v) }); }
+  ctx.font = `500 12px ${mono}`;
+  if (!clusters || now - clusteredAt > 160) recluster(pos, now);
+  const led = new Set(clusters.map(c => c.lead));
+  for (const n of [...nodes].sort((a, b) => pos.get(a).v[2] - pos.get(b).v[2])) {
+    if (led.has(n)) continue;
+    const { v, s } = pos.get(n), r = Math.max(1.6, 5 * conf(v) * s.s);
+    ctx.globalAlpha = 0.75 * fade(v);
+    drawNode(n, s.x, s.y, r, time);
+    if (!clusterOf.get(n)) hits.push({ it: n, x: s.x, y: s.y, r: r + 3, z: v[2] - 1 });   // far-side dots stay clickable
+  }
+  ctx.globalAlpha = 1;
+  if (music && rec.on !== ME && rec.art && rec.vis > 0.02) { const { v, s } = pos.get(rec.on); ctx.globalAlpha = rec.vis; drawLabel(s.x, s.y, labelR(v, s)); ctx.globalAlpha = 1; }
+  for (const c of [...clusters].sort((a, b) => pos.get(a.lead).v[2] - pos.get(b.lead).v[2])) drawTag(c, tagAt(c.lead, pos), time);
+
+  if (music) drawArm(now);
+
+  // the line from the selected point to its bubble
+  if (sel && !sayEl.hidden) {
+    const v = view(sel.z), s = proj(v), b = sayEl.getBoundingClientRect();
+    let ex, ey;
+    if (wide()) { ex = b.left; ey = Math.max(b.top + 36, Math.min(b.bottom - 36, s.y)); }
+    else { ey = b.top; ex = Math.max(b.left + 36, Math.min(b.right - 36, s.x)); }
+    const ang = Math.atan2(ey - s.y, ex - s.x);
+    let reach;
+    if (sel === ME) reach = (music && rec.on === ME ? labelR(v, s) : Math.max(6, 24 * conf(v) * s.s)) + 12;
+    else if (music && sel === rec.on && rec.vis > 0.5) reach = labelR(v, s) + 12;
+    else { ctx.font = `500 12px ${mono}`; const hw = tagWidth(sel, 1) / 2, hh = 11; reach = Math.min(hw / Math.max(1e-6, Math.abs(Math.cos(ang))), hh / Math.max(1e-6, Math.abs(Math.sin(ang)))) + 8; }
+    const sx = s.x + Math.cos(ang) * reach, sy = s.y + Math.sin(ang) * reach;
+    ctx.strokeStyle = col["--ink"]; ctx.lineWidth = 2; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.stroke();
+    ctx.fillStyle = col["--ink"];
+    ctx.beginPath(); ctx.arc(sx, sy, 3.5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(ex, ey, 5, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // until the first click or drag, one quiet line under the ball says what to do
+  if (!touched && sayEl.hidden) {
+    ctx.font = `13px ${mono}`; ctx.fillStyle = col["--muted"]; ctx.textAlign = "center"; ctx.textBaseline = "top";
+    const hint = "Every project I've built, placed by the skills it took. Click a name.";
+    if (ctx.measureText(hint).width < W - 32) ctx.fillText(hint, cx, cy + R + 14);
+    else { ctx.fillText("Every project I've built,", cx, cy + R + 14); ctx.fillText("placed by the skills it took. Click a name.", cx, cy + R + 32); }
+  }
+
+}
+
+function loop(now) {
+  const dt = Math.min(0.05, (now - lastFrame) / 1000); lastFrame = now;
+  if (!reduce && !(drag && drag.moved) && !anim && !trip && sayEl.hidden) {     // the ball holds still while a popup is open
+    const w = len(omega);
+    if (w > 1e-6) rot = mmul(rotAxis(times(omega, 1 / w), w * dt), rot);
+    omega = plus(IDLE, times(minus(omega, IDLE), Math.exp(-dt * 0.55)));   // friction back to the idle spin
+  }
+  if (anim) {
+    const k = Math.min(1, (now - anim.start) / anim.dur);
+    const e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+    rot = mmul(rotAxis(anim.axis, anim.angle * (e - anim.done)), rot);
+    anim.done = e;
+    if (k === 1) anim = null;
+  }
+  if (trip) {
+    const k = Math.min(1, (now - trip.start) / trip.dur);
+    const e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+    const d = trip.d, m = len(d);
+    centre = m < 1e-9 ? trip.from : madd(trip.from, times(d, Math.tanh(e * Math.atanh(m)) / m));
+    if (k === 1) { trip = null; if (queue.length) leg(queue.shift()); }
+  }
+  if (music) {
+    // changing records: while the ball travels, or until the old record has faded, the needle is up
+    const moving = !!trip || queue.length > 0, changing = moving || rec.on !== rec.target;
+    if (changing && !moving && (rec.vis < 0.04 || reduce)) {
+      const next = trackFor(rec.target);
+      rec.on = rec.target;
+      if (next) { music = next; rec.art = artFor(music); rec.revealAt = now; window.dispatchEvent(new Event("record")); }
+    }
+    const live = music.is_playing && !(moving || rec.on !== rec.target);
+    rec.vis += ((changing ? 0 : 1) - rec.vis) * (reduce ? 1 : 1 - Math.exp(-dt * (changing ? 7 : 3)));
+    // the platter gets up to speed in about a second and coasts down over a few when the music stops
+    const want = live && !reduce ? RPM * Math.PI / 30 : 0;
+    rec.speed += (want - rec.speed) * (1 - Math.exp(-dt * (want ? 2.4 : changing ? 4 : 0.7)));
+    rec.phase += rec.speed * dt;
+    rec.arm += ((live ? 1 : 0) - rec.arm) * (1 - Math.exp(-dt * (changing ? 6 : 2.2)));
+  }
+  // ease the ball toward its layout
+  const ease = reduce ? 1 : 0.16;
+  cx += (tx - cx) * ease; cy += (ty - cy) * ease; R += (tR - R) * ease;
+  draw(now);
+  if (!reduce || music || anim || trip || Math.abs(tx - cx) + Math.abs(ty - cy) + Math.abs(tR - R) > 0.5) requestAnimationFrame(loop);
+}
+const kick = () => { if (reduce) requestAnimationFrame(loop); };
+// clicking a point flies the ball to it: out from Kai Shun, and project to project by way of him.
+// Visitors can't fly by hand; the depth is only ever the trip to what they clicked.
+const HOME = [0, 0, 0];
+const clampIn = z => (len(z) > 0.9 ? times(unit(z), 0.9) : z);
+const atHome = () => len(centre) < 0.02;
+function leg(target) {
+  const d = madd(neg(centre), target);
+  if (len(d) < 1e-6) { if (queue.length) leg(queue.shift()); return; }
+  trip = { from: centre, d, start: performance.now(), dur: 520 + 260 * Math.min(1, len(d)) };
+}
+function flyTo(target) {
+  target = clampIn(target);
+  if (reduce) { centre = target; queue = []; trip = null; kick(); return; }
+  queue = atHome() || len(target) < 0.02 ? [target] : [HOME, target];
+  trip = null;
+  leg(queue.shift());
+}
+const goHome = () => flyTo(HOME);
+
+/* ---------- pointer and keys ---------- */
+let drag = null;
+const touches = new Map();
+let pinch = null;
+function hitAt(ev) {
+  let best = null, bz = -Infinity;
+  for (const h of hits) {
+    const inside = h.rect ? ev.clientX >= h.rect.x - 3 && ev.clientX <= h.rect.x + h.rect.w + 3 && ev.clientY >= h.rect.y - 3 && ev.clientY <= h.rect.y + h.rect.h + 3
+                          : Math.hypot(h.x - ev.clientX, h.y - ev.clientY) < Math.max(h.r + 5, 12);
+    if (inside && h.z > bz) { best = h.it; bz = h.z; }
+  }
+  return best;
+}
+cv.addEventListener("pointerdown", ev => {
+  closePick();
+  cv.setPointerCapture(ev.pointerId);
+  touches.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+  if (touches.size === 2) { const [a, b] = [...touches.values()]; pinch = Math.hypot(a.x - b.x, a.y - b.y); drag = null; return; }
+  drag = { x: ev.clientX, y: ev.clientY, lx: ev.clientX, ly: ev.clientY, moved: false };
+});
+cv.addEventListener("pointermove", ev => {
+  if (touches.has(ev.pointerId)) touches.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+  if (pinch != null && touches.size === 2) {
+    const [a, b] = [...touches.values()], d = Math.hypot(a.x - b.x, a.y - b.y);
+    pinch = d;          // two fingers do nothing for now
+    return;
+  }
+  if (drag) {
+    if (Math.hypot(ev.clientX - drag.x, ev.clientY - drag.y) > 4) { drag.moved = true; touched = true; cv.classList.add("dragging"); }
+    if (drag.moved) {
+      const k = 2.4 / R, t = performance.now(), dtm = Math.max(8, t - (drag.t || t - 16)) / 1000;
+      const ax = (ev.clientY - drag.ly) * k, ay = (ev.clientX - drag.lx) * k;
+      rot = mmul(mmul(rotX(ax), rotY(ay)), rot);
+      drag.w = plus(times(drag.w || [0, 0, 0], 0.5), times([-ax / dtm, ay / dtm, 0], 0.5));   // right-handed angular velocity
+      drag.lx = ev.clientX; drag.ly = ev.clientY; drag.t = t;
+      kick();
+    }
+    return;
+  }
+  const h = hitAt(ev);
+  if (h !== hover) { hover = h; cv.style.cursor = h ? "pointer" : ""; kick(); }
+});
+cv.addEventListener("pointercancel", ev => { touches.delete(ev.pointerId); if (touches.size < 2) pinch = null; drag = null; });
+cv.addEventListener("pointerup", ev => {
+  touches.delete(ev.pointerId);
+  if (pinch != null) { if (touches.size < 2) pinch = null; drag = null; return; }
+  const wasDrag = drag && drag.moved;
+  if (wasDrag && !reduce) {
+    // release: the ball keeps the spin you gave it, unless you stopped before letting go
+    const fresh = performance.now() - (drag.t || 0) < 80;
+    omega = fresh && drag.w ? times(drag.w, Math.min(1, 14 / Math.max(1e-6, len(drag.w)))) : [...IDLE];
+  }
+  drag = null; cv.classList.remove("dragging");
+  if (wasDrag) return;
+  const h = hitAt(ev);
+  touched = true;
+  if (h && h.members && !h.title) openPick(h, ev.clientX, ev.clientY);      // a cluster: list what's in it
+  else if (h) select(h);
+  else if (!sayEl.hidden) closeSay();      // a click on blank paper closes the bubble
+});
+cv.addEventListener("pointerleave", () => { if (!drag) { hover = null; kick(); } });
+addEventListener("keydown", ev => {
+  if (ev.key === "Escape") { if (!pickEl.hidden) return closePick(); if (!sayEl.hidden) closeSay(); }
+  if (document.activeElement !== cv) return;
+  const step = 0.12, keys = { ArrowLeft: rotY(-step), ArrowRight: rotY(step), ArrowUp: rotX(-step), ArrowDown: rotX(step) };
+  if (keys[ev.key]) { ev.preventDefault(); rot = mmul(keys[ev.key], rot); kick(); }
+  if (ev.key === "Enter") select(ME);
+});
+
+/* ---------- the record ---------- */
+const labelR = (v, s) => Math.max(14, R * 0.13 * conf(v) * s.s);
+// where a project's name tag sits: on its point, or just under the label while its record is on
+function tagAt(n, pos) {
+  const p = pos.get(n);
+  if (!(music && n === rec.on && rec.vis > 0.5)) return p;
+  return { v: p.v, s: { ...p.s, y: p.s.y + labelR(p.v, p.s) + 16 } };
+}
+// what plays when a project is clicked: one song from its playlist, started somewhere in the middle
+function trackFor(n) {
+  if (n === ME) return homeMusic;
+  const pl = D.playlists && D.playlists[n.id];
+  if (!pl || !pl.tracks.length) return null;
+  const t = pl.tracks[Math.floor(Math.random() * pl.tracks.length)];
+  return { ...t, key: n.id, playlist: pl.name, url: pl.url || t.url, art: pl.art, sample: pl.sample, is_playing: true,
+           progress_ms: Math.random() * 0.6 * t.duration_ms, at: performance.now() };
+}
+// a stand-in cover for the prototype, different for every key: real covers replace it at build time
+function standInCover(g, N, key) {
+  let h = 0; for (const ch of key) h = (h * 31 + ch.charCodeAt(0)) % 360;
+  g.fillStyle = `hsl(${h} 45% 42%)`; g.fillRect(0, 0, N, N);
+  g.fillStyle = `hsl(${(h + 150) % 360} 65% 62%)`; g.beginPath(); g.arc(N * (0.3 + (h % 40) / 100), N * 0.42, N * 0.24, 0, Math.PI * 2); g.fill();
+  g.fillStyle = `hsl(${(h + 40) % 360} 55% 20%)`; g.beginPath(); g.moveTo(0, N * 0.72); g.lineTo(N, N * 0.52); g.lineTo(N, N); g.lineTo(0, N); g.fill();
+}
+// one track's art: the cover in colour (shown big and faint behind the grooves) and the label (the cover as screentone)
+function artFor(m) {
+  const key = m.key + (m.is_playing ? ":on" : ":off");
+  if (rec.cache.has(key)) return rec.cache.get(key);
+  const N = 320, cover = document.createElement("canvas"); cover.width = cover.height = N;
+  const cg = cover.getContext("2d");
+  const img = m.art ? Object.assign(new Image(), { src: m.art }) : null;
+  const paint = () => {
+    if (img && img.complete && img.naturalWidth) cg.drawImage(img, 0, 0, N, N); else standInCover(cg, N, m.key);
+    out.label = halftoneLabel(cover, N, m.is_playing);
+  };
+  const out = { cover, label: null };
+  paint();
+  if (img && !img.complete) img.onload = paint;
+  rec.cache.set(key, out);
+  return out;
+}
+function halftoneLabel(src, N, live) {
+  const c = document.createElement("canvas"); c.width = c.height = N;
+  const g = c.getContext("2d");
+  const px = src.getContext("2d").getImageData(0, 0, N, N).data;
+  g.fillStyle = col["--paper"]; g.fillRect(0, 0, N, N);
+  g.fillStyle = col["--ink"];
+  const step = 9;
+  for (let y = 0, row = 0; y < N; y += step * 0.87, row++) for (let x = (row % 2) * step / 2; x < N; x += step) {
+    const i = (Math.floor(y) * N + Math.floor(x)) * 4, lum = (0.3 * px[i] + 0.59 * px[i + 1] + 0.11 * px[i + 2]) / 255;
+    const r = step * 0.56 * Math.sqrt(1 - lum);
+    if (r > 0.4) { g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill(); }
+  }
+  // the label's rim, printed like a real one; the dot is red while the song is live
+  g.fillStyle = col["--paper"]; g.beginPath(); g.arc(N / 2, N / 2, N / 2, 0, Math.PI * 2); g.arc(N / 2, N / 2, N * 0.4, 0, Math.PI * 2, true); g.fill();
+  g.strokeStyle = col["--ink"]; g.lineWidth = 3; g.beginPath(); g.arc(N / 2, N / 2, N * 0.4, 0, Math.PI * 2); g.stroke();
+  const rim = "TEOH KAI SHUN · SIDE A · 33⅓ RPM · ";
+  g.font = `600 ${N * 0.05}px ${fonts["--font-mono"]}`; g.fillStyle = col["--ink"]; g.textAlign = "center"; g.textBaseline = "middle";
+  [...rim].forEach((ch, k) => { const a = (k / rim.length) * Math.PI * 2; g.save(); g.translate(N / 2 + Math.cos(a) * N * 0.45, N / 2 + Math.sin(a) * N * 0.45); g.rotate(a + Math.PI / 2); g.fillText(ch, 0, 0); g.restore(); });
+  if (live) { g.fillStyle = col["--spot"]; g.beginPath(); g.arc(N / 2, N * 0.08, N * 0.022, 0, Math.PI * 2); g.fill(); }
+  return c;
+}
+function drawLabel(x, y, r) {
+  ctx.save(); ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.clip();
+  ctx.translate(x, y); ctx.rotate(rec.phase); ctx.drawImage(rec.art.label, -r, -r, 2 * r, 2 * r); ctx.restore();
+  ctx.strokeStyle = col["--ink"]; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke();
+  ctx.fillStyle = col["--paper"]; ctx.beginPath(); ctx.arc(x, y, Math.max(2, r * 0.07), 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = col["--ink"]; ctx.lineWidth = 1.2; ctx.stroke();
+}
+function drawGrooves(now) {
+  const r0 = R * 0.3, r1 = R * 0.975, V = rec.vis;
+  // the cover, cropped to a circle, spreading out from the centre once the record is on; kept faint, and fainter at home
+  if (rec.art && V > 0.01) {
+    const k = reduce ? 1 : Math.min(1, (now - rec.revealAt) / 1300), e = 1 - Math.pow(1 - k, 3);
+    const rr = R * 0.12 + (r1 - R * 0.12) * e;
+    ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, rr, 0, Math.PI * 2); ctx.clip();
+    ctx.globalAlpha = (rec.on === ME ? 0.06 : 0.11) * V;
+    ctx.drawImage(rec.art.cover, cx - r1, cy - r1, 2 * r1, 2 * r1);
+    ctx.restore();
+    if (k < 1) { ctx.globalAlpha = 0.45 * (1 - k) * V; ctx.strokeStyle = col["--ink"]; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(cx, cy, rr, 0, Math.PI * 2); ctx.stroke(); }
+  }
+  ctx.strokeStyle = col["--tone"]; ctx.lineWidth = 0.6;
+  ctx.globalAlpha = 0.16 * V;
+  ctx.beginPath();
+  for (let r = r0, k = 0; r < r1; r += 2.6, k++) {
+    if (k % 41 > 38) continue;                    // the quiet bands between tracks
+    ctx.moveTo(cx + r, cy); ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  }
+  ctx.stroke();
+  // a few glints that turn with the platter, so you can see it spin
+  ctx.strokeStyle = col["--ink"]; ctx.lineWidth = 1;
+  for (let i = 0; i < 7; i++) {
+    const r = r0 + (r1 - r0) * ((i * 0.618) % 1), a = rec.phase * 0.5 + i * 2.4;
+    ctx.globalAlpha = 0.12 * V; ctx.beginPath(); ctx.arc(cx, cy, r, a, a + 0.35); ctx.stroke();
+  }
+  // the beat: one faint ring per beat, out from the label through the grooves; the first of each bar a little stronger
+  if (music.is_playing && music.bpm && !reduce) {
+    const beats = songAt(now) * music.bpm / 60, f = beats % 1, bar = Math.floor(beats) % 4 === 0;
+    const r = r0 + (r1 - r0) * Math.pow(f, 0.7);
+    ctx.globalAlpha = (bar ? 0.34 : 0.2) * Math.pow(1 - f, 2) * Math.min(1, rec.speed / (RPM * Math.PI / 30)) * V;
+    ctx.strokeStyle = col["--ink"]; ctx.lineWidth = bar ? 2 : 1.4;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+}
+// the tonearm: pivots just above the record's top right edge (clear of the bubble); the stylus rides from the outer groove inward as the song goes on.
+// When nothing plays it lifts back to its rest beside the record.
+function drawArm(now) {
+  const P = [cx + R * 1.0, Math.max(16, cy - R * 0.95)], L = R * 1.06;
+  const frac = music.duration_ms ? songAt(now) / (music.duration_ms / 1000) : 0;
+  const rr = R * (0.94 - 0.58 * frac);
+  // the stylus is where a circle of the arm's length about the pivot meets the groove of radius rr (the right-hand meeting)
+  const dx = cx - P[0], dy = cy - P[1], d = Math.hypot(dx, dy);
+  const a = (L * L - rr * rr + d * d) / (2 * d), h = Math.sqrt(Math.max(0, L * L - a * a));
+  const mx = P[0] + (a * dx) / d, my = P[1] + (a * dy) / d;
+  const c1 = [mx - (h * dy) / d, my + (h * dx) / d], c2 = [mx + (h * dy) / d, my - (h * dx) / d];
+  const play = c1[0] > c2[0] ? c1 : c2;
+  const angRest = 1.4;                                  // resting just off the record's right edge
+  let angPlay = Math.atan2(play[1] - P[1], play[0] - P[0]);
+  while (angPlay - angRest > Math.PI) angPlay -= 2 * Math.PI;
+  while (angPlay - angRest < -Math.PI) angPlay += 2 * Math.PI;
+  const ang = angRest + (angPlay - angRest) * rec.arm, S = [P[0] + L * Math.cos(ang), P[1] + L * Math.sin(ang)];
+  ctx.lineCap = "round";
+  ctx.strokeStyle = col["--paper"]; ctx.lineWidth = 8; ctx.beginPath(); ctx.moveTo(P[0], P[1]); ctx.lineTo(S[0], S[1]); ctx.stroke();
+  ctx.strokeStyle = col["--ink"]; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(P[0], P[1]); ctx.lineTo(S[0], S[1]); ctx.stroke();
+  ctx.save(); ctx.translate(S[0], S[1]); ctx.rotate(ang);
+  ctx.fillStyle = col["--ink"]; ctx.fillRect(-4, -6, 16, 12);
+  ctx.restore();
+  ctx.fillStyle = col["--paper"]; ctx.strokeStyle = col["--ink"]; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.arc(P[0], P[1], 10, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = col["--ink"]; ctx.beginPath(); ctx.arc(P[0], P[1], 3.5, 0, Math.PI * 2); ctx.fill();
+  ctx.lineCap = "butt";
+}
+
+/* ---------- the speech bubble ---------- */
+const body = document.getElementById("saybody");
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const md = s => esc(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/\*(.+?)\*/g, "<em>$1</em>").replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\[([^\]]+)\]\([^)]*\)/g, "$1");
+const paras = s => s.split(/\n\s*\n/).map(p => `<p>${md(p.replace(/\n/g, " "))}</p>`).join("");
+const f2 = x => (x < 0 ? "−" : " ") + Math.abs(x).toFixed(2);
+function glyph(n) {
+  const st = (STATUS[n.status] || STATUS.archived).style, ink = "var(--ink)", paper = "var(--paper)";
+  const shape = n.track === "work" ? `<rect x="1.5" y="1.5" width="9" height="9"` : n.track === "academic" ? `<polygon points="6,0.6 11.4,6 6,11.4 0.6,6"` : `<circle cx="6" cy="6" r="5"`;
+  const attrs = {
+    solid: `fill="${ink}"`, tone: `fill="url(#tp)" stroke="${ink}" stroke-width="1.5"`, outline: `fill="${paper}" stroke="${ink}" stroke-width="1.8"`,
+    faint: `fill="${paper}" stroke="var(--tone)" stroke-width="1.5"`, dashed: `fill="${paper}" stroke="${ink}" stroke-width="1.5" stroke-dasharray="2 2"`,
+  }[st];
+  const inner = st === "solid" ? `<circle cx="6" cy="6" r="2" fill="var(--spot)"/>` : st === "outline" ? `<circle cx="6" cy="6" r="1.8" fill="${ink}"/>` : "";
+  return `<svg class="glyph" viewBox="0 0 12 12" aria-hidden="true"><defs><pattern id="tp" width="2.4" height="2.4" patternUnits="userSpaceOnUse"><circle cx="1.2" cy="1.2" r="0.6" fill="${ink}"/></pattern></defs>${shape} ${attrs}/>${inner}</svg>`;
+}
+const nearest = (n, k) => nodes.filter(m => m !== n).map(m => ({ m, d: dH(n.z, m.z) })).sort((a, b) => a.d - b.d).slice(0, k);
+const list = items => `<div class="kids">${items.map(({ m, d }) => `<button type="button" data-go="${m.id}">${glyph(m)}<span><b>${esc(m.title)}</b><small>${esc(m.tagline)}</small></span>${d != null ? `<span class="d">d=${d.toFixed(2)}</span>` : ""}</button>`).join("")}</div>`;
+
+function calcBlock(n) {
+  const c = n.calc, terms = Object.entries(n.mix).sort((a, b) => b[1] - a[1]);
+  const bars = terms.map(([k, w]) => `<div class="mixrow"><span>${k}</span><span>${w.toFixed(2)}</span><span class="bar"><i style="width:${w * 100}%"></i></span></div>`).join("");
+  const sum = terms.map(([k, w]) => `${w.toFixed(2)}·u<sub>${k}</sub>`).join(" + ");
+  const dist = 2 * Math.atanh(len(n.z));
+  return `<div class="calc">${bars}<div class="eq">p   = ${sum}
+    = (${f2(c.p[0])}, ${f2(c.p[1])}, ${f2(c.p[2])})
+|p| = <b>${c.L.toFixed(3)}</b>   <span class="c">1 = one skill only; lower = more mixed</span>
+r   = ${DEPTH}·|p| = <b>${c.r.toFixed(3)}</b>${c.twins ? `
+    + spread ${c.spread.toFixed(3)}   <span class="c">${c.twins} other${c.twins > 1 ? "s" : ""} share this mix</span>` : ""}
+d   = 2·atanh(|x|) = <b>${dist.toFixed(2)}</b>   <span class="c">hyperbolic distance from Kai Shun</span></div></div>
+<p class="note">u<sub>k</sub> are the four anchors, the corners of a tetrahedron on the ball's boundary. The mix is a draft for Kai Shun to correct.</p>`;
+}
+
+function render() {
+  const n = sel;
+  if (n === ME) {
+    const p = D.profile;
+    const chapters = [...D.log].sort((a, b) => a[0].localeCompare(b[0])).map((l, i) => [...l, i + 1]).reverse().slice(0, 6);
+    body.innerHTML = `
+      <div class="path"><span>the centre</span></div>
+      <h2>${esc(p.name)}</h2>
+      <p class="tag">${esc(p.oneliner)}</p>
+      <div class="story">${paras(p.summary || "")}</div>
+      <div class="sec"><h4>how to read the ball</h4>
+        <p>I'm the centre. Four skills sit at the corners: <b>ML</b>, <b>Backend</b>, <b>Infra</b>, <b>Product</b>. Each project is placed by its mix of them: single-skill projects sit deep under one corner, mixed ones between corners and nearer me. Drag to spin it, flick to throw it, click any point.</p>
+        <div class="legend">
+          ${glyph({ track: "work", status: "shipped" })}<span>work</span>
+          ${glyph({ track: "side", status: "active" })}<span>running</span>
+          ${glyph({ track: "side", status: "shipped" })}<span>side project</span>
+          ${glyph({ track: "side", status: "paused" })}<span>paused</span>
+          ${glyph({ track: "academic", status: "shipped" })}<span>academic</span>
+          ${glyph({ track: "side", status: "idea" })}<span>pending</span>
+        </div>
+      </div>
+      <div class="sec"><h4>contact</h4><div class="contact">
+        <div class="row"><span class="select" id="email">${esc(p.email)}</span><button type="button" class="btn" id="copy">copy</button></div>
+        <a href="${esc(p.github)}" target="_blank" rel="noopener">github.com/BeanBois</a>
+        <a href="${esc(p.linkedin)}" target="_blank" rel="noopener">linkedin.com/in/kai-shun-teoh</a>
+      </div></div>
+      <div class="sec"><h4>get cv</h4><div class="row">
+        <a class="btn" href="author.html#cv-ml">ML</a><a class="btn" href="author.html#cv-cloud">Cloud</a><a class="btn" href="author.html#cv-backend">Backend</a>
+      </div><p class="note">Opens the CV on the author page. PDFs come at deploy.</p></div>
+      <div class="sec"><h4>latest</h4><ol class="events">${chapters.map(([d, id, msg, ep]) => `<li><button type="button" data-go="${id}"><span class="ep">第${ep}話</span><time>${d}</time><span class="svc">${esc(byId.get(id).title)}</span>${esc(msg)}</button></li>`).join("")}</ol></div>`;
+    const copy = document.getElementById("copy");
+    copy.onclick = () => {
+      const fallback = () => { const r = document.createRange(); r.selectNodeContents(document.getElementById("email")); getSelection().removeAllRanges(); getSelection().addRange(r); };
+      try { navigator.clipboard.writeText(p.email).then(() => { copy.textContent = "copied"; }, fallback); } catch { fallback(); }
+    };
+  } else if (n.members) {
+    const h = n.header;
+    body.innerHTML = `
+      <div class="path"><span>group</span><span>${n.members.length} projects</span></div>
+      <h2>${esc(n.title)}</h2>
+      ${h ? `<p class="tag">${esc(h.role)} · ${esc(h.period)}</p><div class="story">${paras(h.what)}</div>` : ""}
+      <div class="sec"><h4>projects</h4>${list(n.members.map(m => ({ m })))}</div>`;
+  } else {
+    const st = STATUS[n.status] || STATUS.archived;
+    const g = n.group ? groups[n.group] : null;
+    body.innerHTML = `
+      <div class="path"><span>${esc(n.track)}</span>${g ? `<span>·</span><button type="button" data-group="${esc(g.id)}">${esc(g.title)}</button>` : ""}<span>·</span><span>${esc(n.period)}</span></div>
+      <div class="stamps"><span class="stamp" style="color:${st.style === "solid" ? "var(--spot)" : st.style === "faint" ? "var(--muted)" : "var(--ink)"}">${st.label}</span><span class="stamp draft">draft</span></div>
+      <h2>${esc(n.title)}</h2>
+      <p class="tag">${esc(n.role ? n.role + " · " + n.tagline : n.tagline)}</p>
+      ${n.story ? `<div class="story">${paras(n.story)}</div>` : ""}
+      ${D.chapters[n.id] ? `<a class="chap" href="${D.chapters[n.id].href}">Read Vol. ${D.chapters[n.id].vol}, 第1話 →</a>` : ""}
+      ${n.what ? `<div class="sec"><h4>spec</h4>${paras(n.what)}</div>` : ""}
+      ${n.bullets.length ? `<div class="sec"><h4>output</h4><ul>${n.bullets.map(b => `<li>${md(b)}</li>`).join("")}</ul></div>` : ""}
+      <div class="sec"><h4>position</h4>${calcBlock(n)}</div>
+      ${n.stack.length || n.repo ? `<div class="sec"><h4>stack</h4><dl class="meta">
+        ${n.stack.length ? `<dt>uses</dt><dd><div class="chips">${n.stack.map(s => `<span class="chip">${esc(s)}</span>`).join("")}</div></dd>` : ""}
+        ${n.repo ? `<dt>repo</dt><dd><a href="${esc(n.repo)}" target="_blank" rel="noopener" style="color:var(--ink);text-decoration-color:var(--spot);text-decoration-thickness:2px">${esc(n.repo.replace("https://github.com/", ""))}</a></dd>` : ""}
+      </dl></div>` : ""}
+      <div class="sec"><h4>nearest</h4>${list(nearest(n, 4))}</div>`;
+  }
+  sayEl.scrollTop = 0;
+}
+sayEl.addEventListener("click", ev => {
+  const b = ev.target.closest("[data-go]"); if (b) return select(byId.get(b.dataset.go));
+  const g = ev.target.closest("[data-group]"); if (g) select(groups[g.dataset.group]);
+});
+document.getElementById("close").addEventListener("click", closeSay);
+
+const pickEl = document.getElementById("pick");
+function openPick(c, x, y) {
+  pickEl.innerHTML = c.members.map(m => `<button type="button" data-go="${m.id}">${glyph(m)}<span><b>${esc(m.title)}</b><small>${esc(m.tagline)}</small></span></button>`).join("");
+  pickEl.hidden = false;
+  const b = pickEl.getBoundingClientRect();
+  pickEl.style.left = Math.max(12, Math.min(W - b.width - 12, x - b.width / 2)) + "px";
+  pickEl.style.top = Math.max(12, Math.min(H - b.height - 12, y + 18)) + "px";
+  pickEl.querySelector("button")?.focus({ preventScroll: true });
+}
+function closePick() { pickEl.hidden = true; }
+pickEl.addEventListener("click", ev => { const b = ev.target.closest("[data-go]"); if (b) { closePick(); select(byId.get(b.dataset.go)); } });
+
+function select(n) {
+  closePick(); touched = true; clusters = null;
+  sel = n; render();
+  if (n === ME) rec.target = ME;
+  else if (!n.members && D.playlists && D.playlists[n.id]) rec.target = n;
+  const wasOpen = !sayEl.hidden;
+  sayEl.hidden = false;
+  if (!wasOpen) { sayEl.style.animation = "none"; void sayEl.offsetWidth; sayEl.style.animation = ""; }
+  layout(); flyTo(n.z); kick();
+}
+function closeSay() { rec.target = ME; closePick(); clusters = null; sel = null; sayEl.hidden = true; layout(); omega = [...IDLE]; goHome(); kick(); }
+
+/* ---------- a plain list for keyboards and screen readers ---------- */
+document.getElementById("srlist").innerHTML = `<button type="button" data-go="me">${esc(D.profile.name)}</button>` +
+  nodes.map(n => `<button type="button" data-go="${n.id}">${esc(n.title)}</button>`).join("");
+document.getElementById("srlist").addEventListener("click", ev => {
+  const b = ev.target.closest("[data-go]"); if (b) select(b.dataset.go === "me" ? ME : byId.get(b.dataset.go));
+});
+
+const wantId = decodeURIComponent(location.hash.slice(1));
+if (wantId === "me" || byId.has(wantId)) setTimeout(() => select(wantId === "me" ? ME : byId.get(wantId)), 500);
+readColours();
+requestAnimationFrame(loop);
+</script>
+<script>
+/* the line under the record: what's playing, or what played last */
+const npEl = document.getElementById("np");
+const ago = ms => { const m = Math.round(ms / 60000); return m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} d ago`; };
+function renderNp() {
+  if (!music) { npEl.hidden = true; return; }
+  const what = `<b>${esc(music.title)}</b> · ${esc(music.artist)}`;
+  const line = music.playlist ? `from the ${esc(music.playlist)} playlist: ${what}${music.bpm ? ` · ${music.bpm} bpm` : ""}`
+    : music.is_playing ? `<span class="dot" aria-hidden="true"></span>now playing ${what}${music.bpm ? ` · ${music.bpm} bpm` : ""}`
+    : `last played ${ago(Date.now() - music.played_at)} ${what}`;
+  npEl.innerHTML = (music.url ? `<a href="${esc(music.url)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">${line}</a>` : line)
+    + (music.sample ? `<br>sample data, not live${music === homeMusic ? `<button type="button" id="npdemo">${music.is_playing ? "stop the music" : "play it"}</button>` : ""}` : "");
+  const b = document.getElementById("npdemo");
+  if (b) b.onclick = () => {
+    const now = performance.now();
+    if (music.is_playing) Object.assign(music, { is_playing: false, progress_ms: songAt(now) * 1000, played_at: Date.now() - 2 * 3600e3 });
+    else Object.assign(music, { is_playing: true, at: now });
+    rec.art = artFor(music); renderNp();
+  };
+}
+renderNp();
+window.addEventListener("record", renderNp);
+</script>
+</body>
+</html>

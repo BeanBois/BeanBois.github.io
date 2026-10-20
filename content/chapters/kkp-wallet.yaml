@@ -1,0 +1,34 @@
+# Volume page for bank/projects/kkp-wallet.md. Panel text comes from that entry (What it is, Bullets, Story)
+# and from the ball's dated log; the captions (headlines) are editorial. A fact that isn't in the entry doesn't go here.
+entry: kkp-wallet
+kana: ウォレット
+obi: Nothing leaves the phone.
+episodes:
+  - n: 1
+    title: Nothing leaves the phone
+    panels:
+      - span: 4
+        art: phone
+        caption: The idea
+        text: An iOS app that parses Malaysian bank and card statements on the phone, builds a ledger, and shows what you hold and what you spent. Nothing leaves the device.
+      - span: 2
+        art: sen
+        caption: Day one
+        text: Money is integer minor units end to end, decided and recorded on day one.
+      - span: 6
+        art: ledger
+        caption: The rule
+        text: The balance sheet is reconciled by replaying every movement against each statement's closing balance. A screen that can't reconcile says so instead of drawing a zero.
+      - span: 3
+        art: wall
+        caption: The wall
+        text: Module boundaries are enforced in the build. Gradle rules fail if the phone links a forbidden module, with 600+ unit tests across JVM and iOS targets.
+      - span: 3
+        art: month
+        caption: The catch
+        text: Statements are monthly and looking back, so the roadmap splits into what works from statements alone and what needs live capture from bank notifications. Phase 1 shipped from real statements.
+      - span: 6
+        art: live
+        caption: Now
+        text: Live capture is running on an iPhone.
+    next: Card recommendation, a later phase.
