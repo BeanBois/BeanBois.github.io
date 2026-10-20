@@ -132,20 +132,20 @@ dl.meta dd { margin: 0; min-width: 0; }
 .deck { position: fixed; z-index: 2; left: max(20px, calc(env(safe-area-inset-left, 0px) + 12px)); top: calc(env(safe-area-inset-top, 0px) + 66px); pointer-events: auto; }
 .mastnav small { display: none; }
 /* 7-3: the record takes the left 70%, a rail the right 30%, so clicking never moves the record.
-   The rail is cut 3-7 the other way: the top 30% is the deck (what's playing, always in view), the bottom 70% one
-   scrolling area: who I am on the home view, or the open project. The way into the rest of the volume sits at
-   the end of that scroll, starting just below the fold, so it shows only when you scroll down to it. */
+   The rail is cut 7-3 the other way: the top 70% is one scrolling area (who I am on the home view, or the open
+   project), the bottom 30% the deck (what's playing, always in view, like a player bar). The way into the rest
+   of the volume sits at the end of the scroll, starting just below the fold, so it shows only when you scroll to it. */
 .intro, .more { display: none; }
 @media (min-width: 900px) {
   .rail {
     position: fixed; z-index: 2; top: 0; right: 0; bottom: 0; width: 30%;
-    display: grid; grid-template-rows: minmax(0, 3fr) minmax(0, 7fr); grid-template-columns: minmax(0, 1fr);
+    display: grid; grid-template-rows: minmax(0, 7fr) minmax(0, 3fr); grid-template-columns: minmax(0, 1fr);
     background: var(--paper); border-left: 2px solid var(--ink);
   }
   .rail .deck, .rail .mast, .rail .mastnav { position: static; pointer-events: auto; }
   .rail .deck {
-    display: flex; flex-direction: column; min-width: 0; min-height: 0; border-bottom: 2px solid var(--ink);
-    padding: calc(env(safe-area-inset-top, 0px) + 32px) calc(env(safe-area-inset-right, 0px) + 32px) 18px 36px;
+    display: flex; flex-direction: column; min-width: 0; min-height: 0; border-top: 2px solid var(--ink);
+    padding: 22px calc(env(safe-area-inset-right, 0px) + 32px) calc(env(safe-area-inset-bottom, 0px) + 24px) 36px;
   }
   .rail .np { margin: 0; min-width: 0; overflow: hidden; max-width: none; font-size: 12px; }
   .rail .np .lbl, .rail .np .by, .rail .np .bpm { display: block; }
@@ -155,7 +155,7 @@ dl.meta dd { margin: 0; min-width: 0; }
   .rail .meter { width: 100%; flex: 1 1 0; min-height: 28px; height: 0; margin-top: 14px; }   /* the bars take what's left */
   .rail .scroll {
     min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
-    padding: 0 calc(env(safe-area-inset-right, 0px) + 32px) calc(env(safe-area-inset-bottom, 0px) + 28px) 36px;
+    padding: calc(env(safe-area-inset-top, 0px) + 10px) calc(env(safe-area-inset-right, 0px) + 32px) 28px 36px;
   }
   .rail .body { min-height: 100%; display: flex; flex-direction: column; gap: 22px; padding-top: 26px; }
   .rail .body > *, .rail .say * { min-width: 0; }
@@ -192,7 +192,6 @@ dl.meta dd { margin: 0; min-width: 0; }
 
 <canvas id="ball" tabindex="0" aria-label="Kai Shun's projects, placed in a Poincaré ball by skill mix. Drag to spin it, arrow keys to turn it, click a point for details."></canvas>
 <div class="rail">
-<section class="deck" aria-label="Now playing"><p class="np" id="np" aria-live="polite"></p><canvas class="meter" id="meter" aria-hidden="true"></canvas></section>
 <div class="scroll" id="railscroll">
 <div class="body">
 <header class="mast"><a href="author.html">TEOH KAI SHUN</a><span>ML Engineer · AI infra at Tencent · Malaysia</span></header>
@@ -209,6 +208,7 @@ dl.meta dd { margin: 0; min-width: 0; }
   <a href="colophon.html"><b>奥付</b><span>colophon</span><small>how this site is made, from one folder of Markdown</small></a>
 </nav>
 </div>
+<section class="deck" aria-label="Now playing"><p class="np" id="np" aria-live="polite"></p><canvas class="meter" id="meter" aria-hidden="true"></canvas></section>
 </div>
 <nav class="sr" aria-label="All projects" id="srlist"></nav>
 <div class="pick" id="pick" role="dialog" aria-label="Projects here" hidden></div>

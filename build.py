@@ -458,7 +458,7 @@ def cover_page(data, vols, chapters):
     music_js = """<script>
 /* the line under the record: what's playing, or what played last */
 const npEl = document.getElementById("np");
-const ago = ms => { const m = Math.round(ms / 60000); return m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} d ago`; };
+const ago = ms => { const m = Math.round(ms / 60000); return m < 1 ? "just now" : m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} d ago`; };
 function renderNp() {
   if (!music || !music.title) { npEl.hidden = true; return; }
   npEl.hidden = false;
