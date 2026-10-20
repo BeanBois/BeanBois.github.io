@@ -58,7 +58,7 @@ colours:
     archive: "#6a3fa0"    # purple
     mark: "#f4c430"       # saffron yellow
     on_mark: "#2a1b3d"    # text on yellow
-    spot: "#d62a2e"       # the one red: only what's live or chosen
+    spot: "#c62228"       # the one red: only what's live or chosen
     on_spot: "#ffffff"    # text on red
   dark:
     paper: "#0c1511"      # green-black
