@@ -9,7 +9,7 @@ Writes:
   author.html       作者紹介: about, the years, contact, the CV per lens
   colophon.html     奥付: how this printing was made
 """
-import hashlib, html, json, math, re, shutil, subprocess
+import hashlib, html, json, math, os, re, shutil, subprocess
 from datetime import date
 from pathlib import Path
 
@@ -18,6 +18,8 @@ import yaml
 HERE = Path(__file__).parent
 CONTENT, SRC, DIST = HERE / "content", HERE / "src", HERE / "dist"
 HOME = "./"
+LAYOUT = "shapes"   # the cover's layout: deck | record | strip | liner | sleeve | shapes (see src/cover.html)
+PREVIEW = os.environ.get("PREVIEW")   # set by the deploy for design/* branches: shown as a stamp
 
 esc = lambda s: html.escape(str(s or ""), quote=True)
 STATUS = {"active": "running", "paused": "paused", "shipped": "completed", "archived": "archived", "idea": "pending", "learning": "pending"}
@@ -284,9 +286,16 @@ def page(file, title, part, main, script=""):
     nxt = PAGES[i + 1] if i + 1 < len(PAGES) else None
     nxt_html = f'<a href="{nxt[0]}">next: {esc(nxt[2])} {esc(nxt[1])} →</a>' if nxt else f'<a href="{HOME}">back to the cover →</a>'
     out = TEMPLATE
+    if PREVIEW:
+        part += f' <span class="stamp draft">preview: {esc(PREVIEW)}</span>'
     for k, v in {"title": title, "part": part, "nav": nav(file), "main": main, "folio": str(i + 1), "next": nxt_html, "script": script, "home": HOME}.items():
         out = out.replace("{{" + k + "}}", v)
     (DIST / file).write_text(out)
+
+
+def split(main, rail):
+    """7-3: the page's main thing on the left, a sticky rail of what supports it on the right."""
+    return f'<div class="split"><div class="main">{main}</div><aside class="rail">{rail}</aside></div>'
 
 
 def chapter_files():
@@ -309,7 +318,7 @@ def contents_page(nodes, vols, chapters):
                               "status": STATUS.get(n.get("status"), ""), "live": n.get("status") == "active", "big": n.get("size") == "big",
                               "what": n["what"], "bullets": [inline_md(b) for b in n["bullets"]], "stack": n["stack"], "repo": n.get("repo")}
         shelves.append(f'<section aria-labelledby="sh-{track}"><div class="shelfname"><h2 id="sh-{track}"><span class="jp">{kana}</span> {name}</h2><span>{len(items)} volumes</span></div>'
-                       f'<div class="shelf">{"".join(books)}</div><div class="pull" id="pull-{track}" hidden aria-live="polite"></div></section>')
+                       f'<div class="shelf">{"".join(books)}</div></section>')
     statuses = [("all", "all")] + [(k, v) for k, v in [("active", "running"), ("shipped", "completed"), ("paused", "paused"), ("archived", "archived"), ("idea", "pending")]]
     skills = [("all", "all"), ("ml", "ML"), ("backend", "Backend"), ("infra", "Infra"), ("product", "Product")]
     filt = (f'<div class="filters" role="group" aria-label="Filter the shelf"><div class="grp"><span class="lbl">status</span>'
@@ -317,15 +326,16 @@ def contents_page(nodes, vols, chapters):
             + '</div><div class="grp"><span class="lbl">skill</span>'
             + "".join(f'<button type="button" class="chip" data-f="mix" data-v="{k}" aria-pressed="{str(k == "all").lower()}">{v}</button>' for k, v in skills)
             + "</div></div>")
-    main = (f'<div class="pt"><h1>目次</h1><p>Contents. Every project I\'ve built is a volume, numbered in the order I started it. '
-            f'Thick spines are the big ones. A red band means it\'s still running. Pull one out.</p></div>{filt}{"".join(shelves)}')
+    rail = (f'<div class="pt"><h1>目次</h1><p>Contents. Every project I\'ve built is a volume, numbered in the order I started it. '
+            f'Thick spines are the big ones. A red band means it\'s still running. Pull one out.</p></div>{filt}'
+            '<div class="pull" id="pull" hidden aria-live="polite"></div>')
+    main = split("".join(shelves), rail)
     script = "<script>\nconst P = " + json.dumps(pulls, ensure_ascii=False) + r""";
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 let open = null;
 function show(btn) {
-  const id = btn.dataset.id, n = P[id], pull = btn.closest("section").querySelector(".pull");
+  const id = btn.dataset.id, n = P[id], pull = document.getElementById("pull");
   document.querySelectorAll('.spine[aria-expanded="true"]').forEach(b => b.setAttribute("aria-expanded", "false"));
-  document.querySelectorAll(".pull").forEach(p => { if (p !== pull) p.hidden = true; });
   if (open === id) { pull.hidden = true; open = null; return; }
   open = id; btn.setAttribute("aria-expanded", "true");
   pull.innerHTML = `<div><div class="meta">Vol. ${n.vol} · ${esc(n.period)}</div>
@@ -339,6 +349,7 @@ function show(btn) {
       <a href="./#${id}">find it on the ball →</a>${n.repo ? `<a href="${esc(n.repo)}" target="_blank" rel="noopener">repo →</a>` : ""}</div>`;
   pull.hidden = false;
   pull.querySelector(".x").onclick = () => show(btn);
+  if (matchMedia("(max-width: 860px)").matches) pull.scrollIntoView({ block: "nearest", behavior: "smooth" });
 }
 document.querySelectorAll("button.spine").forEach(b => b.addEventListener("click", () => show(b)));
 const want = { status: "all", mix: "all" };
@@ -368,12 +379,12 @@ def volume_page(n, vol, ch, log):
     events = "".join(f"<li><time>{d}</time>{esc(msg)}</li>" for d, i, msg in sorted(log, reverse=True) if i == n["id"])
     blurb = (f'<div class="blurb"><h2>あらすじ · the story so far</h2><p>{inline_md(n["what"])}</p>'
              f'<dl><dt>period</dt><dd>{esc(n["period"])}</dd><dt>status</dt><dd>{STATUS.get(n.get("status"))}</dd><dt>repo</dt><dd>{"private" if not n.get("repo") else esc(n["repo"])}</dd></dl></div>')
-    main = (f'<div class="book">{spine(n, vol)}{cover_wallet(n, vol, ch["kana"], ch["obi"])}{blurb}</div>'
-            + "".join(eps)
+    rail = (blurb
             + f'<div class="back"><div><h3>stack</h3><div class="chips">{"".join(f"<span>{esc(s)}</span>" for s in n["stack"])}</div></div>'
             + (f'<div><h3>log</h3><ol>{events}</ol></div>' if events else "")
-            + f'<div><h3>elsewhere</h3><ul><li><a href="./#{n["id"]}">find it on the ball →</a></li><li><a href="contents.html">back to the shelf →</a></li></ul>'
+            + f'<div><h3>elsewhere</h3><ul><li><a href="./#{n["id"]}">find it on the record →</a></li><li><a href="contents.html">back to the shelf →</a></li></ul>'
             + '<p class="muted" style="font-size:13px;margin-top:10px">Details are drafts until Kai Shun reviews this entry.</p></div></div>')
+    main = split(f'<div class="book">{spine(n, vol)}{cover_wallet(n, vol, ch["kana"], ch["obi"])}</div>' + "".join(eps), rail)
     page(f'vol-{n["id"]}.html', f'{n["title"]} · Vol. {vol}', f'Vol. {vol} · {esc(n["title"])}', main)
 
 
@@ -389,8 +400,8 @@ def author_page(data, groups):
         body = re.sub(r"(</h1>\n)<p>", r'\1<p class="head">', body, count=1)
         tabs.append(f'<button type="button" role="tab" id="tab-{lens}" aria-controls="cv-{lens}" aria-selected="{str(i == 0).lower()}">{label}</button>')
         sheets.append(f'<article class="cv" role="tabpanel" id="cv-{lens}" aria-labelledby="tab-{lens}"{"" if i == 0 else " hidden"}>{body}</article>')
-    main = f'''<div class="pt"><h1>作者紹介</h1><p>About the author, and the CV. Pick the lens that fits the role.</p></div>
-<div class="flap"><aside>
+    rail = f'''<div class="pt"><h1>作者紹介</h1><p>About the author, and the CV. Pick the lens that fits the role.</p></div>
+<div class="flap">
   <div class="seal" aria-hidden="true">KS</div>
   <div><h2 style="margin:0 0 4px;font-size:28px">{esc(p["name"])}</h2><p class="mono muted" style="margin:0;font-size:12px">ML Engineer · Tencent · Malaysia</p></div>
   <div class="comment"><span class="mono muted" style="font-size:11px">作者コメント · a word from the author</span><br>{esc(p["oneliner"])}</div>
@@ -399,8 +410,8 @@ def author_page(data, groups):
     <div class="row"><span class="select" id="email">{esc(p["email"])}</span><button type="button" class="btn" id="copy">copy</button></div>
     <a href="{esc(p["github"])}" target="_blank" rel="noopener">github.com/BeanBois</a>
     <a href="{esc(p["linkedin"])}" target="_blank" rel="noopener">linkedin.com/in/kai-shun-teoh</a></div></div>
-</aside>
-<section aria-label="CV"><div class="tabs" role="tablist" aria-label="CV lens">{"".join(tabs)}<span class="note">PDFs come at deploy</span></div>{"".join(sheets)}</section></div>'''
+</div>'''
+    main = split(f'<section aria-label="CV"><div class="tabs" role="tablist" aria-label="CV lens">{"".join(tabs)}<span class="note">PDFs come at deploy</span></div>{"".join(sheets)}</section>', rail)
     script = """<script>
 const tabs = [...document.querySelectorAll('[role="tab"]')];
 function pick(id) {
@@ -422,7 +433,7 @@ def colophon_page(n_entries, n_public, n_vols):
     git = lambda *a: subprocess.run(["git", *a], cwd=HERE, capture_output=True, text=True).stdout.strip()
     count, short = git("rev-list", "--count", "HEAD") or "0", git("rev-parse", "--short", "HEAD") or "uncommitted"
     pages = "".join(f'<li><a href="{HOME if f == "index.html" else f}">{esc(k)} · {esc(e)}</a> <span class="muted mono" style="font-size:12px">p. {i + 1}</span></li>' for i, (f, e, k) in enumerate(PAGES))
-    main = f'''<div class="okuzuke">
+    box = f'''<div class="okuzuke">
 <h2>奥付</h2><p class="sub">Colophon. Japanese books end with this page: who made the book, and when it was printed.</p>
 <dl>
 <dt>書名<small>title</small></dt><dd>Teoh Kai Shun: every project, big or small</dd>
@@ -431,30 +442,32 @@ def colophon_page(n_entries, n_public, n_vols):
 <dt>刷<small>printing</small></dt><dd>第{count}刷, the {count}th commit to the repo (<code>{esc(short)}</code>)</dd>
 <dt>製本<small>binding</small></dt><dd>Every page is built from one private folder of Markdown, {n_entries} entries, {n_public} of them public. A page can't say something the folder doesn't.
   <div class="pipe"><span>bank/*.md</span><i>→</i><span>check + export</span><i>→</i><span>build.py</span><i>→</i><span>{len(PAGES)} pages</span><i>→</i><span>GitHub Pages</span></div></dd>
-<dt>収録<small>contents</small></dt><dd>{n_vols} volumes on the shelf. <ul class="pages" style="margin-top:6px">{pages}</ul></dd>
+<dt>収録<small>contents</small></dt><dd>{n_vols} volumes on the shelf, {len(PAGES)} pages in this printing.</dd>
 <dt>書体<small>type</small></dt><dd>Dela Gothic One, Zen Kaku Gothic New, IBM Plex Mono</dd>
 <dt>音<small>sound</small></dt><dd>The cover is a record: whatever Kai Shun is listening to on Spotify, or the playlist of the project you open. Here it plays sample data.</dd>
 <dt>状態<small>state</small></dt><dd>A prototype. Details on most volumes are drafts until reviewed.</dd>
 </dl></div>'''
+    main = split(box, f'<div class="back"><div><h3>収録 · in this printing</h3><ul class="pages">{pages}</ul></div></div>')
     page("colophon.html", "奥付 · Teoh Kai Shun", "奥付 colophon", main)
 
 
 def cover_page(data, vols, chapters):
     t = (SRC / "cover.html").read_text()
-    data = dict(data, chapters={i: {"href": f"vol-{i}.html", "vol": vols[i]} for i in chapters}, vols=vols, musicApi=MUSIC_API or None,
+    data = dict(data, chapters={i: {"href": f"vol-{i}.html", "vol": vols[i]} for i in chapters}, vols=vols, musicApi=MUSIC_API or None, layout=LAYOUT,
                 music=SAMPLE_MUSIC if not MUSIC_API else {"is_playing": False, "title": None},
-                playlists={}, topInset=110)   # per-project playlists: not yet (see README)
+                playlists={})   # per-project playlists: not yet (see README)
     music_js = """<script>
 /* the line under the record: what's playing, or what played last */
 const npEl = document.getElementById("np");
-const ago = ms => { const m = Math.round(ms / 60000); return m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} d ago`; };
+const ago = ms => { const m = Math.round(ms / 60000); return m < 1 ? "just now" : m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} d ago`; };
 function renderNp() {
   if (!music || !music.title) { npEl.hidden = true; return; }
   npEl.hidden = false;
-  const what = `<b>${esc(music.title)}</b> · ${esc(music.artist)}`;
-  const line = music.playlist ? `from the ${esc(music.playlist)} playlist: ${what}${music.bpm ? ` · ${music.bpm} bpm` : ""}`
-    : music.is_playing ? `<span class="dot" aria-hidden="true"></span>now playing ${what}${music.bpm ? ` · ${music.bpm} bpm` : ""}`
-    : `last played ${ago(Date.now() - music.played_at)} ${what}`;
+  // one block: what this is, the title, who, and the tempo; laid out inline on phones, stacked in the rail
+  const label = music.playlist ? `from the ${esc(music.playlist)} playlist`
+    : music.is_playing ? `<span class="dot" aria-hidden="true"></span>now playing` : `last played ${ago(Date.now() - music.played_at)}`;
+  const line = `<span class="lbl">${label}</span> <b>${esc(music.title)}</b> <span class="by">${esc(music.artist)}</span>`
+    + (music.bpm ? ` <span class="bpm">${music.bpm} bpm${music.bpm_source ? ` · ${esc(music.bpm_source)}` : ""}</span>` : "");
   npEl.innerHTML = (music.url ? `<a href="${esc(music.url)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">${line}</a>` : line)
     + (music.sample ? `<br>sample data, not live${music === homeMusic ? `<button type="button" id="npdemo">${music.is_playing ? "stop the music" : "play it"}</button>` : ""}` : "");
   const b = document.getElementById("npdemo");
@@ -496,6 +509,7 @@ document.addEventListener("visibilitychange", poll);
     if t.count("/*__DATA__*/null") != 1:
         raise SystemExit("src/cover.html: the data placeholder is missing")
     t = t.replace("/*__DATA__*/null", json.dumps(data, ensure_ascii=False))
+    t = t.replace('<html lang="en">', f'<html lang="en" data-layout="{LAYOUT}">', 1)
     (DIST / "index.html").write_text(t.replace("</body>", music_js + "\n</body>"))
 
 
