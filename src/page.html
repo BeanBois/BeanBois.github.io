@@ -13,28 +13,12 @@
    cover and spine; the trade dress (logo, volume number, obi, folio) is the same on all of them and only the
    art changes. Inner pages share one running head and one folio. Ink on paper; red only for what is live. */
 :root {
-  --paper: #ffffff;
-  --ink: #111111;
-  --tone: #8a8a8a;
-  --soft: #ececec;
-  --muted: #555555;
-  --spot: #d7262e;
-  --on-spot: #ffffff;
   --font-display: "Dela Gothic One", "Arial Black", Impact, system-ui, sans-serif;
   --font-body: "Zen Kaku Gothic New", "Hiragino Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --spine-h: 280px;
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --paper: #0d0d0d; --ink: #f1f1f1; --tone: #6d6d6d; --soft: #222222; --muted: #a9a9a9; --spot: #ff4b52; --on-spot: #0d0d0d;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --paper: #0d0d0d; --ink: #f1f1f1; --tone: #6d6d6d; --soft: #222222; --muted: #a9a9a9; --spot: #ff4b52; --on-spot: #0d0d0d;
-  color-scheme: dark;
-}
+/*__COLOURS__*/
 :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
 * { box-sizing: border-box; }
 body {

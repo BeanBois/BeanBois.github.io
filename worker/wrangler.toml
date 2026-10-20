@@ -2,9 +2,7 @@ name = "kaishun-now-playing"
 main = "src/index.js"
 compatibility_date = "2026-09-01"
 
-# Artists that never show on the site, comma separated
-[vars]
-HIDE_ARTISTS = ""
+# Hidden artists and Kai Shun's own tempos come from site.yaml, via src/config.json (written by build.py)
 
 # created with `wrangler kv namespace create MUSIC`
 [[kv_namespaces]]

@@ -1,0 +1,82 @@
+# site.yaml: the one file to edit for the website's words, colours and music.
+#
+# Facts about projects (what each one is, when, its bullets and stack) live in the bank, in the portfolio repo.
+# This file is how the site presents them. GUIDE.md explains every section and how to see a change.
+#
+#   python3 build.py --watch      builds, serves on http://127.0.0.1:8765, rebuilds when you save
+#
+# YAML tips: keep the two-space indents; text with a colon or # in it goes in "double quotes".
+
+# ---------------------------------------------------------------------------------------------------------------
+# You
+you:
+  name: TEOH KAI SHUN                                   # on the cover, in every page's top-left corner and on volume covers
+  role: ML Engineer · AI infra at Tencent · Malaysia    # under your name on the cover
+  role_short: ML Engineer · Tencent · Malaysia          # under your name on the author page
+  one_liner: "Engineer in Malaysia. Day job: keeping GPUs busy at Tencent. Nights: too many side projects. This is all of them."
+                                                        # your author's comment; it also opens the cover's intro
+
+# ---------------------------------------------------------------------------------------------------------------
+# The cover (index.html)
+cover:
+  intro: "Every project I've built sits on this record, placed by the skills it took: ML, Backend, Infra and Product at the corners, mixed projects nearer the middle. Drag to spin it. Click a name."
+  hint: "Every project I've built, placed by the skills it took. Click a name."   # under the record until the first click (phones)
+  label_rim: "TEOH KAI SHUN · SIDE A · 33⅓ RPM · "      # printed round the record's centre label
+  sleeve_heading: LINER NOTES                           # the small heading on a project's sleeve
+  directory:                                            # the line under each page's name (rail layouts; {count} = number of projects)
+    contents: "{count} projects, as volumes on a shelf"
+    author: about me, the years, and the CV for ML, cloud or backend roles
+    colophon: how this site is made, from one folder of Markdown
+
+# ---------------------------------------------------------------------------------------------------------------
+# The other pages
+pages:
+  contents_intro: "Contents. Every project I've built is a volume, numbered in the order I started it. Thick spines are the big ones. A red band means it's still running. Pull one out."
+  author_intro: About the author, and the CV. Pick the lens that fits the role.
+  author_comment_label: 作者コメント · a word from the author
+  cv_pdf_note: PDFs come at deploy
+  draft_note: Details are drafts until Kai Shun reviews this entry.   # under a volume's links while its entry is a draft
+
+colophon:
+  title: "Teoh Kai Shun: every project, big or small"
+  sound: "The cover is a record playing whatever Kai Shun is listening to on Spotify, live, with each track's tempo from a bank of sources ranked by trust."
+  state: Live since 2026-10-20 and still being drawn. Details on most volumes are drafts until reviewed.
+
+# ---------------------------------------------------------------------------------------------------------------
+# Colours: one palette for the whole site for now, light and dark. Any CSS colour works (#rrggbb is easiest).
+# Next step: split these by part of the site (record, sleeve, spines, panels...).
+colours:
+  light:
+    paper: "#ffffff"      # the page
+    ink: "#111111"        # lines, text, bars
+    tone: "#8a8a8a"       # grooves, faint lines
+    soft: "#ececec"       # dividers, hover fills
+    muted: "#555555"      # small print
+    spot: "#d7262e"       # the one red: only what's live or chosen
+    on_spot: "#ffffff"    # text on red
+  dark:
+    paper: "#0d0d0d"
+    ink: "#f1f1f1"
+    tone: "#6d6d6d"
+    soft: "#222222"
+    muted: "#a9a9a9"
+    spot: "#ff4b52"
+    on_spot: "#0d0d0d"
+
+# ---------------------------------------------------------------------------------------------------------------
+# Music
+music:
+  # A playlist per project: clicking the project plays a song from it (its cover goes on the record).
+  # The key is the project's id (GUIDE.md lists them all); the value is a Spotify playlist link.
+  # Projects without one play whatever you're playing now.
+  playlists:
+    # kkp-wallet: https://open.spotify.com/playlist/xxxxxxxxxxxxxxxxxxxxxx
+
+  # Artists who never show on the site.
+  hide_artists: []
+    # - Some Artist
+
+  # Your own tempo for a track, by Spotify track link. It wins over every other source.
+  # (These two live in the worker: after changing them, run `npm run deploy` in worker/. GUIDE.md, "Music".)
+  bpm:
+    # https://open.spotify.com/track/4iaPbB3jH6NGKhSVjETPwG: 96

@@ -1,7 +1,9 @@
 """Build the website into dist/.
 
 python3 build.py
-Reads content/ (exported from the private bank by portfolio/tools/export_site.py; never edit it by hand) and src/.
+python3 build.py --watch     also serves dist/ on http://127.0.0.1:8765 and rebuilds whenever a source file changes
+Reads site.yaml (words, colours, music: the file to edit), content/ (exported from the private bank by
+portfolio/tools/export_site.py; never edit it by hand) and src/.
 Writes:
   index.html        the cover: the record (the projects' ball), the masthead and now playing
   contents.html     目次: every public project as a volume spine on a shelf
@@ -17,6 +19,7 @@ import yaml
 
 HERE = Path(__file__).parent
 CONTENT, SRC, DIST = HERE / "content", HERE / "src", HERE / "dist"
+CFG = {}   # site.yaml, loaded by main()
 HOME = "./"
 LAYOUT = "shapes"   # the cover's layout: deck | record | strip | liner | sleeve | shapes (see src/cover.html)
 PREVIEW = os.environ.get("PREVIEW")   # set by the deploy for design/* branches: shown as a stamp
@@ -198,7 +201,7 @@ def cover_wallet(n, vol, kana, obi):
 <rect width="{W}" height="{H}" style="{PAPER}"/>
 {tone(0, 200, W, 590, 13, 4.6)}
 <rect width="{W}" height="44" style="{INK}"/>
-<text x="20" y="30" style="{PAPER};font:400 17px var(--font-display);letter-spacing:.04em">TEOH KAI SHUN</text>
+<text x="20" y="30" style="{PAPER};font:400 17px var(--font-display);letter-spacing:.04em">{esc(cfg("you.name"))}</text>
 <text x="{W - 20}" y="30" text-anchor="end" style="{PAPER};font:500 13px var(--font-mono);letter-spacing:.12em">VOL. {vol}</text>
 <text x="22" y="150" textLength="{W - 96}" lengthAdjust="spacingAndGlyphs" style="{INK};font:400 100px var(--font-display)">{esc(n['title']).upper()}</text>
 <text x="{W - 34}" y="196" style="{INK};font:700 30px var(--font-body);writing-mode:vertical-rl">{esc(kana)}</text>
@@ -274,6 +277,76 @@ SAMPLE_MUSIC = {"sample": True, "is_playing": True, "title": "Sample track", "ar
                 "duration_ms": 214000, "progress_ms": 61000, "bpm": 96, "played_at": None}
 
 
+# ---------- site.yaml ----------
+def load_config():
+    cfg = yaml.safe_load((HERE / "site.yaml").read_text()) or {}
+    for key in ("you", "cover", "pages", "colophon", "colours"):
+        if not isinstance(cfg.get(key), dict):
+            raise SystemExit(f"site.yaml: the '{key}' section is missing or not a list of settings")
+    cfg.setdefault("music", {})
+    cfg["music"] = {k: v for k, v in (cfg["music"] or {}).items()}
+    return cfg
+
+
+def cfg(path):
+    """A setting by its dotted path, e.g. cfg("you.name"); a missing one stops the build with its name."""
+    v = CFG
+    for k in path.split("."):
+        if not isinstance(v, dict) or k not in v:
+            raise SystemExit(f"site.yaml: '{path}' is missing")
+        v = v[k]
+    return str(v)
+
+
+def fill(t):
+    """{{you.name}} and the like in a template, from site.yaml (HTML-escaped)."""
+    return re.sub(r"\{\{([a-z_]+(?:\.[a-z_]+)+)\}\}", lambda m: esc(cfg(m.group(1))), t)
+
+
+def colours_css():
+    """The palette as CSS tokens: light on :root, dark for a dark system setting or an explicit dark theme."""
+    def block(name):
+        pal = CFG["colours"].get(name) or {}
+        for k in ("paper", "ink", "tone", "soft", "muted", "spot", "on_spot"):
+            if k not in pal:
+                raise SystemExit(f"site.yaml: colours.{name}.{k} is missing")
+        return " ".join(f"--{k.replace('_', '-')}: {pal[k]};" for k in pal)
+    dark = block("dark") + " color-scheme: dark;"
+    return (f":root {{ {block('light')} }}\n"
+            f"@media (prefers-color-scheme: dark) {{ :root:not([data-theme=\"light\"]) {{ {dark} }} }}\n"
+            f":root[data-theme=\"dark\"] {{ {dark} }}")
+
+
+def spotify_id(link, kind):
+    m = re.search(rf"{kind}/([A-Za-z0-9]{{22}})", str(link or "")) or re.fullmatch(r"([A-Za-z0-9]{22})", str(link or ""))
+    return m.group(1) if m else None
+
+
+def music_settings(node_ids):
+    """Playlists per project for the page; hidden artists and your own tempos for the worker."""
+    music = CFG["music"]
+    lists = {}
+    for pid, link in (music.get("playlists") or {}).items():
+        if pid not in node_ids:
+            raise SystemExit(f"site.yaml: music.playlists has '{pid}', which is not a project id (GUIDE.md lists them)")
+        if not spotify_id(link, "playlist"):
+            raise SystemExit(f"site.yaml: music.playlists.{pid} is not a Spotify playlist link")
+        lists[pid] = spotify_id(link, "playlist")
+    bpm = {}
+    for link, n in (music.get("bpm") or {}).items():
+        tid = spotify_id(link, "track")
+        if not tid or not isinstance(n, (int, float)) or not 30 < n < 300:
+            raise SystemExit(f"site.yaml: music.bpm entry '{link}: {n}' needs a Spotify track link and a tempo between 30 and 300")
+        bpm[tid] = round(n)
+    worker = {"hide_artists": [str(a) for a in (music.get("hide_artists") or [])], "bpm": bpm}
+    out = HERE / "worker" / "src" / "config.json"
+    text = json.dumps(worker, indent=1, ensure_ascii=False) + "\n"
+    if not out.exists() or out.read_text() != text:
+        out.write_text(text)
+        print("music: hidden artists or tempos changed; publish them with `npm run deploy` in worker/")
+    return lists
+
+
 # ---------- pages ----------
 TEMPLATE = (SRC / "page.html").read_text()
 PAGES = []  # (file, short name, kana), in reading order; filled in main
@@ -283,7 +356,7 @@ def nav(current, part):
     """The four corners, as on the cover: triangles point the way to each page; the page you're on is red."""
     cur = lambda f: ' aria-current="page"' if f == current else ""
     corner = lambda pos, f, k, e: f'<div class="c {pos}"><a href="{f}"{cur(f)}><i aria-hidden="true"></i><b>{k}</b>{e}</a></div>'
-    return (f'<div class="c tl"><a class="home" href="{HOME}"><i aria-hidden="true"></i>TEOH KAI SHUN</a><span class="part">{part}</span></div>'
+    return (f'<div class="c tl"><a class="home" href="{HOME}"><i aria-hidden="true"></i>{esc(cfg("you.name"))}</a><span class="part">{part}</span></div>'
             + corner("tr", "contents.html", "目次", "contents") + corner("bl", "author.html", "作者", "author &amp; CV")
             + corner("br", "colophon.html", "奥付", "colophon"))
 
@@ -298,7 +371,7 @@ def page(file, title, part, main, script=""):
         part += f' <span class="stamp draft">preview: {esc(PREVIEW)}</span>'
     for k, v in {"title": title, "part": part, "nav": nav(file, part), "main": main, "folio": str(i + 1), "next": nxt_html, "script": script, "home": HOME}.items():
         out = out.replace("{{" + k + "}}", v)
-    (DIST / file).write_text(out)
+    (DIST / file).write_text(fill(out.replace("/*__COLOURS__*/", colours_css())))
 
 
 def split(main, rail, rail_first=True):
@@ -346,11 +419,10 @@ def contents_page(nodes, vols, chapters):
             + '</div><div class="grp"><span class="lbl">skill</span>'
             + "".join(f'<button type="button" class="chip" data-f="mix" data-v="{k}" aria-pressed="{str(k == "all").lower()}">{v}</button>' for k, v in skills)
             + "</div></div>")
-    rail = (f'<div class="pt"><h1>目次</h1><p>Contents. Every project I\'ve built is a volume, numbered in the order I started it. '
-            f'Thick spines are the big ones. A red band means it\'s still running. Pull one out.</p></div>{filt}'
+    rail = (f'<div class="pt"><h1>目次</h1><p>{esc(cfg("pages.contents_intro"))}</p></div>{filt}'
             '<div class="obj sleeve" id="pull" hidden><div class="pull" id="pullbody" aria-live="polite"></div></div>')
     main = split(blot() + "".join(shelves), rail)
-    script = "<script>\nconst P = " + json.dumps(pulls, ensure_ascii=False) + r""";
+    script = "<script>\nconst SLEEVE = " + json.dumps(cfg("cover.sleeve_heading")) + ";\nconst P = " + json.dumps(pulls, ensure_ascii=False) + r""";
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 let open = null;
 function show(btn) {
@@ -359,7 +431,7 @@ function show(btn) {
   if (open === id) { pull.hidden = true; open = null; return; }
   open = id; btn.setAttribute("aria-expanded", "true");
   body.scrollTop = 0;
-  body.innerHTML = `<div><div class="meta">LINER NOTES · Vol. ${n.vol} · ${esc(n.period)}</div>
+  body.innerHTML = `<div><div class="meta">${esc(SLEEVE)} · Vol. ${n.vol} · ${esc(n.period)}</div>
     <h3>${esc(n.title)}</h3><p class="tag">${esc(n.role ? n.role + " · " + n.tagline : n.tagline)}</p>
     ${n.what ? `<p>${esc(n.what)}</p>` : ""}
     ${n.bullets.length ? `<ul>${n.bullets.map(b => `<li>${b}</li>`).join("")}</ul>` : ""}
@@ -404,7 +476,7 @@ def volume_page(n, vol, ch, log):
             + f'<div class="back"><div><h3>stack</h3><div class="chips">{"".join(f"<span>{esc(s)}</span>" for s in n["stack"])}</div></div>'
             + (f'<div><h3>log</h3><ol>{events}</ol></div>' if events else "")
             + f'<div><h3>elsewhere</h3><ul><li><a href="./#{n["id"]}">find it on the record →</a></li><li><a href="contents.html">back to the shelf →</a></li></ul>'
-            + '<p class="muted" style="font-size:13px;margin-top:10px">Details are drafts until Kai Shun reviews this entry.</p></div></div>')
+            + f'<p class="muted" style="font-size:13px;margin-top:10px">{esc(cfg("pages.draft_note"))}</p></div></div>')
     main = split(f'<div class="book"><div class="obj">{spine(n, vol)}</div><div class="obj">{cover_wallet(n, vol, ch["kana"], ch["obi"])}</div></div>' + "".join(eps), rail, rail_first=False)
     page(f'vol-{n["id"]}.html', f'{n["title"]} · Vol. {vol}', f'Vol. {vol} · {esc(n["title"])}', main)
 
@@ -421,18 +493,18 @@ def author_page(data, groups):
         body = re.sub(r"(</h1>\n)<p>", r'\1<p class="head">', body, count=1)
         tabs.append(f'<button type="button" role="tab" id="tab-{lens}" aria-controls="cv-{lens}" aria-selected="{str(i == 0).lower()}">{label}</button>')
         sheets.append(f'<article class="cv obj" role="tabpanel" id="cv-{lens}" aria-labelledby="tab-{lens}"{"" if i == 0 else " hidden"}>{body}</article>')
-    rail = f'''<div class="pt"><h1>作者紹介</h1><p>About the author, and the CV. Pick the lens that fits the role.</p></div>
+    rail = f'''<div class="pt"><h1>作者紹介</h1><p>{esc(cfg("pages.author_intro"))}</p></div>
 <div class="flap">
   <div class="seal" aria-hidden="true">KS</div>
-  <div><h2 style="margin:0 0 4px;font-size:28px">{esc(p["name"])}</h2><p class="mono muted" style="margin:0;font-size:12px">ML Engineer · Tencent · Malaysia</p></div>
-  <div class="comment"><span class="mono muted" style="font-size:11px">作者コメント · a word from the author</span><br>{esc(p["oneliner"])}</div>
+  <div><h2 style="margin:0 0 4px;font-size:28px">{esc(p["name"])}</h2><p class="mono muted" style="margin:0;font-size:12px">{esc(cfg("you.role_short"))}</p></div>
+  <div class="comment"><span class="mono muted" style="font-size:11px">{esc(cfg("pages.author_comment_label"))}</span><br>{esc(cfg("you.one_liner"))}</div>
   <div><h3>年譜 · the years</h3><ol class="years">{yrs}</ol></div>
   <div><h3>contact</h3><div class="contact">
     <div class="row"><span class="select" id="email">{esc(p["email"])}</span><button type="button" class="btn" id="copy">copy</button></div>
     <a href="{esc(p["github"])}" target="_blank" rel="noopener">github.com/BeanBois</a>
     <a href="{esc(p["linkedin"])}" target="_blank" rel="noopener">linkedin.com/in/kai-shun-teoh</a></div></div>
 </div>'''
-    main = split(f'<section aria-label="CV"><div class="tabs" role="tablist" aria-label="CV lens">{"".join(tabs)}<span class="note">PDFs come at deploy</span></div>{"".join(sheets)}</section>', rail)
+    main = split(f'<section aria-label="CV"><div class="tabs" role="tablist" aria-label="CV lens">{"".join(tabs)}<span class="note">{esc(cfg("pages.cv_pdf_note"))}</span></div>{"".join(sheets)}</section>', rail)
     script = """<script>
 const tabs = [...document.querySelectorAll('[role="tab"]')];
 function pick(id) {
@@ -462,7 +534,7 @@ def colophon_page(n_entries, n_public, n_vols):
     box = f'''<div class="okuzuke obj"><div class="seal-c" aria-hidden="true"><b>第{count}刷</b><small>printing</small></div>
 <h2>奥付</h2><p class="sub">Colophon. Japanese books end with this page: who made the book, and when it was printed.</p>
 <dl>
-<dt>書名<small>title</small></dt><dd>Teoh Kai Shun: every project, big or small</dd>
+<dt>書名<small>title</small></dt><dd>{esc(cfg("colophon.title"))}</dd>
 <dt>著者<small>author</small></dt><dd>Teoh Kai Shun</dd>
 <dt>発行<small>printed</small></dt><dd>{date.today().isoformat()}</dd>
 <dt>刷<small>printing</small></dt><dd>第{count}刷, the {ordinal(count)} commit to the repo (<code>{esc(short)}</code>)</dd>
@@ -470,8 +542,8 @@ def colophon_page(n_entries, n_public, n_vols):
   <div class="pipe"><span>bank/*.md</span><i>→</i><span>check + export</span><i>→</i><span>build.py</span><i>→</i><span>{len(PAGES)} pages</span><i>→</i><span>GitHub Pages</span></div></dd>
 <dt>収録<small>contents</small></dt><dd>{n_vols} volumes on the shelf, {len(PAGES)} pages in this printing.</dd>
 <dt>書体<small>type</small></dt><dd>Dela Gothic One, Zen Kaku Gothic New, IBM Plex Mono</dd>
-<dt>音<small>sound</small></dt><dd>The cover is a record playing whatever Kai Shun is listening to on Spotify, live, with each track's tempo from a bank of sources ranked by trust.</dd>
-<dt>状態<small>state</small></dt><dd>Live since 2026-10-20 and still being drawn. Details on most volumes are drafts until reviewed.</dd>
+<dt>音<small>sound</small></dt><dd>{esc(cfg("colophon.sound"))}</dd>
+<dt>状態<small>state</small></dt><dd>{esc(cfg("colophon.state"))}</dd>
 </dl></div>'''
     main = split(box, f'<div class="back"><div><h3>収録 · in this printing</h3><ul class="pages">{pages}</ul></div></div>')
     page("colophon.html", "奥付 · Teoh Kai Shun", "奥付 colophon", main)
@@ -480,6 +552,9 @@ def colophon_page(n_entries, n_public, n_vols):
 def cover_page(data, vols, chapters):
     t = (SRC / "cover.html").read_text()
     data = dict(data, chapters={i: {"href": f"vol-{i}.html", "vol": vols[i]} for i in chapters}, vols=vols, musicApi=MUSIC_API or None, layout=LAYOUT,
+                profile=dict(data["profile"], oneliner=cfg("you.one_liner")), playlistIds=music_settings({n["id"] for n in data["nodes"]}),
+                text={"intro": cfg("cover.intro"), "hint": cfg("cover.hint"), "labelRim": cfg("cover.label_rim"),
+                      "directoryContents": cfg("cover.directory.contents"), "cvPdfNote": cfg("pages.cv_pdf_note")},
                 music=SAMPLE_MUSIC if not MUSIC_API else {"is_playing": False, "title": None},
                 playlists={})   # per-project playlists: not yet (see README)
     music_js = """<script>
@@ -530,16 +605,22 @@ async function poll() {
 }
 poll();
 setInterval(poll, 5000);
+/* each project's playlist (site.yaml music.playlists), fetched once; until one arrives, that project plays the current song */
+for (const [pid, plid] of Object.entries(D.playlistIds || {})) {
+  if (!D.musicApi) break;
+  fetch(D.musicApi + "/playlist?id=" + plid).then(r => r.json()).then(j => { if (j.tracks && j.tracks.length) D.playlists[pid] = j; }).catch(() => {});
+}
 document.addEventListener("visibilitychange", poll);
 </script>"""
     if t.count("/*__DATA__*/null") != 1:
         raise SystemExit("src/cover.html: the data placeholder is missing")
-    t = t.replace("/*__DATA__*/null", json.dumps(data, ensure_ascii=False))
+    t = fill(t.replace("/*__COLOURS__*/", colours_css())).replace("/*__DATA__*/null", json.dumps(data, ensure_ascii=False))
     t = t.replace('<html lang="en">', f'<html lang="en" data-layout="{LAYOUT}">', 1)
     (DIST / "index.html").write_text(t.replace("</body>", music_js + "\n</body>"))
 
 
 def main():
+    CFG.clear(); CFG.update(load_config())
     data = json.loads((CONTENT / "site.json").read_text())
     nodes = data["nodes"]
     ordered = sorted(nodes, key=lambda n: (start(n["period"]), n["id"]))
@@ -566,5 +647,39 @@ def main():
     print(f"{len(PAGES)} pages, {len(nodes)} volumes, {len(chapters)} written -> dist/")
 
 
+def watch(port=8765):
+    """Serve dist/ and rebuild whenever site.yaml, src/ or content/ changes. 127.0.0.1:8765 is a page the
+    now-playing worker answers, so the record plays live locally too."""
+    import functools, http.server, sys, threading, time
+    watched = lambda: [HERE / "site.yaml", HERE / "build.py"] + [p for d in (SRC, CONTENT) for p in d.rglob("*") if p.is_file()]
+    stamp = lambda: max(p.stat().st_mtime for p in watched())
+    def build():
+        try:
+            main()
+        except SystemExit as e:        # a mistake in site.yaml: say so and keep serving the last good build
+            print(f"not rebuilt: {e}", file=sys.stderr)
+    sys.stdout.reconfigure(line_buffering=True)
+    build()
+
+    class Quiet(http.server.SimpleHTTPRequestHandler):
+        def log_message(self, *a):
+            pass
+    handler = functools.partial(Quiet, directory=str(DIST))
+    server = http.server.ThreadingHTTPServer(("127.0.0.1", port), handler)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    print(f"serving http://127.0.0.1:{port}/  (rebuilds when you save; Ctrl+C stops)")
+    last = stamp()
+    try:
+        while True:
+            time.sleep(0.7)
+            if stamp() != last:
+                last = stamp()
+                print(time.strftime("%H:%M:%S"), "rebuilding")
+                build()
+    except KeyboardInterrupt:
+        server.shutdown()
+
+
 if __name__ == "__main__":
-    main()
+    import sys
+    watch() if "--watch" in sys.argv else main()

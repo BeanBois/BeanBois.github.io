@@ -14,26 +14,11 @@
    corners of a tetrahedron and every project is placed by its skill mix. Clicking a point opens a speech bubble
    beside it, and the ball slides aside to make room. Ink on paper, one red spot colour for flows. */
 :root {
-  --paper: #ffffff;
-  --ink: #111111;
-  --tone: #8a8a8a;
-  --soft: #e2e2e2;
-  --muted: #555555;
-  --spot: #d7262e;
   --font-display: "Dela Gothic One", "Arial Black", Impact, system-ui, sans-serif;
   --font-body: "Zen Kaku Gothic New", "Hiragino Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --paper: #0d0d0d; --ink: #f1f1f1; --tone: #6d6d6d; --soft: #262626; --muted: #a9a9a9; --spot: #ff4b52;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --paper: #0d0d0d; --ink: #f1f1f1; --tone: #6d6d6d; --soft: #262626; --muted: #a9a9a9; --spot: #ff4b52;
-  color-scheme: dark;
-}
+/*__COLOURS__*/
 
 html, body { height: 100%; overflow: hidden; margin: 0; }
 [hidden] { display: none !important; }
@@ -217,7 +202,7 @@ dl.meta dd { margin: 0; min-width: 0; }
   :root[data-layout="sleeve"] .mastnav a:nth-child(3) { bottom: calc(env(safe-area-inset-bottom, 0px) + 26px); right: calc(env(safe-area-inset-right, 0px) + 32px); }
   /* the sleeve: square, flat, printed like liner notes; it slides out from the record's side */
   :root[data-layout="sleeve"] .say { border-radius: 0; border-width: 2.5px; padding: 30px 32px 32px; animation: slide 0.35s cubic-bezier(.2, .8, .2, 1); }
-  :root[data-layout="sleeve"] .say::before { content: "LINER NOTES"; display: block; font: 500 10px var(--font-mono); letter-spacing: 0.2em; color: var(--muted); margin-bottom: 6px; }
+  :root[data-layout="sleeve"] .say::before { content: "{{cover.sleeve_heading}}"; display: block; font: 500 10px var(--font-mono); letter-spacing: 0.2em; color: var(--muted); margin-bottom: 6px; }
 }
 /* shapes: the record (circle) half pulled out of its sleeve (square), with triangles pointing the way out.
    The sleeve is the rail made an object: JS sizes it and cuts a hole where the record sits in front of it. */
@@ -225,7 +210,7 @@ dl.meta dd { margin: 0; min-width: 0; }
   :root[data-layout="shapes"] .rail { right: auto; bottom: auto; border: 2.5px solid var(--ink); grid-template-rows: minmax(0, 1fr); overflow: hidden; }
   :root[data-layout="shapes"] .rail .deck, :root[data-layout="shapes"] .rail .more { display: none; }
   :root[data-layout="shapes"] .rail .scroll { position: relative; z-index: 1; padding: 34px var(--sleeve-pad, 40%) 30px 34px; }
-  :root[data-layout="shapes"] .rail .say::before { content: "LINER NOTES"; display: block; font: 500 10px var(--font-mono); letter-spacing: 0.2em; color: var(--muted); margin-bottom: 6px; }
+  :root[data-layout="shapes"] .rail .say::before { content: "{{cover.sleeve_heading}}"; display: block; font: 500 10px var(--font-mono); letter-spacing: 0.2em; color: var(--muted); margin-bottom: 6px; }
   :root[data-layout="shapes"] .rail .say:not([hidden]) { animation: sleeve-in 0.4s cubic-bezier(.2, .8, .2, 1); }
   .shade { display: none; }
   :root[data-layout="shapes"] .shade {
@@ -273,7 +258,7 @@ dl.meta dd { margin: 0; min-width: 0; }
 <div class="crescent" id="crescent" aria-hidden="true"></div>
 <div class="scroll" id="railscroll">
 <div class="body">
-<header class="mast"><a href="author.html">TEOH KAI SHUN</a><span>ML Engineer · AI infra at Tencent · Malaysia</span></header>
+<header class="mast"><a href="author.html">{{you.name}}</a><span>{{you.role}}</span></header>
 <section class="intro" id="intro"></section>
 <aside class="say" id="say" aria-live="polite" hidden>
   <button type="button" class="close" id="close" aria-label="Close">×</button>
@@ -282,9 +267,9 @@ dl.meta dd { margin: 0; min-width: 0; }
 <p class="more" aria-hidden="true">目次 · 作者 · 奥付 further down ↓</p>
 </div>
 <nav class="mastnav" aria-label="Volume">
-  <a href="contents.html"><b>目次</b><span>contents</span><small id="navvols">every project, as volumes on a shelf</small></a>
-  <a href="author.html"><b>作者</b><span>author &amp; CV</span><small>about me, the years, and the CV for ML, cloud or backend roles</small></a>
-  <a href="colophon.html"><b>奥付</b><span>colophon</span><small>how this site is made, from one folder of Markdown</small></a>
+  <a href="contents.html"><b>目次</b><span>contents</span><small id="navvols">{{cover.directory.contents}}</small></a>
+  <a href="author.html"><b>作者</b><span>author &amp; CV</span><small>{{cover.directory.author}}</small></a>
+  <a href="colophon.html"><b>奥付</b><span>colophon</span><small>{{cover.directory.colophon}}</small></a>
 </nav>
 </div>
 <section class="deck" aria-label="Now playing"><p class="np" id="np" aria-live="polite"></p><canvas class="meter" id="meter" aria-hidden="true"></canvas></section>
@@ -720,9 +705,12 @@ function draw(now = performance.now()) {
   // until the first click or drag, one quiet line under the ball says what to do
   if (!touched && sayEl.hidden && (!wide() || LAYOUT === "sleeve") && LAYOUT !== "shapes") {
     ctx.font = `13px ${mono}`; ctx.fillStyle = col["--muted"]; ctx.textAlign = "center"; ctx.textBaseline = "top";
-    const hint = "Every project I've built, placed by the skills it took. Click a name.";
+    const hint = D.text.hint;
     if (ctx.measureText(hint).width < W - 32) ctx.fillText(hint, cx, cy + R + 14);
-    else { ctx.fillText("Every project I've built,", cx, cy + R + 14); ctx.fillText("placed by the skills it took. Click a name.", cx, cy + R + 32); }
+    else {   // two lines on a narrow screen, broken near the middle
+      const words = hint.split(" "), half = Math.ceil(words.length / 2);
+      ctx.fillText(words.slice(0, half).join(" "), cx, cy + R + 14); ctx.fillText(words.slice(half).join(" "), cx, cy + R + 32);
+    }
   }
 
 }
@@ -873,8 +861,20 @@ function trackFor(n) {
   const pl = D.playlists && D.playlists[n.id];
   if (!pl || !pl.tracks.length) return homeMusic;
   const t = pl.tracks[Math.floor(Math.random() * pl.tracks.length)];
-  return { ...t, key: n.id, playlist: pl.name, url: pl.url || t.url, art: pl.art, sample: pl.sample, is_playing: true,
-           progress_ms: Math.random() * 0.6 * t.duration_ms, at: performance.now() };
+  const m = { ...t, key: n.id, playlist: pl.name, url: t.url || pl.url, art: pl.art, bpm: null, is_playing: true,
+              progress_ms: Math.random() * 0.6 * t.duration_ms, at: performance.now() };
+  fetchTempo(m);
+  return m;
+}
+// a playlist track's tempo, from the worker's tempo bank; the beat starts when it arrives
+function fetchTempo(m) {
+  if (!D.musicApi || !m.id) return;
+  const q = new URLSearchParams({ id: m.id, title: m.title, artist: m.artist, ms: m.duration_ms || 0, isrc: m.isrc || "" });
+  fetch(D.musicApi + "/tempo?" + q).then(r => r.json()).then(j => {
+    if (!j.bpm) return;
+    Object.assign(m, { bpm: j.bpm, bpm_source: j.bpm_source });
+    if (music === m) window.dispatchEvent(new Event("record"));
+  }).catch(() => {});
 }
 // a stand-in cover for the prototype, different for every key: real covers replace it at build time
 function standInCover(g, N, key) {
@@ -916,7 +916,7 @@ function halftoneLabel(src, N, live) {
   // the label's rim, printed like a real one; the dot is red while the song is live
   g.fillStyle = col["--paper"]; g.beginPath(); g.arc(N / 2, N / 2, N / 2, 0, Math.PI * 2); g.arc(N / 2, N / 2, N * 0.4, 0, Math.PI * 2, true); g.fill();
   g.strokeStyle = col["--ink"]; g.lineWidth = 3; g.beginPath(); g.arc(N / 2, N / 2, N * 0.4, 0, Math.PI * 2); g.stroke();
-  const rim = "TEOH KAI SHUN · SIDE A · 33⅓ RPM · ";
+  const rim = D.text.labelRim;
   g.font = `600 ${N * 0.05}px ${fonts["--font-mono"]}`; g.fillStyle = col["--ink"]; g.textAlign = "center"; g.textBaseline = "middle";
   [...rim].forEach((ch, k) => { const a = (k / rim.length) * Math.PI * 2; g.save(); g.translate(N / 2 + Math.cos(a) * N * 0.45, N / 2 + Math.sin(a) * N * 0.45); g.rotate(a + Math.PI / 2); g.fillText(ch, 0, 0); g.restore(); });
   if (live) { g.fillStyle = col["--spot"]; g.beginPath(); g.arc(N / 2, N * 0.08, N * 0.022, 0, Math.PI * 2); g.fill(); }
@@ -1120,7 +1120,7 @@ function render() {
       </div></div>
       <div class="sec"><h4>get cv</h4><div class="row">
         <a class="btn" href="author.html#cv-ml">ML</a><a class="btn" href="author.html#cv-cloud">Cloud</a><a class="btn" href="author.html#cv-backend">Backend</a>
-      </div><p class="note">Opens the CV on the author page. PDFs come at deploy.</p></div>
+      </div><p class="note">Opens the CV on the author page. ${esc(D.text.cvPdfNote)}.</p></div>
       <div class="sec"><h4>latest</h4><ol class="events">${chapters.map(([d, id, msg, ep]) => `<li><button type="button" data-go="${id}"><span class="ep">第${ep}話</span><time>${d}</time><span class="svc">${esc(byId.get(id).title)}</span>${esc(msg)}</button></li>`).join("")}</ol></div>`;
     const copy = document.getElementById("copy");
     copy.onclick = () => {
@@ -1231,9 +1231,9 @@ function drawMeter(now) {
 (function meterLoop(now) { drawMeter(now); requestAnimationFrame(meterLoop); })(performance.now());
 
 if (LAYOUT === "shapes") document.body.append(document.querySelector(".mastnav"));
-document.getElementById("navvols").textContent = `${D.nodes.length} projects, as volumes on a shelf`;
+document.getElementById("navvols").textContent = D.text.directoryContents.replace("{count}", D.nodes.length);
 document.getElementById("intro").innerHTML = `<p class="lede">${esc(D.profile.oneliner)}</p>
-  <p class="hint">Every project I've built sits on this record, placed by the skills it took: ML, Backend, Infra and Product at the corners, mixed projects nearer the middle. Drag to spin it. Click a name.</p>`;
+  <p class="hint">${esc(D.text.intro)}</p>`;
 readColours();
 requestAnimationFrame(loop);
 </script>

@@ -1,9 +1,11 @@
 // What Kai Shun is listening to, for the record on beanbois.github.io.
 //   GET /now        {is_playing, title, artist, url, art, duration_ms, progress_ms, bpm, played_at, fetched_at}
 //   GET /art?u=…    a Spotify cover image, re-served with CORS so the page can print it as screentone
+//   GET /playlist?id=…   a playlist's name, cover and tracks, for a project that has one (site.yaml music.playlists)
+//   GET /tempo?id=…&title=…&artist=…&ms=…&isrc=…   one track's tempo from the tempo bank
 // Secrets (wrangler secret put): SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REFRESH_TOKEN.
 // KV (binding MUSIC): the current access token, a rotated refresh token if Spotify sends one, and tempo per track.
-import MANUAL from "./bpm.json";
+import CONFIG from "./config.json";   // written by build.py from site.yaml: hidden artists, Kai Shun's own tempos
 
 const SITES = ["https://beanbois.github.io", "http://localhost:8765", "http://127.0.0.1:8765"];
 const FRESH_MS = 4000;      // every visitor polls; Spotify is asked at most once per 4 s per isolate
@@ -17,6 +19,10 @@ export default {
     try {
       if (url.pathname === "/now") return json(await now(env, url), cors);
       if (url.pathname === "/art") return art(url);
+      if (url.pathname === "/playlist") return json(await playlist(env, url), cors);
+      if (url.pathname === "/tempo") return json(await tempo({ id: url.searchParams.get("id"), name: url.searchParams.get("title") || "",
+        artists: [{ name: url.searchParams.get("artist") || "" }], duration_ms: Number(url.searchParams.get("ms")) || 0,
+        external_ids: { isrc: url.searchParams.get("isrc") || undefined } }, env), cors);
       return new Response("not found", { status: 404 });
     } catch (e) {
       console.log("error", e.message);
@@ -47,7 +53,7 @@ async function now(env, url) {
     }
   }
   let body = { is_playing: false, fetched_at: Date.now() };
-  const hidden = (env.HIDE_ARTISTS || "").toLowerCase().split(",").map(s => s.trim()).filter(Boolean);
+  const hidden = CONFIG.hide_artists.map(a => a.toLowerCase());
   if (item && !item.artists.some(a => hidden.includes(a.name.toLowerCase()))) {
     const cover = item.album?.images?.[0]?.url;
     body = {
@@ -80,7 +86,7 @@ async function accessToken(env) {
 
 // The tempo bank. Spotify closed its tempo data to new apps (Nov 2024), so a track's BPM comes from the most
 // trusted source that knows it; the first hit wins. Exact-id sources rank above anything matched by search.
-//   1 manual      bpm.json in this repo: Kai Shun's own count, always wins
+//   1 manual      site.yaml music.bpm (via config.json): Kai Shun's own count, always wins
 //   2 reccobeats  audio features looked up by Spotify id
 //   3 deezer      the same recording, matched by ISRC
 //   4 deezer      a search, kept only if title, artist and length (±3 s) all agree
@@ -111,7 +117,7 @@ const TIERS = [
 
 async function tempo(item, env) {
   if (!item.id) return { bpm: null, bpm_source: null };
-  if (MANUAL[item.id]?.bpm) return { bpm: MANUAL[item.id].bpm, bpm_source: "manual" };
+  if (CONFIG.bpm[item.id]) return { bpm: CONFIG.bpm[item.id], bpm_source: "manual" };
   const hit = await env.MUSIC.get("tempo:" + item.id, "json");
   if (hit) return { bpm: hit.bpm, bpm_source: hit.source };
   for (const [source, look] of TIERS) {
@@ -127,9 +133,35 @@ async function tempo(item, env) {
   return { bpm: null, bpm_source: null };
 }
 
+// A project's playlist: its name, cover and up to 100 tracks, cached for six hours.
+async function playlist(env, url) {
+  const id = url.searchParams.get("id") || "";
+  if (!/^[A-Za-z0-9]{22}$/.test(id)) return { error: "bad id" };
+  const hit = await env.MUSIC.get("playlist:" + id, "json");
+  if (hit) return hit;
+  const h = { Authorization: "Bearer " + (await accessToken(env)) };
+  const meta = await fetch(`https://api.spotify.com/v1/playlists/${id}?fields=name,images,external_urls`, { headers: h });
+  if (!meta.ok) return { error: `spotify ${meta.status}` };
+  const m = await meta.json();
+  // Development-mode apps only see the tracks of playlists Kai Shun owns or collaborates on (Spotify, Feb 2026);
+  // for any other playlist this answers 403 and the project falls back to what he's playing now
+  const r = await fetch(`https://api.spotify.com/v1/playlists/${id}/items?limit=100`, { headers: h });
+  const items = r.ok ? (await r.json()).items || [] : [];
+  const hidden = CONFIG.hide_artists.map(a => a.toLowerCase());
+  const tracks = items.map(x => x.item || x.track).filter(t => t && t.id && t.type !== "episode")
+    .filter(t => !t.artists.some(a => hidden.includes(a.name.toLowerCase())))
+    .map(t => ({ id: t.id, title: t.name, artist: t.artists.map(a => a.name).join(", "), duration_ms: t.duration_ms,
+                 url: t.external_urls?.spotify || null, isrc: t.external_ids?.isrc || null }));
+  const cover = m.images?.[0]?.url;
+  const body = { name: m.name, url: m.external_urls?.spotify || null, art: cover ? `${url.origin}/art?u=${encodeURIComponent(cover)}` : null, tracks };
+  if (tracks.length) await env.MUSIC.put("playlist:" + id, JSON.stringify(body), { expirationTtl: 6 * 3600 });
+  return body;
+}
+
 async function art(url) {
   const u = url.searchParams.get("u") || "";
-  if (!/^https:\/\/i\.scdn\.co\/image\/[a-z0-9]+$/i.test(u)) return new Response("bad image", { status: 400 });
+  // album covers, and the mosaic or custom covers playlists get
+  if (!/^https:\/\/(i\.scdn\.co|mosaic\.scdn\.co|image-cdn-[a-z0-9-]+\.spotifycdn\.com)\/[\w\/.-]+$/i.test(u)) return new Response("bad image", { status: 400 });
   const r = await fetch(u, { cf: { cacheTtl: 86400, cacheEverything: true } });
   return new Response(r.body, {
     status: r.status,
