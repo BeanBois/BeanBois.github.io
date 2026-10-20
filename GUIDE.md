@@ -53,7 +53,7 @@ you:
   one_liner: "Builds the platforms that keep GPUs busy. Also builds too many side projects."
 ```
 
-**Colours.** A light and a dark palette, each its own colours (the site follows the visitor's system setting). Any CSS colour works; `#rrggbb` is easiest. `spot` is the one red: keep it for things that are live or selected. The other names are roles, not hues, so each mode can colour them differently: `music` is what moves with the music (rim text, level bars, tonearm); `archive` is the shelf bands, corner squares, panels and the CV sheet; `mark` fills the caption boxes and hovers, with `on_mark` for text on it. `spot_edge` is the border round red things (set it the same as `spot` for no border).
+**Colours.** A light and a dark palette, each its own colours (the site follows the visitor's system setting). Any CSS colour works; `#rrggbb` is easiest. `spot` is the one red: keep it for things that are live or selected. The other names are roles, not hues, so each mode can colour them differently: `music` is what moves with the music (rim text, level bars, tonearm); `archive` is the shelf bands, corner squares, panels and the CV sheet; `mark` fills the caption boxes and hovers, with `on_mark` for text on it. `spot_edge` is the border round red things (set it the same as `spot` for no border). **By part:** to recolour one part of the site only (record, rim player, tonearm, sleeve, shadows, corners, live, shelf, panels, CV sheet), add it under `light:` or `dark:` with just the colours you want; the comment in `site.yaml` lists every part, its colours and their defaults. A misspelt part or colour stops the build with a message saying so.
 
 ## Changing a project's facts
 

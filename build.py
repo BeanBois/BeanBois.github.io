@@ -148,7 +148,7 @@ def spine(n, vol, href=None, extra=""):
 
 
 # ---------- Wallet's art (hand-drawn, one volume) ----------
-INK, PAPER, SPOT, ONSPOT = "fill:var(--ink)", "fill:var(--paper)", "fill:var(--spot)", "fill:var(--on-spot)"
+INK, PAPER, SPOT, ONSPOT = "fill:var(--ink)", "fill:var(--paper)", "fill:var(--live-red)", "fill:var(--live-on-red)"
 
 
 def tone(x0, y0, x1, y1, step, rmax, fade_from_top=True):
@@ -303,14 +303,43 @@ def fill(t):
     return re.sub(r"\{\{([a-z_]+(?:\.[a-z_]+)+)\}\}", lambda m: esc(cfg(m.group(1))), t)
 
 
+# Colours by part of the site. Each part's colour falls back to a base colour, so site.yaml only sets what differs.
+# The page is the base itself (paper, ink, muted).
+PARTS = {
+    "record": {"grooves": "tone", "edge": "ink", "label_rim": "ink"},
+    "rim_player": {"track_text": "music", "level_bars": "music"},
+    "tonearm": {"arm": "music"},
+    "sleeve": {"paper": "paper", "border": "ink", "text": "ink"},
+    "shadows": {"shadow": "ink", "blot": "ink"},
+    "corners": {"triangles": "archive", "labels": "ink", "current": "spot"},
+    "live": {"red": "spot", "edge": "spot_edge", "text": "spot", "on_red": "on_spot"},
+    "shelf": {"spine_paper": "paper", "spine_ink": "ink", "running_band": "archive", "finished_band": "archive"},
+    "panels": {"border": "archive", "caption_box": "mark", "caption_text": "on_mark"},
+    "cv": {"paper": "paper", "border": "archive", "tabs": "archive"},
+}
+BASE = ("paper", "ink", "tone", "soft", "muted", "music", "archive", "mark", "on_mark", "spot", "spot_edge", "on_spot")
+
+
 def colours_css():
-    """The palette as CSS tokens: light on :root, dark for a dark system setting or an explicit dark theme."""
+    """The palette as CSS tokens: light on :root, dark for a dark system setting or an explicit dark theme.
+    Base colours become --paper etc.; each part's colour becomes --<part>-<name>, resolved here to a value."""
     def block(name):
         pal = CFG["colours"].get(name) or {}
-        for k in ("paper", "ink", "tone", "soft", "muted", "music", "archive", "mark", "on_mark", "spot", "spot_edge", "on_spot"):
+        for k in BASE:
             if k not in pal:
                 raise SystemExit(f"site.yaml: colours.{name}.{k} is missing")
-        return " ".join(f"--{k.replace('_', '-')}: {pal[k]};" for k in pal)
+        for k, v in pal.items():
+            if k not in BASE and k not in PARTS:
+                raise SystemExit(f"site.yaml: colours.{name}.{k} is not a colour or a part of the site")
+            if k in PARTS:
+                for n in v or {}:
+                    if n not in PARTS[k]:
+                        raise SystemExit(f"site.yaml: colours.{name}.{k}.{n} is not one of: {', '.join(PARTS[k])}")
+        out = [f"--{k.replace('_', '-')}: {pal[k]};" for k in BASE]
+        for part, names in PARTS.items():
+            own = pal.get(part) or {}
+            out += [f"--{part}-{n}: {own.get(n, pal[base])};".replace("_", "-") for n, base in names.items()]
+        return " ".join(out)
     dark = block("dark") + " color-scheme: dark;"
     return (f":root {{ {block('light')} }}\n"
             f"@media (prefers-color-scheme: dark) {{ :root:not([data-theme=\"light\"]) {{ {dark} }} }}\n"

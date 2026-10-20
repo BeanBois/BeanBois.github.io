@@ -43,11 +43,26 @@ colophon:
   state: Live since 2026-10-20 and still being drawn. Details on most volumes are drafts until reviewed.
 
 # ---------------------------------------------------------------------------------------------------------------
-# Colours: one palette for the whole site for now, light and dark. Any CSS colour works (#rrggbb is easiest).
-# Next step: split these by part of the site (record, sleeve, spines, panels...).
+# Colours: a light and a dark palette. Any CSS colour works (#rrggbb is easiest).
 colours:
   # Roles, not hues: `music` is what moves with the music (rim text, level bars, tonearm); `archive` is the
   # shelf bands, corner squares, panels and CV sheet; `mark` fills the caption boxes and hovers; `spot` is the one red, with `spot_edge` as its border.
+  #
+  # By part: each part of the site takes its colours from the ones above. To change one part only, add it under
+  # light: or dark: with just the colours you want (anything left out keeps its default, shown here):
+  #   record:      { grooves: tone, edge: ink, label_rim: ink }
+  #   rim_player:  { track_text: music, level_bars: music }
+  #   tonearm:     { arm: music }
+  #   sleeve:      { paper: paper, border: ink, text: ink }
+  #   shadows:     { shadow: ink, blot: ink }
+  #   corners:     { triangles: archive, labels: ink, current: spot }
+  #   live:        { red: spot, edge: spot_edge, text: spot, on_red: on_spot }
+  #   shelf:       { spine_paper: paper, spine_ink: ink, running_band: archive, finished_band: archive }
+  #   panels:      { border: archive, caption_box: mark, caption_text: on_mark }
+  #   cv:          { paper: paper, border: archive, tabs: archive }
+  # The page itself is paper, ink and muted. Example, under light:
+  #   live:
+  #     text: "#b03463"     # a darker red for words, so they pass contrast
   light:
     paper: "#f5ecdb"      # the page: warm beige
     ink: "#2a1b3d"        # lines, text: purple-black

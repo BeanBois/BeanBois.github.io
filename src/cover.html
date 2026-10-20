@@ -32,7 +32,7 @@ body {
 }
 #ball { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
 #ball.dragging { cursor: grabbing; }
-button:focus-visible, a:focus-visible, canvas:focus-visible { outline: 3px solid var(--spot); outline-offset: 2px; }
+button:focus-visible, a:focus-visible, canvas:focus-visible { outline: 3px solid var(--live-red); outline-offset: 2px; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .sr:focus-within { position: fixed; left: 16px; top: 16px; width: auto; height: auto; clip: auto; z-index: 5; background: var(--paper); border: 2px solid var(--ink); padding: 8px; max-height: 80vh; overflow: auto; }
 
@@ -53,7 +53,7 @@ button:focus-visible, a:focus-visible, canvas:focus-visible { outline: 3px solid
 .pick small { display: block; color: var(--muted); font-size: 12px; line-height: 1.4; }
 .close { float: right; margin: -8px -10px 6px 10px; width: 34px; height: 34px; border-radius: 50%; font: 400 15px var(--font-display); color: var(--paper); background: var(--ink); border: 0; cursor: pointer; }
 .path { font: 12px var(--font-mono); color: var(--muted); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-.path button { font: inherit; color: var(--ink); background: none; border: 0; border-bottom: 2px solid var(--spot); padding: 0; cursor: pointer; }
+.path button { font: inherit; color: var(--ink); background: none; border: 0; border-bottom: 2px solid var(--live-red); padding: 0; cursor: pointer; }
 .stamps { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
 .stamp { font: 400 12px var(--font-display); letter-spacing: 0.06em; text-transform: uppercase; padding: 0 9px; border: 2.5px solid currentColor; transform: rotate(-4deg); white-space: nowrap; }
 .stamp.draft { font-size: 10px; color: var(--muted); transform: rotate(3deg); border-style: dashed; }
@@ -66,7 +66,7 @@ dl.meta dd { margin: 0; min-width: 0; }
 .chip { font: 11px var(--font-mono); padding: 0 6px; border: 1.5px solid var(--ink); }
 .sec { margin-top: 20px; }
 .sec h4 { display: inline-block; margin: 0 0 8px; font: 500 12px var(--font-mono); background: var(--ink); color: var(--paper); padding: 2px 10px 2px 8px; }
-.sec h4::before { content: "$ "; color: var(--spot); }
+.sec h4::before { content: "$ "; color: var(--live-text); }
 .sec p { margin: 0 0 8px; max-width: 62ch; }
 .sec ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
 .sec li { padding-left: 16px; position: relative; }
@@ -90,7 +90,7 @@ dl.meta dd { margin: 0; min-width: 0; }
 .legend { display: grid; grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr); gap: 4px 10px; align-items: start; font-size: 14px; }
 .legend .glyph { margin-top: 5px; }
 .contact { display: grid; gap: 6px; font: 13px var(--font-mono); }
-.contact a { color: var(--ink); text-decoration-thickness: 2px; text-decoration-color: var(--spot); text-underline-offset: 3px; }
+.contact a { color: var(--ink); text-decoration-thickness: 2px; text-decoration-color: var(--live-red); text-underline-offset: 3px; }
 .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .btn { font: 12px var(--font-mono); color: var(--ink); background: var(--paper); border: 2px solid var(--ink); padding: 3px 10px; cursor: pointer; }
 .btn:hover:not([disabled]) { background: var(--ink); color: var(--paper); }
@@ -102,7 +102,7 @@ dl.meta dd { margin: 0; min-width: 0; }
 .events button:hover { background: var(--soft); }
 .events .ep { font: 400 12px var(--font-display); margin-right: 6px; }
 .events time { color: var(--muted); margin-right: 6px; font-variant-numeric: tabular-nums; }
-.events .svc { color: var(--spot); margin-right: 6px; font-weight: 600; }
+.events .svc { color: var(--live-text); margin-right: 6px; font-weight: 600; }
 
 .mast { position: fixed; z-index: 2; left: max(20px, calc(env(safe-area-inset-left, 0px) + 12px)); top: calc(env(safe-area-inset-top, 0px) + 18px); display: grid; gap: 2px; pointer-events: none; }
 .mast a { pointer-events: auto; font: 400 20px var(--font-display); color: var(--ink); text-decoration: none; letter-spacing: 0.02em; }
@@ -110,7 +110,7 @@ dl.meta dd { margin: 0; min-width: 0; }
 .mastnav { position: fixed; z-index: 2; left: max(20px, calc(env(safe-area-inset-left, 0px) + 12px)); bottom: calc(env(safe-area-inset-bottom, 0px) + 18px); display: flex; gap: 18px; flex-wrap: wrap; font: 12px var(--font-mono); }
 .mastnav a { color: var(--ink); text-decoration: none; }
 .mastnav a b { font: 700 13px var(--font-body); margin-right: 4px; }
-.mastnav a:hover { text-decoration: underline; text-decoration-color: var(--spot); text-decoration-thickness: 2px; }
+.mastnav a:hover { text-decoration: underline; text-decoration-color: var(--live-red); text-decoration-thickness: 2px; }
 .np { margin: 6px 0 0; max-width: min(60ch, calc(100vw - 40px)); font: 12px/1.5 var(--font-mono); color: var(--muted); pointer-events: auto; }
 .np b { font: 400 13px var(--font-display); color: var(--ink); }
 .np a { font: inherit; letter-spacing: normal; color: inherit; text-decoration: none; }
@@ -159,7 +159,7 @@ dl.meta dd { margin: 0; min-width: 0; }
   :root:not([data-layout="sleeve"]) .rail .mastnav a b { font: 700 18px var(--font-body); margin: 0; grid-row: span 2; }
   :root:not([data-layout="sleeve"]) .rail .mastnav a span { font: 400 16px var(--font-display); }
   :root:not([data-layout="sleeve"]) .rail .mastnav small { display: block; font: 12px/1.5 var(--font-mono); color: var(--muted); }
-  :root:not([data-layout="sleeve"]) .rail .mastnav a:hover span { text-decoration: underline; text-decoration-color: var(--spot); text-decoration-thickness: 2px; }
+  :root:not([data-layout="sleeve"]) .rail .mastnav a:hover span { text-decoration: underline; text-decoration-color: var(--live-red); text-decoration-thickness: 2px; }
 }
 /* Layouts, one per design branch (D.layout, also set on <html data-layout>):
    deck    the rail ends in a music deck (30%)
@@ -207,7 +207,7 @@ dl.meta dd { margin: 0; min-width: 0; }
 /* shapes: the record (circle) half pulled out of its sleeve (square), with triangles pointing the way out.
    The sleeve is the rail made an object: JS sizes it and cuts a hole where the record sits in front of it. */
 @media (min-width: 900px) {
-  :root[data-layout="shapes"] .rail { right: auto; bottom: auto; border: 2.5px solid var(--ink); grid-template-rows: minmax(0, 1fr); overflow: hidden; }
+  :root[data-layout="shapes"] .rail { right: auto; bottom: auto; background: var(--sleeve-paper); color: var(--sleeve-text); border: 2.5px solid var(--sleeve-border); grid-template-rows: minmax(0, 1fr); overflow: hidden; }
   :root[data-layout="shapes"] .rail .deck, :root[data-layout="shapes"] .rail .more { display: none; }
   :root[data-layout="shapes"] .rail .scroll { position: relative; z-index: 1; padding: 34px var(--sleeve-pad, 40%) 30px 34px; }
   :root[data-layout="shapes"] .rail .say::before { content: "{{cover.sleeve_heading}}"; display: block; font: 500 10px var(--font-mono); letter-spacing: 0.2em; color: var(--muted); margin-bottom: 6px; }
@@ -215,17 +215,17 @@ dl.meta dd { margin: 0; min-width: 0; }
   .shade { display: none; }
   :root[data-layout="shapes"] .shade {
     display: block; position: fixed; z-index: 1; pointer-events: none;
-    background-image: radial-gradient(var(--ink) 1px, transparent 1.4px); background-size: 5px 5px; opacity: 0.55;
+    background-image: radial-gradient(var(--shadows-shadow) 1px, transparent 1.4px); background-size: 5px 5px; opacity: 0.55;
   }
   :root[data-layout="shapes"] .rail .crescent {
     position: absolute; z-index: 0; border-radius: 50%; pointer-events: none;
-    background-image: radial-gradient(var(--ink) 1px, transparent 1.4px); background-size: 4px 4px; opacity: 0.6;
+    background-image: radial-gradient(var(--shadows-shadow) 1px, transparent 1.4px); background-size: 4px 4px; opacity: 0.6;
   }
   :root[data-layout="shapes"] body > .mastnav { position: fixed; inset: 0; z-index: 2; pointer-events: none; display: block; }
-  :root[data-layout="shapes"] body > .mastnav a { position: fixed; pointer-events: auto; display: flex; gap: 8px; align-items: center; color: var(--ink); text-decoration: none; font: 13px var(--font-mono); }
+  :root[data-layout="shapes"] body > .mastnav a { position: fixed; pointer-events: auto; display: flex; gap: 8px; align-items: center; color: var(--corners-labels); text-decoration: none; font: 13px var(--font-mono); }
   :root[data-layout="shapes"] body > .mastnav a b { font: 700 14px var(--font-body); }
-  :root[data-layout="shapes"] body > .mastnav a::before { content: ""; width: 11px; height: 11px; background: var(--archive); flex: none; }
-  :root[data-layout="shapes"] body > .mastnav a:hover::before { background: var(--spot); box-shadow: 0 0 0 2px var(--spot-edge); }
+  :root[data-layout="shapes"] body > .mastnav a::before { content: ""; width: 11px; height: 11px; background: var(--corners-triangles); flex: none; }
+  :root[data-layout="shapes"] body > .mastnav a:hover::before { background: var(--corners-current); box-shadow: 0 0 0 2px var(--live-edge); }
   :root[data-layout="shapes"] body > .mastnav a:nth-child(1) { top: calc(env(safe-area-inset-top, 0px) + 30px); right: calc(env(safe-area-inset-right, 0px) + 34px); flex-direction: row-reverse; }
   :root[data-layout="shapes"] body > .mastnav a:nth-child(1)::before { clip-path: polygon(0 0, 100% 0, 100% 100%); }
   :root[data-layout="shapes"] body > .mastnav a:nth-child(2) { bottom: calc(env(safe-area-inset-bottom, 0px) + 28px); left: calc(env(safe-area-inset-left, 0px) + 34px); }
@@ -244,10 +244,10 @@ dl.meta dd { margin: 0; min-width: 0; }
 .np .bpm::before { content: "· "; }
 @media (min-width: 900px) { .rail .np .by::before, .rail .np .bpm::before { content: none; } }
 .meter { display: block; width: 160px; height: 18px; margin-top: 6px; }
-.np .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--spot); box-shadow: 0 0 0 2px var(--spot-edge); margin-right: 6px; vertical-align: 1px; }
+.np .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--live-red); box-shadow: 0 0 0 2px var(--live-edge); margin-right: 6px; vertical-align: 1px; }
 .np button { font: inherit; color: var(--muted); background: none; border: 0; border-bottom: 1px dashed var(--tone); padding: 0; margin-left: 8px; cursor: pointer; }
 .chap { display: inline-block; margin-top: 14px; font: 400 15px var(--font-display); color: var(--paper); background: var(--ink); padding: 6px 14px 5px; text-decoration: none; }
-.chap:hover { background: var(--spot); box-shadow: 0 0 0 2px var(--spot-edge); }
+.chap:hover { background: var(--live-red); box-shadow: 0 0 0 2px var(--live-edge); }
 </style>
 </head>
 <body>
@@ -388,18 +388,21 @@ const rec = { phase: 0, speed: music && music.is_playing && !reduce ? RPM * Math
 const songAt = now => !music ? 0 : Math.min(music.duration_ms, music.progress_ms + (music.is_playing ? now - music.at : 0)) / 1000;
 
 /* ---------- colours and fonts from tokens ---------- */
-let col = {}, fonts = {}, toneFill = null;
+let col = {}, fonts = {}, toneFill = null, blotFill = null;
 const cv = document.getElementById("ball");
 const ctx = cv.getContext("2d");
 function readColours() {
   const cs = getComputedStyle(document.documentElement);
-  for (const t of ["--paper", "--ink", "--tone", "--soft", "--muted", "--music", "--archive", "--spot", "--spot-edge"]) col[t] = cs.getPropertyValue(t).trim();
+  for (const t of ["--paper", "--ink", "--tone", "--soft", "--muted", "--music", "--archive", "--live-red", "--live-edge", "--record-grooves", "--record-edge", "--record-label-rim", "--rim-player-track-text", "--rim-player-level-bars", "--tonearm-arm", "--shadows-blot"]) col[t] = cs.getPropertyValue(t).trim();
   for (const t of ["--font-display", "--font-mono"]) fonts[t] = cs.getPropertyValue(t).trim();
   const p = document.createElement("canvas"); p.width = p.height = 5;
   const pc = p.getContext("2d");
   pc.fillStyle = col["--paper"]; pc.fillRect(0, 0, 5, 5);
   pc.fillStyle = col["--ink"]; pc.beginPath(); pc.arc(2.5, 2.5, 1.1, 0, Math.PI * 2); pc.fill();
   toneFill = ctx.createPattern(p, "repeat");
+  pc.fillStyle = col["--paper"]; pc.fillRect(0, 0, 5, 5);
+  pc.fillStyle = col["--shadows-blot"]; pc.beginPath(); pc.arc(2.5, 2.5, 1.1, 0, Math.PI * 2); pc.fill();
+  blotFill = ctx.createPattern(p, "repeat");
   if (music) { rec.cache.clear(); rec.art = artFor(music); }
   draw();
 }
@@ -497,7 +500,7 @@ function drawNode(n, x, y, r, time) {
   }
   if (st === "solid") {
     const lr = r * 0.38 * (reduce ? 1 : 0.8 + 0.3 * Math.sin(time * 3.2 + n.z[0] * 10));
-    ctx.fillStyle = col["--spot"]; ctx.strokeStyle = col["--spot-edge"]; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(x, y, Math.max(1, lr), 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = col["--live-red"]; ctx.strokeStyle = col["--live-edge"]; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(x, y, Math.max(1, lr), 0, Math.PI * 2); ctx.fill(); ctx.stroke();
   }
 }
 // a geodesic drawn segment by segment, each segment faded by its depth
@@ -582,7 +585,7 @@ function draw(now = performance.now()) {
     }
     ctx.globalAlpha = 1;
   }
-  ctx.strokeStyle = col["--ink"]; ctx.lineWidth = 2.5;
+  ctx.strokeStyle = col[music ? "--record-edge" : "--ink"]; ctx.lineWidth = 2.5;
   ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
 
   // the tetrahedron: geodesics between the four skill anchors
@@ -596,7 +599,7 @@ function draw(now = performance.now()) {
       ctx.strokeStyle = col["--ink"];
       geodesic(A(k), sel.z, 36, (v, s) => Math.max(1, 1 + 6 * w * conf(v) * s.s), 0.9);
       if (!reduce) {
-        ctx.fillStyle = col["--spot"];
+        ctx.fillStyle = col["--live-red"];
         const n = Math.max(1, Math.round(w * 6));
         for (let i = 0; i < n; i++) {
           const t = (time * 0.35 + i / n + flowSeed.get(sel.id)) % 1;
@@ -915,19 +918,19 @@ function halftoneLabel(src, N, live) {
   }
   // the label's rim, printed like a real one; the dot is red while the song is live
   g.fillStyle = col["--paper"]; g.beginPath(); g.arc(N / 2, N / 2, N / 2, 0, Math.PI * 2); g.arc(N / 2, N / 2, N * 0.4, 0, Math.PI * 2, true); g.fill();
-  g.strokeStyle = col["--ink"]; g.lineWidth = 3; g.beginPath(); g.arc(N / 2, N / 2, N * 0.4, 0, Math.PI * 2); g.stroke();
+  g.strokeStyle = col["--record-label-rim"]; g.lineWidth = 3; g.beginPath(); g.arc(N / 2, N / 2, N * 0.4, 0, Math.PI * 2); g.stroke();
   const rim = D.text.labelRim;
-  g.font = `600 ${N * 0.05}px ${fonts["--font-mono"]}`; g.fillStyle = col["--ink"]; g.textAlign = "center"; g.textBaseline = "middle";
+  g.font = `600 ${N * 0.05}px ${fonts["--font-mono"]}`; g.fillStyle = col["--record-label-rim"]; g.textAlign = "center"; g.textBaseline = "middle";
   [...rim].forEach((ch, k) => { const a = (k / rim.length) * Math.PI * 2; g.save(); g.translate(N / 2 + Math.cos(a) * N * 0.45, N / 2 + Math.sin(a) * N * 0.45); g.rotate(a + Math.PI / 2); g.fillText(ch, 0, 0); g.restore(); });
-  if (live) { g.fillStyle = col["--spot"]; g.strokeStyle = col["--spot-edge"]; g.lineWidth = 2; g.beginPath(); g.arc(N / 2, N * 0.08, N * 0.022, 0, Math.PI * 2); g.fill(); g.stroke(); }
+  if (live) { g.fillStyle = col["--live-red"]; g.strokeStyle = col["--live-edge"]; g.lineWidth = 2; g.beginPath(); g.arc(N / 2, N * 0.08, N * 0.022, 0, Math.PI * 2); g.fill(); g.stroke(); }
   return c;
 }
 function drawLabel(x, y, r) {
   ctx.save(); ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.clip();
   ctx.translate(x, y); ctx.rotate(rec.phase); ctx.drawImage(rec.art.label, -r, -r, 2 * r, 2 * r); ctx.restore();
-  ctx.strokeStyle = col["--ink"]; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke();
+  ctx.strokeStyle = col["--record-label-rim"]; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke();
   ctx.fillStyle = col["--paper"]; ctx.beginPath(); ctx.arc(x, y, Math.max(2, r * 0.07), 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = col["--ink"]; ctx.lineWidth = 1.2; ctx.stroke();
+  ctx.strokeStyle = col["--record-label-rim"]; ctx.lineWidth = 1.2; ctx.stroke();
 }
 function drawGrooves(now) {
   const r0 = R * 0.3, r1 = R * 0.975, V = rec.vis;
@@ -941,7 +944,7 @@ function drawGrooves(now) {
     ctx.restore();
     if (k < 1) { ctx.globalAlpha = 0.45 * (1 - k) * V; ctx.strokeStyle = col["--ink"]; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(cx, cy, rr, 0, Math.PI * 2); ctx.stroke(); }
   }
-  ctx.strokeStyle = col["--tone"]; ctx.lineWidth = 0.6;
+  ctx.strokeStyle = col["--record-grooves"]; ctx.lineWidth = 0.6;
   ctx.globalAlpha = 0.16 * V;
   ctx.beginPath();
   for (let r = r0, k = 0; r < r1; r += 2.6, k++) {
@@ -977,7 +980,7 @@ function drawBlot() {
     const x = bx + r * Math.cos(a) * 1.15, y = by + r * Math.sin(a) * 0.85;
     i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
   }
-  ctx.closePath(); ctx.globalAlpha = 0.5; ctx.fillStyle = toneFill; ctx.fill(); ctx.restore(); ctx.globalAlpha = 1;
+  ctx.closePath(); ctx.globalAlpha = 0.5; ctx.fillStyle = blotFill; ctx.fill(); ctx.restore(); ctx.globalAlpha = 1;
 }
 const railEl = document.querySelector(".rail"), shadeEl = document.getElementById("shade"), crescentEl = document.getElementById("crescent");
 let sleeveKey = "";
@@ -1006,7 +1009,7 @@ function drawRimPlayer(now) {
   const w = c => ctx.measureText(c).width + 1.6;
   while ([...text].reduce((a, c) => a + w(c), 0) / rr > Math.PI * 0.95 && text.length > 12) text = text.slice(0, -2).trimEnd() + "…";
   const chars = [...text], span = chars.reduce((a, c) => a + w(c), 0) / rr;
-  ctx.fillStyle = col["--music"]; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillStyle = col["--rim-player-track-text"]; ctx.textAlign = "center"; ctx.textBaseline = "middle";
   const mid = LAYOUT === "shapes" ? -Math.PI / 3 : -Math.PI / 2;      // shapes: round to the upper right, clear of the sleeve
   let a = mid - span / 2;
   for (const c of chars) {
@@ -1017,7 +1020,7 @@ function drawRimPlayer(now) {
   if (!music.is_playing) return;
   // the bars: low frequencies at the bottom of the record, high ones up toward the text
   const N = 132, clear = span / 2 + 0.1;
-  ctx.strokeStyle = col["--music"]; ctx.lineCap = "butt"; ctx.lineWidth = Math.max(1.5, (2 * Math.PI * R / N) * 0.45);
+  ctx.strokeStyle = col["--rim-player-level-bars"]; ctx.lineCap = "butt"; ctx.lineWidth = Math.max(1.5, (2 * Math.PI * R / N) * 0.45);
   for (let k = 0; k < N; k++) {
     const th = -Math.PI / 2 + (k / N) * 2 * Math.PI;
     const d = Math.abs(Math.atan2(Math.sin(th - mid), Math.cos(th - mid)));   // angle from the text's middle
@@ -1049,13 +1052,13 @@ function drawArm(now) {
   const ang = angRest + (angPlay - angRest) * rec.arm, S = [P[0] + L * Math.cos(ang), P[1] + L * Math.sin(ang)];
   ctx.lineCap = "round";
   ctx.strokeStyle = col["--paper"]; ctx.lineWidth = 8; ctx.beginPath(); ctx.moveTo(P[0], P[1]); ctx.lineTo(S[0], S[1]); ctx.stroke();
-  ctx.strokeStyle = col["--music"]; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(P[0], P[1]); ctx.lineTo(S[0], S[1]); ctx.stroke();
+  ctx.strokeStyle = col["--tonearm-arm"]; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(P[0], P[1]); ctx.lineTo(S[0], S[1]); ctx.stroke();
   ctx.save(); ctx.translate(S[0], S[1]); ctx.rotate(ang);
-  ctx.fillStyle = col["--music"]; ctx.fillRect(-4, -6, 16, 12);
+  ctx.fillStyle = col["--tonearm-arm"]; ctx.fillRect(-4, -6, 16, 12);
   ctx.restore();
-  ctx.fillStyle = col["--paper"]; ctx.strokeStyle = col["--music"]; ctx.lineWidth = 2.5;
+  ctx.fillStyle = col["--paper"]; ctx.strokeStyle = col["--tonearm-arm"]; ctx.lineWidth = 2.5;
   ctx.beginPath(); ctx.arc(P[0], P[1], 10, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-  ctx.fillStyle = col["--music"]; ctx.beginPath(); ctx.arc(P[0], P[1], 3.5, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = col["--tonearm-arm"]; ctx.beginPath(); ctx.arc(P[0], P[1], 3.5, 0, Math.PI * 2); ctx.fill();
   ctx.lineCap = "butt";
 }
 
@@ -1072,7 +1075,7 @@ function glyph(n) {
     solid: `fill="${ink}"`, tone: `fill="url(#tp)" stroke="${ink}" stroke-width="1.5"`, outline: `fill="${paper}" stroke="${ink}" stroke-width="1.8"`,
     faint: `fill="${paper}" stroke="var(--tone)" stroke-width="1.5"`, dashed: `fill="${paper}" stroke="${ink}" stroke-width="1.5" stroke-dasharray="2 2"`,
   }[st];
-  const inner = st === "solid" ? `<circle cx="6" cy="6" r="2" fill="var(--spot)"/>` : st === "outline" ? `<circle cx="6" cy="6" r="1.8" fill="${ink}"/>` : "";
+  const inner = st === "solid" ? `<circle cx="6" cy="6" r="2" fill="var(--live-red)"/>` : st === "outline" ? `<circle cx="6" cy="6" r="1.8" fill="${ink}"/>` : "";
   return `<svg class="glyph" viewBox="0 0 12 12" aria-hidden="true"><defs><pattern id="tp" width="2.4" height="2.4" patternUnits="userSpaceOnUse"><circle cx="1.2" cy="1.2" r="0.6" fill="${ink}"/></pattern></defs>${shape} ${attrs}/>${inner}</svg>`;
 }
 const nearest = (n, k) => nodes.filter(m => m !== n).map(m => ({ m, d: dH(n.z, m.z) })).sort((a, b) => a.d - b.d).slice(0, k);
@@ -1139,7 +1142,7 @@ function render() {
     const g = n.group ? groups[n.group] : null;
     body.innerHTML = `
       <div class="path"><span>${esc(n.track)}</span>${g ? `<span>·</span><button type="button" data-group="${esc(g.id)}">${esc(g.title)}</button>` : ""}<span>·</span><span>${esc(n.period)}</span></div>
-      <div class="stamps"><span class="stamp" style="${st.style === "solid" ? "border-color:var(--spot-edge);" : ""}color:${st.style === "solid" ? "var(--spot)" : st.style === "faint" ? "var(--muted)" : "var(--ink)"}">${st.label}</span><span class="stamp draft">draft</span></div>
+      <div class="stamps"><span class="stamp" style="${st.style === "solid" ? "border-color:var(--live-edge);" : ""}color:${st.style === "solid" ? "var(--live-text)" : st.style === "faint" ? "var(--muted)" : "var(--ink)"}">${st.label}</span><span class="stamp draft">draft</span></div>
       <h2>${esc(n.title)}</h2>
       <p class="tag">${esc(n.role ? n.role + " · " + n.tagline : n.tagline)}</p>
       ${n.story ? `<div class="story">${paras(n.story)}</div>` : ""}
@@ -1149,7 +1152,7 @@ function render() {
       <div class="sec"><h4>position</h4>${calcBlock(n)}</div>
       ${n.stack.length || n.repo ? `<div class="sec"><h4>stack</h4><dl class="meta">
         ${n.stack.length ? `<dt>uses</dt><dd><div class="chips">${n.stack.map(s => `<span class="chip">${esc(s)}</span>`).join("")}</div></dd>` : ""}
-        ${n.repo ? `<dt>repo</dt><dd><a href="${esc(n.repo)}" target="_blank" rel="noopener" style="color:var(--ink);text-decoration-color:var(--spot);text-decoration-thickness:2px">${esc(n.repo.replace("https://github.com/", ""))}</a></dd>` : ""}
+        ${n.repo ? `<dt>repo</dt><dd><a href="${esc(n.repo)}" target="_blank" rel="noopener" style="color:var(--ink);text-decoration-color:var(--live-red);text-decoration-thickness:2px">${esc(n.repo.replace("https://github.com/", ""))}</a></dd>` : ""}
       </dl></div>` : ""}
       <div class="sec"><h4>nearest</h4>${list(nearest(n, 4))}</div>`;
   }
@@ -1224,8 +1227,8 @@ function drawMeter(now) {
   const bw = w / BARS;
   for (let i = 0; i < BARS; i++) {
     const bh = Math.max(1.5, level[i] * h);
-    mctx.fillStyle = col["--music"]; mctx.fillRect(i * bw + 1, h - bh, bw - 2, bh);
-    if (live) { mctx.fillStyle = col["--spot"]; mctx.fillRect(i * bw + 1, h - peak[i] * h - 3, bw - 2, 1.5); }   // red peak caps while it's live
+    mctx.fillStyle = col["--rim-player-level-bars"]; mctx.fillRect(i * bw + 1, h - bh, bw - 2, bh);
+    if (live) { mctx.fillStyle = col["--live-red"]; mctx.fillRect(i * bw + 1, h - peak[i] * h - 3, bw - 2, 1.5); }   // red peak caps while it's live
   }
 }
 (function meterLoop(now) { drawMeter(now); requestAnimationFrame(meterLoop); })(performance.now());
