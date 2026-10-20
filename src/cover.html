@@ -225,7 +225,7 @@ dl.meta dd { margin: 0; min-width: 0; }
   :root[data-layout="shapes"] body > .mastnav a { position: fixed; pointer-events: auto; display: flex; gap: 8px; align-items: center; color: var(--ink); text-decoration: none; font: 13px var(--font-mono); }
   :root[data-layout="shapes"] body > .mastnav a b { font: 700 14px var(--font-body); }
   :root[data-layout="shapes"] body > .mastnav a::before { content: ""; width: 11px; height: 11px; background: var(--archive); flex: none; }
-  :root[data-layout="shapes"] body > .mastnav a:hover::before { background: var(--spot); }
+  :root[data-layout="shapes"] body > .mastnav a:hover::before { background: var(--spot); box-shadow: 0 0 0 2px var(--spot-edge); }
   :root[data-layout="shapes"] body > .mastnav a:nth-child(1) { top: calc(env(safe-area-inset-top, 0px) + 30px); right: calc(env(safe-area-inset-right, 0px) + 34px); flex-direction: row-reverse; }
   :root[data-layout="shapes"] body > .mastnav a:nth-child(1)::before { clip-path: polygon(0 0, 100% 0, 100% 100%); }
   :root[data-layout="shapes"] body > .mastnav a:nth-child(2) { bottom: calc(env(safe-area-inset-bottom, 0px) + 28px); left: calc(env(safe-area-inset-left, 0px) + 34px); }
@@ -244,10 +244,10 @@ dl.meta dd { margin: 0; min-width: 0; }
 .np .bpm::before { content: "· "; }
 @media (min-width: 900px) { .rail .np .by::before, .rail .np .bpm::before { content: none; } }
 .meter { display: block; width: 160px; height: 18px; margin-top: 6px; }
-.np .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--spot); margin-right: 6px; vertical-align: 1px; }
+.np .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--spot); box-shadow: 0 0 0 2px var(--spot-edge); margin-right: 6px; vertical-align: 1px; }
 .np button { font: inherit; color: var(--muted); background: none; border: 0; border-bottom: 1px dashed var(--tone); padding: 0; margin-left: 8px; cursor: pointer; }
 .chap { display: inline-block; margin-top: 14px; font: 400 15px var(--font-display); color: var(--paper); background: var(--ink); padding: 6px 14px 5px; text-decoration: none; }
-.chap:hover { background: var(--spot); }
+.chap:hover { background: var(--spot); box-shadow: 0 0 0 2px var(--spot-edge); }
 </style>
 </head>
 <body>
@@ -393,7 +393,7 @@ const cv = document.getElementById("ball");
 const ctx = cv.getContext("2d");
 function readColours() {
   const cs = getComputedStyle(document.documentElement);
-  for (const t of ["--paper", "--ink", "--tone", "--soft", "--muted", "--music", "--archive", "--spot"]) col[t] = cs.getPropertyValue(t).trim();
+  for (const t of ["--paper", "--ink", "--tone", "--soft", "--muted", "--music", "--archive", "--spot", "--spot-edge"]) col[t] = cs.getPropertyValue(t).trim();
   for (const t of ["--font-display", "--font-mono"]) fonts[t] = cs.getPropertyValue(t).trim();
   const p = document.createElement("canvas"); p.width = p.height = 5;
   const pc = p.getContext("2d");
@@ -497,7 +497,7 @@ function drawNode(n, x, y, r, time) {
   }
   if (st === "solid") {
     const lr = r * 0.38 * (reduce ? 1 : 0.8 + 0.3 * Math.sin(time * 3.2 + n.z[0] * 10));
-    ctx.fillStyle = col["--spot"]; ctx.beginPath(); ctx.arc(x, y, Math.max(1, lr), 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = col["--spot"]; ctx.strokeStyle = col["--spot-edge"]; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(x, y, Math.max(1, lr), 0, Math.PI * 2); ctx.fill(); ctx.stroke();
   }
 }
 // a geodesic drawn segment by segment, each segment faded by its depth
@@ -919,7 +919,7 @@ function halftoneLabel(src, N, live) {
   const rim = D.text.labelRim;
   g.font = `600 ${N * 0.05}px ${fonts["--font-mono"]}`; g.fillStyle = col["--ink"]; g.textAlign = "center"; g.textBaseline = "middle";
   [...rim].forEach((ch, k) => { const a = (k / rim.length) * Math.PI * 2; g.save(); g.translate(N / 2 + Math.cos(a) * N * 0.45, N / 2 + Math.sin(a) * N * 0.45); g.rotate(a + Math.PI / 2); g.fillText(ch, 0, 0); g.restore(); });
-  if (live) { g.fillStyle = col["--spot"]; g.beginPath(); g.arc(N / 2, N * 0.08, N * 0.022, 0, Math.PI * 2); g.fill(); }
+  if (live) { g.fillStyle = col["--spot"]; g.strokeStyle = col["--spot-edge"]; g.lineWidth = 2; g.beginPath(); g.arc(N / 2, N * 0.08, N * 0.022, 0, Math.PI * 2); g.fill(); g.stroke(); }
   return c;
 }
 function drawLabel(x, y, r) {
@@ -1139,7 +1139,7 @@ function render() {
     const g = n.group ? groups[n.group] : null;
     body.innerHTML = `
       <div class="path"><span>${esc(n.track)}</span>${g ? `<span>·</span><button type="button" data-group="${esc(g.id)}">${esc(g.title)}</button>` : ""}<span>·</span><span>${esc(n.period)}</span></div>
-      <div class="stamps"><span class="stamp" style="color:${st.style === "solid" ? "var(--spot)" : st.style === "faint" ? "var(--muted)" : "var(--ink)"}">${st.label}</span><span class="stamp draft">draft</span></div>
+      <div class="stamps"><span class="stamp" style="${st.style === "solid" ? "border-color:var(--spot-edge);" : ""}color:${st.style === "solid" ? "var(--spot)" : st.style === "faint" ? "var(--muted)" : "var(--ink)"}">${st.label}</span><span class="stamp draft">draft</span></div>
       <h2>${esc(n.title)}</h2>
       <p class="tag">${esc(n.role ? n.role + " · " + n.tagline : n.tagline)}</p>
       ${n.story ? `<div class="story">${paras(n.story)}</div>` : ""}

@@ -47,18 +47,19 @@ colophon:
 # Next step: split these by part of the site (record, sleeve, spines, panels...).
 colours:
   # Roles, not hues: `music` is what moves with the music (rim text, level bars, tonearm); `archive` is the
-  # shelf bands, corner squares, panels and CV sheet; `mark` fills the caption boxes and hovers; `spot` is the one red.
+  # shelf bands, corner squares, panels and CV sheet; `mark` fills the caption boxes and hovers; `spot` is the one red, with `spot_edge` as its border.
   light:
     paper: "#f5ecdb"      # the page: warm beige
     ink: "#2a1b3d"        # lines, text: purple-black
     tone: "#b3a58f"       # grooves, faint lines
     soft: "#fbe9a6"       # hover fills: pale yellow
     muted: "#6b5a74"      # small print
-    music: "#1f5fbf"      # cobalt blue
+    music: "#163a7a"      # deep blue
     archive: "#6a3fa0"    # purple
     mark: "#f4c430"       # saffron yellow
     on_mark: "#2a1b3d"    # text on yellow
-    spot: "#b8336a"       # raspberry: only what's live or chosen
+    spot: "#d9507f"       # light raspberry: only what's live or chosen
+    spot_edge: "#f2a7c0"  # pink border round the red
     on_spot: "#ffffff"    # text on red
   dark:
     paper: "#0c1511"      # green-black
@@ -71,6 +72,7 @@ colours:
     mark: "#74b592"
     on_mark: "#0c1511"
     spot: "#ff5a5f"
+    spot_edge: "#ff5a5f"
     on_spot: "#0c1511"
 
 # ---------------------------------------------------------------------------------------------------------------

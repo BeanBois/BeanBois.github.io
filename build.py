@@ -307,7 +307,7 @@ def colours_css():
     """The palette as CSS tokens: light on :root, dark for a dark system setting or an explicit dark theme."""
     def block(name):
         pal = CFG["colours"].get(name) or {}
-        for k in ("paper", "ink", "tone", "soft", "muted", "music", "archive", "mark", "on_mark", "spot", "on_spot"):
+        for k in ("paper", "ink", "tone", "soft", "muted", "music", "archive", "mark", "on_mark", "spot", "spot_edge", "on_spot"):
             if k not in pal:
                 raise SystemExit(f"site.yaml: colours.{name}.{k} is missing")
         return " ".join(f"--{k.replace('_', '-')}: {pal[k]};" for k in pal)

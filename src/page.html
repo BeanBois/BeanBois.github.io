@@ -57,7 +57,7 @@ body { position: relative; min-height: 100vh; }
 .corners a { display: flex; gap: 8px; align-items: center; color: var(--ink); text-decoration: none; }
 .corners a b { font: 700 14px var(--font-body); }
 .corners i { display: block; flex: none; width: 11px; height: 11px; background: var(--archive); }
-.corners a:hover i, .corners a[aria-current] i { background: var(--spot); }
+.corners a:hover i, .corners a[aria-current] i { background: var(--spot); box-shadow: 0 0 0 2px var(--spot-edge); }
 .corners a[aria-current] { text-decoration: underline; text-decoration-color: var(--spot); text-decoration-thickness: 2px; text-underline-offset: 4px; }
 .corners .tl { top: calc(env(safe-area-inset-top, 0px) + 18px); left: calc(env(safe-area-inset-left, 0px) + 22px); flex-direction: column; }
 .corners .tl i { clip-path: polygon(0 0, 100% 0, 0 100%); }
@@ -91,7 +91,7 @@ body { position: relative; min-height: 100vh; }
 /* stamps, shared with the ball */
 .stamp { display: inline-block; font: 400 12px var(--font-display); letter-spacing: 0.06em; text-transform: uppercase; padding: 0 9px; border: 2.5px solid currentColor; transform: rotate(-4deg); white-space: nowrap; }
 .stamp.draft { font-size: 10px; color: var(--muted); transform: rotate(3deg); border-style: dashed; }
-.stamp.live { color: var(--spot); }
+.stamp.live { color: var(--spot); border-color: var(--spot-edge); }
 
 /* page title block */
 .pt { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px 22px; margin: 44px 0 28px; }
@@ -140,7 +140,7 @@ section + section .shelfname { margin-top: 40px; }
 .spine.big .ttl { font-size: 17px; }
 .spine .art { width: 100%; height: 54px; display: block; border-top: 2px solid var(--ink); }
 .spine .obi { width: 100%; height: 30px; display: grid; place-items: center; background: var(--archive); color: var(--paper); }
-.spine .obi.live { background: var(--spot); color: var(--on-spot); }
+.spine .obi.live { background: var(--spot); color: var(--on-spot); box-shadow: 0 0 0 2px var(--spot-edge); }
 .spine .obi svg { width: 12px; height: 12px; }
 .sleeve { aspect-ratio: 1; border: 2.5px solid var(--ink); }
 .pull { height: 100%; overflow: auto; padding: 16px 18px 18px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; align-content: start; }
