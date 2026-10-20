@@ -128,34 +128,45 @@ dl.meta dd { margin: 0; min-width: 0; }
 .mastnav a:hover { text-decoration: underline; text-decoration-color: var(--spot); text-decoration-thickness: 2px; }
 .np { margin: 6px 0 0; max-width: min(60ch, calc(100vw - 40px)); font: 12px/1.5 var(--font-mono); color: var(--muted); pointer-events: auto; }
 .np b { font: 400 13px var(--font-display); color: var(--ink); }
-.mast .np a { font: inherit; letter-spacing: normal; color: inherit; }
-/* 7-3: the record takes the left 70%, a rail the right 30%. The rail holds who, what's playing, the open
-   project (or an intro) and the way into the volume, so clicking never moves the record. */
+.np a { font: inherit; letter-spacing: normal; color: inherit; text-decoration: none; }
+.deck { position: fixed; z-index: 2; left: max(20px, calc(env(safe-area-inset-left, 0px) + 12px)); top: calc(env(safe-area-inset-top, 0px) + 66px); pointer-events: auto; }
+.mastnav small { display: none; }
+/* 7-3: the record takes the left 70%, a rail the right 30%, so clicking never moves the record.
+   The rail is cut by the golden ratio: the top 61.8% is the deck (what's playing, always first) and then either
+   who I am (home) or the open project; the bottom 38.2% is the way into the rest of the volume. */
 .intro { display: none; }
 @media (min-width: 900px) {
   .rail {
     position: fixed; z-index: 2; top: 0; right: 0; bottom: 0; width: 30%;
-    display: flex; flex-direction: column; gap: 30px; background: var(--paper); border-left: 2px solid var(--ink);
-    padding: calc(env(safe-area-inset-top, 0px) + 40px) calc(env(safe-area-inset-right, 0px) + 32px) calc(env(safe-area-inset-bottom, 0px) + 28px) 36px;
+    display: grid; grid-template-rows: minmax(0, 1.618fr) minmax(0, 1fr); grid-template-columns: minmax(0, 1fr); background: var(--paper); border-left: 2px solid var(--ink);
+    padding: calc(env(safe-area-inset-top, 0px) + 36px) calc(env(safe-area-inset-right, 0px) + 32px) calc(env(safe-area-inset-bottom, 0px) + 28px) 36px;
   }
-  .rail .mast, .rail .mastnav { position: static; pointer-events: auto; }
-  .rail .mast { gap: 4px; min-width: 0; }
-  .rail .np { min-width: 0; overflow: hidden; }
-  .rail .mast > a { font-size: 26px; line-height: 1.05; }
-  .rail .np { margin-top: 18px; padding-top: 14px; border-top: 1.5px solid var(--soft); max-width: none; font-size: 12px; }
+  .rail .top { display: flex; flex-direction: column; gap: 26px; min-height: 0; padding-bottom: 24px; }
+  .rail .top > *, .rail .say * { min-width: 0; }
+  .rail .say { overflow-x: hidden; overflow-y: auto; }
+  .rail .deck, .rail .mast, .rail .mastnav { position: static; pointer-events: auto; }
+  .rail .deck { min-width: 0; }
+  .rail .np { margin: 0; min-width: 0; overflow: hidden; max-width: none; font-size: 12px; }
   .rail .np .lbl, .rail .np .by, .rail .np .bpm { display: block; }
   .rail .np b { display: block; margin: 4px 0 2px; font-size: 19px; line-height: 1.2; }
   .rail .np .by { color: var(--ink); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .rail .np .bpm { margin-top: 2px; }
   .rail .meter { width: 100%; height: 44px; margin-top: 12px; }
-  .rail .close { margin: 0 0 6px 10px; }
-  .rail .intro { display: block; flex: 1; min-height: 0; }
+  .rail .mast { gap: 4px; min-width: 0; padding-top: 22px; border-top: 1.5px solid var(--soft); }
+  .rail .mast > a { font-size: 26px; line-height: 1.05; }
+  .rail:has(.say:not([hidden])) .mast, .rail:has(.say:not([hidden])) .intro { display: none; }   /* who I am: home only */
+  .rail .intro { display: block; min-height: 0; overflow: auto; }
   .rail .intro p { margin: 0 0 14px; max-width: 40ch; }
   .rail .intro .lede { font-size: 17px; }
   .rail .intro .hint { font: 12px/1.7 var(--font-mono); color: var(--muted); }
-  .rail:has(.say:not([hidden])) .intro { display: none; }
-  .rail .say { position: static; flex: 1; min-height: 0; border: 0; border-radius: 0; padding: 0 4px 0 0; animation: fade 0.25s ease-out; }
-  .rail .mastnav { flex-direction: column; gap: 6px; font-size: 13px; padding-top: 14px; border-top: 1.5px solid var(--soft); }
+  .rail .say { position: static; flex: 1; min-height: 0; border: 0; border-top: 1.5px solid var(--soft); border-radius: 0; padding: 20px 4px 0 0; animation: fade 0.25s ease-out; }
+  .rail .close { margin: 0 0 6px 10px; }
+  .rail .mastnav { display: grid; align-content: start; gap: 16px; border-top: 2px solid var(--ink); padding-top: 22px; overflow: auto; }
+  .rail .mastnav a { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0 10px; align-items: baseline; text-decoration: none; }
+  .rail .mastnav a b { font: 700 18px var(--font-body); margin: 0; grid-row: span 2; }
+  .rail .mastnav a span { font: 400 16px var(--font-display); }
+  .rail .mastnav small { display: block; font: 12px/1.5 var(--font-mono); color: var(--muted); }
+  .rail .mastnav a:hover span { text-decoration: underline; text-decoration-color: var(--spot); text-decoration-thickness: 2px; }
 }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .rail .say { animation: none; } }
@@ -173,13 +184,20 @@ dl.meta dd { margin: 0; min-width: 0; }
 
 <canvas id="ball" tabindex="0" aria-label="Kai Shun's projects, placed in a Poincaré ball by skill mix. Drag to spin it, arrow keys to turn it, click a point for details."></canvas>
 <div class="rail">
-<header class="mast"><a href="author.html">TEOH KAI SHUN</a><span>ML Engineer · AI infra at Tencent · Malaysia</span><p class="np" id="np" aria-live="polite"></p><canvas class="meter" id="meter" aria-hidden="true"></canvas></header>
+<div class="top">
+<section class="deck" aria-label="Now playing"><p class="np" id="np" aria-live="polite"></p><canvas class="meter" id="meter" aria-hidden="true"></canvas></section>
+<header class="mast"><a href="author.html">TEOH KAI SHUN</a><span>ML Engineer · AI infra at Tencent · Malaysia</span></header>
 <section class="intro" id="intro"></section>
 <aside class="say" id="say" aria-live="polite" hidden>
   <button type="button" class="close" id="close" aria-label="Close">×</button>
   <div id="saybody"></div>
 </aside>
-<nav class="mastnav" aria-label="Volume"><a href="contents.html"><b>目次</b>contents</a><a href="author.html"><b>作者</b>author &amp; CV</a><a href="colophon.html"><b>奥付</b>colophon</a></nav>
+</div>
+<nav class="mastnav" aria-label="Volume">
+  <a href="contents.html"><b>目次</b><span>contents</span><small id="navvols">every project, as volumes on a shelf</small></a>
+  <a href="author.html"><b>作者</b><span>author &amp; CV</span><small>about me, the years, and the CV for ML, cloud or backend roles</small></a>
+  <a href="colophon.html"><b>奥付</b><span>colophon</span><small>how this site is made, from one folder of Markdown</small></a>
+</nav>
 </div>
 <nav class="sr" aria-label="All projects" id="srlist"></nav>
 <div class="pick" id="pick" role="dialog" aria-label="Projects here" hidden></div>
@@ -1038,6 +1056,7 @@ function drawMeter(now) {
 }
 (function meterLoop(now) { drawMeter(now); requestAnimationFrame(meterLoop); })(performance.now());
 
+document.getElementById("navvols").textContent = `${D.nodes.length} projects, as volumes on a shelf`;
 document.getElementById("intro").innerHTML = `<p class="lede">${esc(D.profile.oneliner)}</p>
   <p class="hint">Every project I've built sits on this record, placed by the skills it took: ML, Backend, Infra and Product at the corners, mixed projects nearer the middle. Drag to spin it. Click a name.</p>`;
 readColours();
