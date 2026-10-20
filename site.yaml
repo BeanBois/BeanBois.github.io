@@ -46,24 +46,30 @@ colophon:
 # Colours: one palette for the whole site for now, light and dark. Any CSS colour works (#rrggbb is easiest).
 # Next step: split these by part of the site (record, sleeve, spines, panels...).
 colours:
+  # Roles, not hues: `music` is what moves with the music (rim text, level bars, tonearm); `archive` is the
+  # shelf bands, corner squares, panels and CV sheet; `mark` fills the caption boxes and hovers; `spot` is the one red.
   light:
-    paper: "#edf2ee"      # the page: sage-silver
-    ink: "#14231c"        # lines, text, bars: green-black
-    tone: "#94a69b"       # grooves, faint lines: silver
-    soft: "#d9e4dc"       # dividers, hover fills
-    muted: "#53655a"      # small print: grey-green
-    blue: "#2b5a87"       # what moves with the music: rim text, level bars, tonearm
-    green: "#2c6a4b"      # the archive: shelf bands, corner squares, panels, CV sheet
-    spot: "#c8323a"       # the one red: only what's live or chosen
+    paper: "#f5ecdb"      # the page: warm beige
+    ink: "#2a1b3d"        # lines, text: purple-black
+    tone: "#b3a58f"       # grooves, faint lines
+    soft: "#fbe9a6"       # hover fills: pale yellow
+    muted: "#6b5a74"      # small print
+    music: "#1f5fbf"      # cobalt blue
+    archive: "#6a3fa0"    # purple
+    mark: "#f4c430"       # saffron yellow
+    on_mark: "#2a1b3d"    # text on yellow
+    spot: "#d62a2e"       # the one red: only what's live or chosen
     on_spot: "#ffffff"    # text on red
   dark:
-    paper: "#0c1511"
+    paper: "#0c1511"      # green-black
     ink: "#e2ebe5"
     tone: "#66786d"
     soft: "#1a2620"
     muted: "#99aba0"
-    blue: "#7ea8d4"
-    green: "#74b592"
+    music: "#7ea8d4"      # blue
+    archive: "#74b592"    # green
+    mark: "#74b592"
+    on_mark: "#0c1511"
     spot: "#ff5a5f"
     on_spot: "#0c1511"
 
