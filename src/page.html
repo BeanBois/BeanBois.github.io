@@ -58,22 +58,47 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--spot); outline-
 @media (max-width: 860px) {
   .split { grid-template-columns: minmax(0, 1fr); }
   .split > .rail { position: static; max-height: none; order: -1; margin-bottom: 18px; }
+  .split.main-first > .rail { order: 0; margin: 40px 0 0; }
 }
 h1, h2, h3 { font-family: var(--font-display); font-weight: 400; text-wrap: balance; line-height: 1.1; }
 .mono { font-family: var(--font-mono); }
 .jp { font-family: var(--font-body); font-weight: 700; }
 .muted { color: var(--muted); }
 
-/* running head: the same line at the top of every inner page */
-.rh { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 3fr); gap: 6px 56px; align-items: baseline; padding-block: 18px 12px; border-bottom: 2px solid var(--ink); font: 12px var(--font-mono); }
-.rh .logo { font: 400 15px var(--font-display); text-decoration: none; letter-spacing: 0.02em; }
-.rh .part { color: var(--muted); }
-.rh .rh-l { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: baseline; }
-.rh nav { display: flex; gap: 6px 14px; flex-wrap: wrap; }
-@media (max-width: 860px) { .rh { grid-template-columns: minmax(0, 1fr); } }
-.rh nav a { text-decoration: none; }
-.rh nav a[aria-current] { text-decoration: underline; text-decoration-color: var(--spot); text-decoration-thickness: 2px; }
-.rh nav a b { font: 700 13px var(--font-body); margin-right: 4px; }
+/* Shapes, as on the cover. Circle: a person or something live. Square: something you read. Triangle: direction.
+   Organic: art. Depth: every object casts the same flat screentone shadow, and nothing else does. */
+body { position: relative; min-height: 100vh; }
+.wrap { padding-block: 92px 64px; }
+.corners .c { position: absolute; z-index: 5;   /* on the page, not the screen: the bottom corners wait at the end */ display: flex; gap: 2px; background: var(--paper); padding: 5px 9px; font: 13px var(--font-mono); }
+.corners a { display: flex; gap: 8px; align-items: center; color: var(--ink); text-decoration: none; }
+.corners a b { font: 700 14px var(--font-body); }
+.corners i { display: block; flex: none; width: 11px; height: 11px; background: var(--ink); }
+.corners a:hover i, .corners a[aria-current] i { background: var(--spot); }
+.corners a[aria-current] { text-decoration: underline; text-decoration-color: var(--spot); text-decoration-thickness: 2px; text-underline-offset: 4px; }
+.corners .tl { top: calc(env(safe-area-inset-top, 0px) + 18px); left: calc(env(safe-area-inset-left, 0px) + 22px); flex-direction: column; }
+.corners .tl i { clip-path: polygon(0 0, 100% 0, 0 100%); }
+.corners .home { font: 400 15px var(--font-display); letter-spacing: 0.02em; }
+.corners .part { font: 12px var(--font-mono); color: var(--muted); padding-left: 19px; }
+.corners .tr { top: calc(env(safe-area-inset-top, 0px) + 18px); right: calc(env(safe-area-inset-right, 0px) + 22px); }
+.corners .tr a, .corners .br a { flex-direction: row-reverse; }
+.corners .tr i { clip-path: polygon(0 0, 100% 0, 100% 100%); }
+.corners .bl { bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); left: calc(env(safe-area-inset-left, 0px) + 22px); }
+.corners .bl i { clip-path: polygon(0 0, 0 100%, 100% 100%); }
+.corners .br { bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); right: calc(env(safe-area-inset-right, 0px) + 22px); }
+.corners .br i { clip-path: polygon(100% 0, 100% 100%, 0 100%); }
+@media (max-width: 860px) {
+  .wrap { padding-top: 20px; }
+  .corners { display: flex; flex-wrap: wrap; gap: 8px 18px; padding: 16px max(16px, env(safe-area-inset-right, 0px)) 14px max(16px, env(safe-area-inset-left, 0px)); border-bottom: 2px solid var(--ink); }
+  .corners .c { position: static; padding: 0; background: none; }
+  .corners .tl { flex-basis: 100%; }
+}
+.obj { position: relative; background: var(--paper); }
+.obj::after {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; transform: translate(12px, 14px);
+  background-image: radial-gradient(var(--ink) 1px, transparent 1.4px); background-size: 5px 5px; opacity: 0.5;
+}
+.blot { position: absolute; z-index: -1; width: 420px; max-width: 70%; left: -60px; bottom: -40px; color: var(--ink); opacity: 0.45; pointer-events: none; }
+.split > .main { position: relative; }
 
 /* folio: page number and the next page, like the foot of a printed page */
 .folio { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 3fr); gap: 12px 56px; align-items: baseline; margin-top: 72px; padding-block: 14px 28px; border-top: 2px solid var(--ink); font: 12px var(--font-mono); }
@@ -105,7 +130,13 @@ section + section .shelfname { margin-top: 40px; }
   background: repeating-linear-gradient(to bottom, transparent 0 var(--spine-h), var(--ink) var(--spine-h) calc(var(--spine-h) + 6px), transparent calc(var(--spine-h) + 6px) calc(var(--spine-h) + 22px));
   padding-bottom: 0;
 }
-.slot { height: var(--spine-h); display: flex; align-items: flex-end; }
+.slot { height: var(--spine-h); display: flex; align-items: flex-end; position: relative; }
+.slot::after {
+  content: ""; position: absolute; z-index: -1; left: 9px; bottom: 0; width: 34px; height: var(--sh); pointer-events: none; opacity: 0; transition: opacity 0.18s;
+  background-image: radial-gradient(var(--ink) 1px, transparent 1.4px); background-size: 5px 5px;
+}
+.slot.big::after { width: 52px; }
+.slot:has(.spine[aria-expanded="true"])::after, .slot:has(.spine:hover)::after, .slot:has(.spine:focus-visible)::after { opacity: 0.5; }
 .spine {
   --w: 34px;
   display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto auto; justify-items: center;
@@ -127,7 +158,8 @@ section + section .shelfname { margin-top: 40px; }
 .spine .obi { width: 100%; height: 30px; display: grid; place-items: center; background: var(--ink); color: var(--paper); }
 .spine .obi.live { background: var(--spot); color: var(--on-spot); }
 .spine .obi svg { width: 12px; height: 12px; }
-.pull { border: 3px solid var(--ink); padding: 16px 18px 18px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.sleeve { aspect-ratio: 1; border: 2.5px solid var(--ink); }
+.pull { height: 100%; overflow: auto; padding: 16px 18px 18px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; align-content: start; }
 .pull .side { grid-row: 1; font: 12px var(--font-mono); display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-items: start; }
 .pull .side .x { margin-left: auto; order: 9; }
 .pull h3 { margin: 6px 0 2px; font-size: 26px; }
@@ -139,7 +171,9 @@ section + section .shelfname { margin-top: 40px; }
 
 /* ---------- a volume ---------- */
 .book { display: grid; grid-template-columns: auto minmax(0, 460px); gap: 0 28px; align-items: start; justify-content: center; margin-top: 36px; }
-.book .spine { cursor: default; height: auto; align-self: stretch; }
+.book .spine { cursor: default; height: auto; }
+.book > .obj { align-self: stretch; display: flex; }
+.book > .obj > .spine { height: auto; }
 .book .spine:hover { transform: none; }
 .cover { width: 100%; aspect-ratio: 128 / 182; max-width: 100%; border: 3px solid var(--ink); display: block; background: var(--paper); }
 .blurb { align-self: end; padding-bottom: 8px; }
@@ -148,7 +182,7 @@ section + section .shelfname { margin-top: 40px; }
 .blurb dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 14px; font: 12px var(--font-mono); margin: 16px 0 0; }
 .blurb dt { color: var(--muted); }
 .blurb dd { margin: 0; }
-@media (max-width: 760px) { .book { grid-template-columns: minmax(0, 1fr); gap: 20px; } .book > .spine { display: none; } }
+@media (max-width: 760px) { .book { grid-template-columns: minmax(0, 1fr); gap: 20px; } .book > .obj:first-child { display: none; } }
 .rail .blurb h2 { margin-top: 0; }
 .rail .back { margin: 0; grid-template-columns: minmax(0, 1fr); gap: 22px; }
 
@@ -179,7 +213,7 @@ section + section .shelfname { margin-top: 40px; }
 
 /* ---------- 作者紹介 ---------- */
 .flap { display: grid; gap: 24px; }
-.seal { width: 88px; height: 88px; border: 3px solid var(--ink); display: grid; place-items: center; font: 400 34px var(--font-display); transform: rotate(-3deg); }
+.seal { width: 92px; height: 92px; border: 3px solid var(--ink); border-radius: 50%; display: grid; place-items: center; font: 400 32px var(--font-display); transform: rotate(-8deg); }
 .comment { border: 3px solid var(--ink); border-radius: 22px; padding: 14px 18px; font-size: 15px; position: relative; }
 .comment::after { content: ""; position: absolute; left: 30px; top: -14px; width: 20px; height: 14px; background: var(--ink); clip-path: polygon(0 100%, 100% 100%, 20% 0); }
 .flap h3 { font: 500 12px var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 8px; }
@@ -205,7 +239,11 @@ section + section .shelfname { margin-top: 40px; }
 .cv .head { font: 13px var(--font-mono); }
 
 /* ---------- 奥付 ---------- */
-.okuzuke { max-width: 620px; margin: 8px 0 0; border: 3px double var(--ink); border-width: 6px; padding: 26px clamp(16px, 4vw, 34px); }
+.seal-c { position: absolute; top: -26px; right: -22px; width: 92px; height: 92px; border: 2.5px solid var(--ink); border-radius: 50%; background: var(--paper);
+  display: grid; place-content: center; text-align: center; transform: rotate(-10deg); z-index: 1; }
+.seal-c b { font: 700 18px var(--font-body); }
+.seal-c small { font: 10px var(--font-mono); color: var(--muted); letter-spacing: 0.1em; }
+.okuzuke { max-width: 620px; margin: 30px 0 0; border: 3px double var(--ink); border-width: 6px; padding: 26px clamp(16px, 4vw, 34px); }
 .okuzuke h2 { margin: 0 0 4px; font-size: 34px; }
 .okuzuke .sub { font: 12px var(--font-mono); color: var(--muted); margin: 0 0 18px; }
 .okuzuke dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px 20px; margin: 0; border-top: 2px solid var(--ink); padding-top: 16px; }
@@ -220,12 +258,8 @@ section + section .shelfname { margin-top: 40px; }
 </style>
 </head>
 <body>
+<nav class="corners" aria-label="Volume">{{nav}}</nav>
 <div class="wrap">
-<header class="rh">
-  <div class="rh-l"><a class="logo" href="{{home}}">TEOH KAI SHUN</a>
-  <span class="part">{{part}}</span></div>
-  <nav aria-label="Volume">{{nav}}</nav>
-</header>
 <main>
 {{main}}
 </main>
