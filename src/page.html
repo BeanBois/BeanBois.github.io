@@ -47,23 +47,36 @@ body {
 a { color: var(--ink); text-decoration-thickness: 2px; text-decoration-color: var(--spot); text-underline-offset: 3px; }
 a:focus-visible, button:focus-visible { outline: 3px solid var(--spot); outline-offset: 2px; }
 [hidden] { display: none !important; }
-.wrap { max-width: 1040px; margin: 0 auto; }
+.wrap { max-width: 1180px; margin: 0 auto; }
+/* 7-3: every page is a main column (70%) and a rail (30%) that holds what supports it */
+.split { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 3fr); gap: 0 56px; align-items: start; margin-top: 32px; }
+.split > .rail { position: sticky; top: 24px; display: grid; gap: 22px; align-content: start; max-height: calc(100vh - 48px); overflow: auto; padding-bottom: 8px; }
+.split > .rail .pt { margin: 0; display: grid; gap: 10px; }
+.split > .rail .pt h1 { font-size: clamp(48px, 5.4vw, 76px); }
+.split > .rail .pt p { margin: 0; font-size: 15px; }
+.split > .main { padding-top: 6px; }
+@media (max-width: 860px) {
+  .split { grid-template-columns: minmax(0, 1fr); }
+  .split > .rail { position: static; max-height: none; order: -1; margin-bottom: 18px; }
+}
 h1, h2, h3 { font-family: var(--font-display); font-weight: 400; text-wrap: balance; line-height: 1.1; }
 .mono { font-family: var(--font-mono); }
 .jp { font-family: var(--font-body); font-weight: 700; }
 .muted { color: var(--muted); }
 
 /* running head: the same line at the top of every inner page */
-.rh { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: baseline; padding-block: 18px 12px; border-bottom: 2px solid var(--ink); font: 12px var(--font-mono); }
+.rh { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 3fr); gap: 6px 56px; align-items: baseline; padding-block: 18px 12px; border-bottom: 2px solid var(--ink); font: 12px var(--font-mono); }
 .rh .logo { font: 400 15px var(--font-display); text-decoration: none; letter-spacing: 0.02em; }
 .rh .part { color: var(--muted); }
-.rh nav { margin-left: auto; display: flex; gap: 14px; flex-wrap: wrap; }
+.rh .rh-l { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: baseline; }
+.rh nav { display: flex; gap: 6px 14px; flex-wrap: wrap; }
+@media (max-width: 860px) { .rh { grid-template-columns: minmax(0, 1fr); } }
 .rh nav a { text-decoration: none; }
 .rh nav a[aria-current] { text-decoration: underline; text-decoration-color: var(--spot); text-decoration-thickness: 2px; }
 .rh nav a b { font: 700 13px var(--font-body); margin-right: 4px; }
 
 /* folio: page number and the next page, like the foot of a printed page */
-.folio { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-top: 72px; padding-block: 14px 28px; border-top: 2px solid var(--ink); font: 12px var(--font-mono); }
+.folio { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 3fr); gap: 12px 56px; align-items: baseline; margin-top: 72px; padding-block: 14px 28px; border-top: 2px solid var(--ink); font: 12px var(--font-mono); }
 .folio .no { font-variant-numeric: tabular-nums; }
 
 /* stamps, shared with the ball */
@@ -77,12 +90,13 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 400; text-wrap: bala
 .pt p { margin: 0 0 6px; max-width: 46ch; }
 
 /* ---------- 目次: the shelf ---------- */
-.filters { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; font: 12px var(--font-mono); margin-bottom: 8px; }
+.filters { display: grid; gap: 8px; font: 12px var(--font-mono); }
 .filters .grp { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
 .filters .lbl { color: var(--muted); margin-right: 4px; }
 .chip { font: 12px var(--font-mono); color: var(--ink); background: var(--paper); border: 1.5px solid var(--ink); padding: 1px 8px; cursor: pointer; }
 .chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
-.shelfname { display: flex; align-items: baseline; gap: 10px; margin: 40px 0 10px; }
+.shelfname { display: flex; align-items: baseline; gap: 10px; margin: 0 0 10px; }
+section + section .shelfname { margin-top: 40px; }
 .shelfname h2 { margin: 0; font-size: 22px; }
 .shelfname span { font: 12px var(--font-mono); color: var(--muted); }
 .shelf {
@@ -113,18 +127,18 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 400; text-wrap: bala
 .spine .obi { width: 100%; height: 30px; display: grid; place-items: center; background: var(--ink); color: var(--paper); }
 .spine .obi.live { background: var(--spot); color: var(--on-spot); }
 .spine .obi svg { width: 12px; height: 12px; }
-.pull { border: 3px solid var(--ink); padding: 18px 22px 20px; margin-top: 14px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 20px; }
+.pull { border: 3px solid var(--ink); padding: 16px 18px 18px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.pull .side { grid-row: 1; font: 12px var(--font-mono); display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-items: start; }
+.pull .side .x { margin-left: auto; order: 9; }
 .pull h3 { margin: 6px 0 2px; font-size: 26px; }
 .pull .tag { margin: 0 0 8px; }
 .pull ul { margin: 6px 0 0; padding-left: 18px; }
 .pull li { margin-bottom: 4px; max-width: 70ch; }
 .pull .meta { font: 12px var(--font-mono); color: var(--muted); }
-.pull .side { display: grid; gap: 8px; align-content: start; justify-items: end; font: 12px var(--font-mono); }
 .pull .x { width: 32px; height: 32px; border-radius: 50%; border: 0; background: var(--ink); color: var(--paper); font: 400 14px var(--font-display); cursor: pointer; }
-@media (max-width: 640px) { .pull { grid-template-columns: minmax(0, 1fr); } .pull .side { justify-items: start; grid-row: 1; grid-auto-flow: column; } }
 
 /* ---------- a volume ---------- */
-.book { display: grid; grid-template-columns: auto minmax(0, 460px) minmax(0, 1fr); gap: 0 32px; align-items: start; margin-top: 36px; }
+.book { display: grid; grid-template-columns: auto minmax(0, 460px); gap: 0 28px; align-items: start; justify-content: center; margin-top: 36px; }
 .book .spine { cursor: default; height: auto; align-self: stretch; }
 .book .spine:hover { transform: none; }
 .cover { width: 100%; aspect-ratio: 128 / 182; max-width: 100%; border: 3px solid var(--ink); display: block; background: var(--paper); }
@@ -135,13 +149,15 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 400; text-wrap: bala
 .blurb dt { color: var(--muted); }
 .blurb dd { margin: 0; }
 @media (max-width: 760px) { .book { grid-template-columns: minmax(0, 1fr); gap: 20px; } .book > .spine { display: none; } }
+.rail .blurb h2 { margin-top: 0; }
+.rail .back { margin: 0; grid-template-columns: minmax(0, 1fr); gap: 22px; }
 
 .tobira { text-align: center; margin: 96px auto 40px; max-width: 640px; }
 .tobira .ep { font: 400 20px var(--font-display); letter-spacing: 0.1em; }
 .tobira h2 { font-size: clamp(34px, 6vw, 58px); margin: 10px 0 18px; }
 .tobira .stamps { display: flex; gap: 12px; justify-content: center; }
 
-.page { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; max-width: 880px; margin: 0 auto; }
+.page { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
 .panel { border: 3px solid var(--ink); display: grid; grid-template-rows: auto auto; min-width: 0; background: var(--paper); }
 .panel svg { width: 100%; height: auto; display: block; }
 .panel .txt { padding: 12px 16px 16px; border-top: 2px solid var(--ink); }
@@ -150,9 +166,9 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 400; text-wrap: bala
 .s2 { grid-column: span 2; } .s3 { grid-column: span 3; } .s4 { grid-column: span 4; } .s6 { grid-column: span 6; }
 @media (max-width: 640px) { .page > .panel { grid-column: 1 / -1; } }
 
-.tsuzuku { display: flex; justify-content: flex-end; align-items: center; gap: 18px; max-width: 880px; margin: 18px auto 0; }
+.tsuzuku { display: flex; justify-content: flex-end; align-items: center; gap: 18px; margin: 18px 0 0; }
 .tsuzuku .big { font: 400 30px var(--font-display); }
-.next { max-width: 880px; margin: 40px auto 0; border: 3px solid var(--ink); padding: 16px 20px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 18px; align-items: baseline; }
+.next { margin: 40px 0 0; border: 3px solid var(--ink); padding: 16px 20px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 18px; align-items: baseline; }
 .next .lbl { font: 400 18px var(--font-display); }
 .back { max-width: 880px; margin: 56px auto 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 28px; }
 .back h3 { font: 500 12px var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 8px; }
@@ -162,9 +178,7 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 400; text-wrap: bala
 .chips span { font: 11px var(--font-mono); padding: 0 6px; border: 1.5px solid var(--ink); }
 
 /* ---------- 作者紹介 ---------- */
-.flap { display: grid; grid-template-columns: minmax(0, 320px) minmax(0, 1fr); gap: 40px; margin-top: 36px; align-items: start; }
-.flap aside { display: grid; gap: 26px; position: sticky; top: 20px; }
-@media (max-width: 820px) { .flap { grid-template-columns: minmax(0, 1fr); } .flap aside { position: static; } }
+.flap { display: grid; gap: 24px; }
 .seal { width: 88px; height: 88px; border: 3px solid var(--ink); display: grid; place-items: center; font: 400 34px var(--font-display); transform: rotate(-3deg); }
 .comment { border: 3px solid var(--ink); border-radius: 22px; padding: 14px 18px; font-size: 15px; position: relative; }
 .comment::after { content: ""; position: absolute; left: 30px; top: -14px; width: 20px; height: 14px; background: var(--ink); clip-path: polygon(0 100%, 100% 100%, 20% 0); }
@@ -191,7 +205,7 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 400; text-wrap: bala
 .cv .head { font: 13px var(--font-mono); }
 
 /* ---------- 奥付 ---------- */
-.okuzuke { max-width: 620px; margin: 56px auto 0; border: 3px double var(--ink); border-width: 6px; padding: 26px clamp(16px, 4vw, 34px); }
+.okuzuke { max-width: 620px; margin: 8px 0 0; border: 3px double var(--ink); border-width: 6px; padding: 26px clamp(16px, 4vw, 34px); }
 .okuzuke h2 { margin: 0 0 4px; font-size: 34px; }
 .okuzuke .sub { font: 12px var(--font-mono); color: var(--muted); margin: 0 0 18px; }
 .okuzuke dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px 20px; margin: 0; border-top: 2px solid var(--ink); padding-top: 16px; }
@@ -208,8 +222,8 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 400; text-wrap: bala
 <body>
 <div class="wrap">
 <header class="rh">
-  <a class="logo" href="{{home}}">TEOH KAI SHUN</a>
-  <span class="part">{{part}}</span>
+  <div class="rh-l"><a class="logo" href="{{home}}">TEOH KAI SHUN</a>
+  <span class="part">{{part}}</span></div>
   <nav aria-label="Volume">{{nav}}</nav>
 </header>
 <main>
