@@ -263,7 +263,7 @@ def panel_art(kind):
 
 # What the music proxy will return (stage 3: a small worker holding Kai Shun's Spotify token). Until then the
 # cover plays this sample, and a prototype-only switch shows the offline state.
-MUSIC_API = ""   # the now-playing worker (worker/); empty: the cover plays SAMPLE_MUSIC
+MUSIC_API = "https://kaishun-now-playing.beanbois.workers.dev"   # the now-playing worker (worker/); empty: the cover plays SAMPLE_MUSIC
 SAMPLE_MUSIC = {"sample": True, "is_playing": True, "title": "Sample track", "artist": "Sample artist", "url": None,
                 "duration_ms": 214000, "progress_ms": 61000, "bpm": 96, "played_at": None}
 

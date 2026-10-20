@@ -28,7 +28,21 @@ python3 -m http.server -d dist       # look at it locally
 
 Change a fact in the bank, run the export from `portfolio`, then commit and push here. The push deploys.
 
+## Now playing
+
+`worker/` is a Cloudflare Worker at `https://kaishun-now-playing.beanbois.workers.dev`:
+
+- `/now` is what's playing on Spotify, or the last track played. The tempo comes from ReccoBeats, cached per track; there's no beat ring when a track has none.
+- `/art` re-serves the album cover with CORS, so the page can print it as screentone.
+
+```sh
+cd worker
+npx wrangler deploy             # after changing src/index.js
+npm run connect-spotify         # if Spotify's login expires: re-authorise (stores secrets in Cloudflare only)
+```
+
+To keep artists off the site, list them in `HIDE_ARTISTS` in `worker/wrangler.toml`, then deploy.
+
 ## Not live yet
 
-- **Now playing.** The record plays sample data. Next: a small worker that holds the Spotify token and returns what's playing, with a BPM per track.
 - **Playlists.** Each project plays a sample playlist until its bank entry gets a `playlist:` link.
