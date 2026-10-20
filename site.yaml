@@ -47,25 +47,25 @@ colophon:
 # Next step: split these by part of the site (record, sleeve, spines, panels...).
 colours:
   light:
-    paper: "#eef1f2"      # the page: silver-white
-    ink: "#15212c"        # lines, text, bars: navy-black
-    tone: "#9aa4ab"       # grooves, faint lines: silver
-    soft: "#dde2e5"       # dividers, hover fills
-    muted: "#56636d"      # small print: slate
-    blue: "#2b5a87"       # what moves with the music: rim text, level bars, tonearm; panel borders, CV tabs
-    green: "#2f6b4f"      # the archive: shelf bands, corner squares, caption boxes
+    paper: "#edf2ee"      # the page: sage-silver
+    ink: "#14231c"        # lines, text, bars: green-black
+    tone: "#94a69b"       # grooves, faint lines: silver
+    soft: "#d9e4dc"       # dividers, hover fills
+    muted: "#53655a"      # small print: grey-green
+    blue: "#2b5a87"       # what moves with the music: rim text, level bars, tonearm
+    green: "#2c6a4b"      # the archive: shelf bands, corner squares, panels, CV sheet
     spot: "#c8323a"       # the one red: only what's live or chosen
     on_spot: "#ffffff"    # text on red
   dark:
-    paper: "#0e1419"
-    ink: "#e4e9ec"
-    tone: "#69757e"
-    soft: "#1b242b"
-    muted: "#9ba7af"
+    paper: "#0c1511"
+    ink: "#e2ebe5"
+    tone: "#66786d"
+    soft: "#1a2620"
+    muted: "#99aba0"
     blue: "#7ea8d4"
-    green: "#72b08f"
+    green: "#74b592"
     spot: "#ff5a5f"
-    on_spot: "#0e1419"
+    on_spot: "#0c1511"
 
 # ---------------------------------------------------------------------------------------------------------------
 # Music
