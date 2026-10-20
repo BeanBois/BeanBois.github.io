@@ -41,8 +41,19 @@ npx wrangler deploy             # after changing src/index.js
 npm run connect-spotify         # if Spotify's login expires: re-authorise (stores secrets in Cloudflare only)
 ```
 
+**Tempo bank.** A track's BPM comes from the most trusted source that knows it, and the first hit wins:
+
+| Trust | Source | Matched by |
+|---|---|---|
+| 1 | `worker/src/bpm.json`: your own count | Spotify track id. Always wins |
+| 2 | ReccoBeats audio features | Spotify track id |
+| 3 | Deezer | ISRC (the same recording) |
+| 4 | Deezer search | title, artist and length (±3 s) must all agree |
+
+Hits are cached for 90 days, misses for 1 day. `/now` says which source answered (`bpm_source`). To fix a wrong or missing tempo, add the track's Spotify id to `bpm.json` and deploy.
+
 To keep artists off the site, list them in `HIDE_ARTISTS` in `worker/wrangler.toml`, then deploy.
 
 ## Not live yet
 
-- **Playlists.** Each project plays a sample playlist until its bank entry gets a `playlist:` link.
+- **TODO (Kai Shun): playlists per project.** Clicking a project plays whatever you're playing now. To give a project its own record, add `playlist: https://open.spotify.com/playlist/…` to its bank entry in `portfolio`. The build then needs to fetch each playlist's name, cover and tracks (not written yet).

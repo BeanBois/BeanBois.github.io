@@ -247,9 +247,9 @@ const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 // The label at the centre turns at 33⅓ rpm while a song plays, the tonearm follows the song's progress,
 // and each beat sends one faint ring out through the grooves. No music data: the plain steel ball.
 const RPM = 100 / 3;
-// Every project can carry a playlist (D.playlists). Clicking it changes the record: the needle lifts and the record
-// fades while the ball travels, then that playlist goes on at the point (now the centre) and its cover spreads out
-// from there as a faint circle. Home is Kai Shun's own listening (D.music).
+// Clicking a project changes the record: the needle lifts and the record fades while the ball travels, then the
+// record goes on again at the point (now the centre) and its cover spreads out from there as a faint circle.
+// It plays the project's playlist (D.playlists) if it has one, otherwise Kai Shun's own listening (D.music).
 const homeMusic = D.music ? { ...D.music, key: "me", at: performance.now() } : null;
 let music = homeMusic;
 // a visitor arrives mid-song: the platter is already turning and the needle already down
@@ -710,7 +710,7 @@ function tagAt(n, pos) {
 function trackFor(n) {
   if (n === ME) return homeMusic;
   const pl = D.playlists && D.playlists[n.id];
-  if (!pl || !pl.tracks.length) return null;
+  if (!pl || !pl.tracks.length) return homeMusic;
   const t = pl.tracks[Math.floor(Math.random() * pl.tracks.length)];
   return { ...t, key: n.id, playlist: pl.name, url: pl.url || t.url, art: pl.art, sample: pl.sample, is_playing: true,
            progress_ms: Math.random() * 0.6 * t.duration_ms, at: performance.now() };
@@ -951,7 +951,7 @@ function select(n) {
   closePick(); touched = true; clusters = null;
   sel = n; render();
   if (n === ME) rec.target = ME;
-  else if (!n.members && D.playlists && D.playlists[n.id]) rec.target = n;
+  else if (!n.members) rec.target = n;
   const wasOpen = !sayEl.hidden;
   sayEl.hidden = false;
   if (!wasOpen) { sayEl.style.animation = "none"; void sayEl.offsetWidth; sayEl.style.animation = ""; }

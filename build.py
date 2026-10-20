@@ -268,17 +268,6 @@ SAMPLE_MUSIC = {"sample": True, "is_playing": True, "title": "Sample track", "ar
                 "duration_ms": 214000, "progress_ms": 61000, "bpm": 96, "played_at": None}
 
 
-def sample_playlists(nodes):
-    """A stand-in playlist per project until Kai Shun names real ones (a `playlist:` link in the entry). Stage 3 reads
-    each real playlist's name, cover and tracks (with a BPM per track) at build time and inlines the cover."""
-    out = {}
-    for n in nodes:
-        tracks = [{"title": f"Sample track {k + 1}", "artist": "Sample artist", "bpm": int(78 + 54 * seed(n["id"], 20 + k)),
-                   "duration_ms": int(180000 + 80000 * seed(n["id"], 30 + k))} for k in range(3)]
-        out[n["id"]] = {"name": f"{n['title']}", "url": n.get("playlist"), "art": None, "sample": True, "tracks": tracks}
-    return out
-
-
 # ---------- pages ----------
 TEMPLATE = (SRC / "page.html").read_text()
 PAGES = []  # (file, short name, kana), in reading order; filled in main
@@ -454,7 +443,7 @@ def cover_page(data, vols, chapters):
     t = (SRC / "cover.html").read_text()
     data = dict(data, chapters={i: {"href": f"vol-{i}.html", "vol": vols[i]} for i in chapters}, vols=vols, musicApi=MUSIC_API or None,
                 music=SAMPLE_MUSIC if not MUSIC_API else {"is_playing": False, "title": None},
-                playlists=sample_playlists(data["nodes"]), topInset=110)
+                playlists={}, topInset=110)   # per-project playlists: not yet (see README)
     music_js = """<script>
 /* the line under the record: what's playing, or what played last */
 const npEl = document.getElementById("np");
@@ -479,7 +468,9 @@ function renderNp() {
 renderNp();
 window.addEventListener("record", renderNp);
 
-/* the real thing: ask the worker what's playing, every 20 s while the page is open and visible */
+/* the real thing: ask the worker what's playing every 5 s while the page is visible, and again the moment the song
+   should end, so a change shows within a few seconds */
+let endTimer = 0;
 async function poll() {
   if (!D.musicApi || document.hidden) return;
   try {
@@ -490,11 +481,16 @@ async function poll() {
     const changed = j.title !== homeMusic.title || j.is_playing !== homeMusic.is_playing || j.art !== homeMusic.art;
     const late = j.is_playing ? Math.max(0, Date.now() - j.fetched_at) : 0;   // the worker's answer can be up to 15 s old
     Object.assign(homeMusic, j, { key: "me", progress_ms: (j.progress_ms || 0) + late, at: performance.now(), sample: false });
-    if (rec.on === ME) { if (changed) rec.art = artFor(homeMusic); renderNp(); }
+    if (music === homeMusic) {
+      if (changed) { rec.art = artFor(homeMusic); rec.revealAt = performance.now(); }   // a new song: its cover spreads out again
+      renderNp();
+    }
+    clearTimeout(endTimer);
+    if (j.is_playing && j.duration_ms) endTimer = setTimeout(poll, Math.max(1000, j.duration_ms - homeMusic.progress_ms + 800));
   } catch {}
 }
 poll();
-setInterval(poll, 20000);
+setInterval(poll, 5000);
 document.addEventListener("visibilitychange", poll);
 </script>"""
     if t.count("/*__DATA__*/null") != 1:

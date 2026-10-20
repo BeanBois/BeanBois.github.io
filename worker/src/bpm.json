@@ -1,0 +1,4 @@
+{
+  "_how": "Kai Shun's own tempo for a track, by Spotify track id (the part after /track/ in a share link). Beats every other source.",
+  "_example": { "bpm": 92, "title": "Song", "artist": "Artist" }
+}
