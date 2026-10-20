@@ -219,6 +219,38 @@ dl.meta dd { margin: 0; min-width: 0; }
   :root[data-layout="sleeve"] .say { border-radius: 0; border-width: 2.5px; padding: 30px 32px 32px; animation: slide 0.35s cubic-bezier(.2, .8, .2, 1); }
   :root[data-layout="sleeve"] .say::before { content: "LINER NOTES"; display: block; font: 500 10px var(--font-mono); letter-spacing: 0.2em; color: var(--muted); margin-bottom: 6px; }
 }
+/* shapes: the record (circle) half pulled out of its sleeve (square), with triangles pointing the way out.
+   The sleeve is the rail made an object: JS sizes it and cuts a hole where the record sits in front of it. */
+@media (min-width: 900px) {
+  :root[data-layout="shapes"] .rail { right: auto; bottom: auto; border: 2.5px solid var(--ink); grid-template-rows: minmax(0, 1fr); overflow: hidden; }
+  :root[data-layout="shapes"] .rail .deck, :root[data-layout="shapes"] .rail .more { display: none; }
+  :root[data-layout="shapes"] .rail .scroll { position: relative; z-index: 1; padding: 34px var(--sleeve-pad, 40%) 30px 34px; }
+  :root[data-layout="shapes"] .rail .say::before { content: "LINER NOTES"; display: block; font: 500 10px var(--font-mono); letter-spacing: 0.2em; color: var(--muted); margin-bottom: 6px; }
+  :root[data-layout="shapes"] .rail .say:not([hidden]) { animation: sleeve-in 0.4s cubic-bezier(.2, .8, .2, 1); }
+  .shade { display: none; }
+  :root[data-layout="shapes"] .shade {
+    display: block; position: fixed; z-index: 1; pointer-events: none;
+    background-image: radial-gradient(var(--ink) 1px, transparent 1.4px); background-size: 5px 5px; opacity: 0.55;
+  }
+  :root[data-layout="shapes"] .rail .crescent {
+    position: absolute; z-index: 0; border-radius: 50%; pointer-events: none;
+    background-image: radial-gradient(var(--ink) 1px, transparent 1.4px); background-size: 4px 4px; opacity: 0.6;
+  }
+  :root[data-layout="shapes"] body > .mastnav { position: fixed; inset: 0; z-index: 2; pointer-events: none; display: block; }
+  :root[data-layout="shapes"] body > .mastnav a { position: fixed; pointer-events: auto; display: flex; gap: 8px; align-items: center; color: var(--ink); text-decoration: none; font: 13px var(--font-mono); }
+  :root[data-layout="shapes"] body > .mastnav a b { font: 700 14px var(--font-body); }
+  :root[data-layout="shapes"] body > .mastnav a::before { content: ""; width: 11px; height: 11px; background: var(--ink); flex: none; }
+  :root[data-layout="shapes"] body > .mastnav a:hover::before { background: var(--spot); }
+  :root[data-layout="shapes"] body > .mastnav a:nth-child(1) { top: calc(env(safe-area-inset-top, 0px) + 30px); right: calc(env(safe-area-inset-right, 0px) + 34px); flex-direction: row-reverse; }
+  :root[data-layout="shapes"] body > .mastnav a:nth-child(1)::before { clip-path: polygon(0 0, 100% 0, 100% 100%); }
+  :root[data-layout="shapes"] body > .mastnav a:nth-child(2) { bottom: calc(env(safe-area-inset-bottom, 0px) + 28px); left: calc(env(safe-area-inset-left, 0px) + 34px); }
+  :root[data-layout="shapes"] body > .mastnav a:nth-child(2)::before { clip-path: polygon(0 0, 0 100%, 100% 100%); }
+  :root[data-layout="shapes"] body > .mastnav a:nth-child(3) { bottom: calc(env(safe-area-inset-bottom, 0px) + 28px); right: calc(env(safe-area-inset-right, 0px) + 34px); flex-direction: row-reverse; }
+  :root[data-layout="shapes"] body > .mastnav a:nth-child(3)::before { clip-path: polygon(100% 0, 100% 100%, 0 100%); }
+  :root[data-layout="shapes"] body > .mastnav small { display: none; }
+}
+@keyframes sleeve-in { from { transform: translateY(14px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { :root[data-layout="shapes"] .rail .say:not([hidden]) { animation: none; } }
 @keyframes slide { from { transform: translateX(-90px); opacity: 0; } to { transform: none; opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { :root[data-layout="sleeve"] .say { animation: none; } }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
@@ -236,7 +268,9 @@ dl.meta dd { margin: 0; min-width: 0; }
 <body>
 
 <canvas id="ball" tabindex="0" aria-label="Kai Shun's projects, placed in a Poincaré ball by skill mix. Drag to spin it, arrow keys to turn it, click a point for details."></canvas>
+<div class="shade" id="shade" aria-hidden="true"></div>
 <div class="rail">
+<div class="crescent" id="crescent" aria-hidden="true"></div>
 <div class="scroll" id="railscroll">
 <div class="body">
 <header class="mast"><a href="author.html">TEOH KAI SHUN</a><span>ML Engineer · AI infra at Tencent · Malaysia</span></header>
@@ -400,7 +434,11 @@ const AREA = 0.7;                    // the record's share of a wide screen
 const GAP = 56;                     // blank paper between the ball and the bubble
 function layout() {
   const open = !sayEl.hidden;
-  if (wide() && LAYOUT === "sleeve") {
+  if (wide() && LAYOUT === "shapes") {
+    // the sleeve, a square, sits left of centre; the record is pulled two-thirds out of it, to the right
+    const S = Math.min(H - 110, W * 0.44), R0 = S * 0.485;
+    tR = R0; tx = W * 0.07 + S + R0 * 0.3; ty = H / 2;
+  } else if (wide() && LAYOUT === "sleeve") {
     // no rail: the record alone in the middle; an open project's sleeve slides out to its right
     if (!open) { tR = Math.min(W, H) / 2 - 90; tx = W / 2; ty = H / 2; }
     else { tR = Math.max(80, Math.min(H / 2 - 90, W * 0.24)); tx = W * 0.06 + tR + 30; ty = H / 2; }
@@ -419,7 +457,9 @@ function layout() {
 function placeSay() {
   if (sayEl.hidden) return;
   const s = sayEl.style;
-  if (wide() && LAYOUT === "sleeve") {
+  if (wide() && LAYOUT === "shapes") {
+    s.cssText = "";                  // it's printed on the sleeve
+  } else if (wide() && LAYOUT === "sleeve") {
     // a square the height of the record, beside it
     const side = Math.min(2 * tR, W - (tx + tR + 40) - 40), top = Math.max(24, ty - side / 2);
     Object.assign(s, { left: (tx + tR + 40) + "px", width: side + "px", right: "auto", top: top + "px", height: side + "px", bottom: "auto" });
@@ -540,8 +580,9 @@ function draw(now = performance.now()) {
   const time = (now - t0) / 1000;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.fillStyle = col["--paper"]; ctx.fillRect(0, 0, W, H);
+  if (LAYOUT === "shapes" && wide()) { drawBlot(); placeSleeve(); }
   if (music) drawGrooves(now);
-  if (music && (LAYOUT === "record" || LAYOUT === "sleeve")) drawRimPlayer(now);
+  if (music && (LAYOUT === "record" || LAYOUT === "sleeve" || LAYOUT === "shapes")) drawRimPlayer(now);
 
   // the steel ball: three grooves on its surface, turning with it (a record has its own grooves instead)
   if (!music) for (const plane of [[1, 0, 0], [0, 1, 0], [0, 0, 1]]) {
@@ -658,7 +699,7 @@ function draw(now = performance.now()) {
   if (music) drawArm(now);
 
   // the line from the selected point to its bubble
-  if (sel && !sayEl.hidden) {
+  if (sel && !sayEl.hidden && !(LAYOUT === "shapes" && wide())) {
     const v = view(sel.z), s = proj(v), b = sayEl.getBoundingClientRect();
     let ex, ey;
     if (wide()) { ex = b.left; ey = Math.max(b.top + 36, Math.min(b.bottom - 36, s.y)); }
@@ -677,7 +718,7 @@ function draw(now = performance.now()) {
   }
 
   // until the first click or drag, one quiet line under the ball says what to do
-  if (!touched && sayEl.hidden && (!wide() || LAYOUT === "sleeve")) {
+  if (!touched && sayEl.hidden && (!wide() || LAYOUT === "sleeve") && LAYOUT !== "shapes") {
     ctx.font = `13px ${mono}`; ctx.fillStyle = col["--muted"]; ctx.textAlign = "center"; ctx.textBaseline = "top";
     const hint = "Every project I've built, placed by the skills it took. Click a name.";
     if (ctx.measureText(hint).width < W - 32) ctx.fillText(hint, cx, cy + R + 14);
@@ -924,6 +965,35 @@ function drawGrooves(now) {
   }
   ctx.globalAlpha = 1;
 }
+// shapes: one organic ink shape behind the geometric ones (the farthest layer), and the sleeve kept in step with
+// the record as it eases: it sits behind, with a hole cut where the record lies in front of it, the record's
+// shadow on it, and its own shadow on the page.
+function drawBlot() {
+  const S = R / 0.485, left = cx - R * 0.3 - S, top = cy - S / 2;
+  const bx = left + S * 0.04, by = top + S * 0.98, br = S * 0.3;   // peeking out from under the sleeve's lower left
+  ctx.save(); ctx.beginPath();
+  for (let i = 0; i <= 72; i++) {
+    const a = (i / 72) * Math.PI * 2, r = br * (1 + 0.13 * Math.sin(3 * a + 0.6) + 0.07 * Math.sin(5 * a + 2.1) + 0.04 * Math.sin(9 * a));
+    const x = bx + r * Math.cos(a) * 1.15, y = by + r * Math.sin(a) * 0.85;
+    i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+  }
+  ctx.closePath(); ctx.globalAlpha = 0.5; ctx.fillStyle = toneFill; ctx.fill(); ctx.restore(); ctx.globalAlpha = 1;
+}
+const railEl = document.querySelector(".rail"), shadeEl = document.getElementById("shade"), crescentEl = document.getElementById("crescent");
+let sleeveKey = "";
+function placeSleeve() {
+  const S = R / 0.485, left = cx - R * 0.3 - S, top = cy - S / 2, hole = R + 7, hx = cx - left, hy = cy - top;
+  const key = [S, left, top].map(v => v.toFixed(1)).join();
+  if (key === sleeveKey) return;
+  sleeveKey = key;
+  const ring = (x, y, r) => `M${x + r} ${y}A${r} ${r} 0 1 0 ${x - r} ${y}A${r} ${r} 0 1 0 ${x + r} ${y}Z`;
+  const cut = (dx, dy) => `path(evenodd, "M0 0H${S}V${S}H0Z${ring(hx - dx, hy - dy, hole)}")`;
+  Object.assign(railEl.style, { left: left + "px", top: top + "px", width: S + "px", height: S + "px", clipPath: cut(0, 0) });
+  railEl.style.setProperty("--sleeve-pad", (S - (hx - hole) + 28) + "px");
+  Object.assign(shadeEl.style, { left: left + 12 + "px", top: top + 14 + "px", width: S + "px", height: S + "px", clipPath: cut(12, 14) });
+  Object.assign(crescentEl.style, { left: hx - hole + 9 + "px", top: hy - hole + 11 + "px", width: 2 * hole + "px", height: 2 * hole + "px" });
+}
+
 // The record as the player (layouts "record" and "sleeve"): what's playing is printed round the top of the rim,
 // the way a label prints its text, and level bars ring the rest of the edge, pumping with the beat.
 function drawRimPlayer(now) {
@@ -937,7 +1007,8 @@ function drawRimPlayer(now) {
   while ([...text].reduce((a, c) => a + w(c), 0) / rr > Math.PI * 0.95 && text.length > 12) text = text.slice(0, -2).trimEnd() + "…";
   const chars = [...text], span = chars.reduce((a, c) => a + w(c), 0) / rr;
   ctx.fillStyle = col["--muted"]; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-  let a = -Math.PI / 2 - span / 2;
+  const mid = LAYOUT === "shapes" ? -Math.PI / 3 : -Math.PI / 2;      // shapes: round to the upper right, clear of the sleeve
+  let a = mid - span / 2;
   for (const c of chars) {
     const th = a + w(c) / 2 / rr;
     ctx.save(); ctx.translate(cx + rr * Math.cos(th), cy + rr * Math.sin(th)); ctx.rotate(th + Math.PI / 2); ctx.fillText(c, 0, 0); ctx.restore();
@@ -949,7 +1020,7 @@ function drawRimPlayer(now) {
   ctx.strokeStyle = col["--ink"]; ctx.lineCap = "butt"; ctx.lineWidth = Math.max(1.5, (2 * Math.PI * R / N) * 0.45);
   for (let k = 0; k < N; k++) {
     const th = -Math.PI / 2 + (k / N) * 2 * Math.PI;
-    const d = Math.abs(Math.atan2(Math.sin(th + Math.PI / 2), Math.cos(th + Math.PI / 2)));   // angle from the top
+    const d = Math.abs(Math.atan2(Math.sin(th - mid), Math.cos(th - mid)));   // angle from the text's middle
     if (d < clear) continue;
     const f = (d - clear) / (Math.PI - clear), li = Math.round((1 - f) * (BARS - 1));
     const L = 2 + level[li] * R * 0.09;
@@ -1159,6 +1230,7 @@ function drawMeter(now) {
 }
 (function meterLoop(now) { drawMeter(now); requestAnimationFrame(meterLoop); })(performance.now());
 
+if (LAYOUT === "shapes") document.body.append(document.querySelector(".mastnav"));
 document.getElementById("navvols").textContent = `${D.nodes.length} projects, as volumes on a shelf`;
 document.getElementById("intro").innerHTML = `<p class="lede">${esc(D.profile.oneliner)}</p>
   <p class="hint">Every project I've built sits on this record, placed by the skills it took: ML, Backend, Infra and Product at the corners, mixed projects nearer the middle. Drag to spin it. Click a name.</p>`;

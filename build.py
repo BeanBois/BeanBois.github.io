@@ -18,7 +18,7 @@ import yaml
 HERE = Path(__file__).parent
 CONTENT, SRC, DIST = HERE / "content", HERE / "src", HERE / "dist"
 HOME = "./"
-LAYOUT = "deck"   # the cover's layout: deck | record | strip | liner | sleeve (see src/cover.html)
+LAYOUT = "shapes"   # the cover's layout: deck | record | strip | liner | sleeve | shapes (see src/cover.html)
 PREVIEW = os.environ.get("PREVIEW")   # set by the deploy for design/* branches: shown as a stamp
 
 esc = lambda s: html.escape(str(s or ""), quote=True)
