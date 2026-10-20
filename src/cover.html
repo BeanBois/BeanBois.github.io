@@ -137,45 +137,90 @@ dl.meta dd { margin: 0; min-width: 0; }
    of the volume sits at the end of the scroll, starting just below the fold, so it shows only when you scroll to it. */
 .intro, .more { display: none; }
 @media (min-width: 900px) {
-  .rail {
+  :root:not([data-layout="sleeve"]) .rail {
     position: fixed; z-index: 2; top: 0; right: 0; bottom: 0; width: 30%;
     display: grid; grid-template-rows: minmax(0, 7fr) minmax(0, 3fr); grid-template-columns: minmax(0, 1fr);
     background: var(--paper); border-left: 2px solid var(--ink);
   }
-  .rail .deck, .rail .mast, .rail .mastnav { position: static; pointer-events: auto; }
-  .rail .deck {
+  :root:not([data-layout="sleeve"]) .rail .deck, :root:not([data-layout="sleeve"]) .rail .mast, :root:not([data-layout="sleeve"]) .rail .mastnav { position: static; pointer-events: auto; }
+  :root:not([data-layout="sleeve"]) .rail .deck {
     display: flex; flex-direction: column; min-width: 0; min-height: 0; border-top: 2px solid var(--ink);
     padding: 22px calc(env(safe-area-inset-right, 0px) + 32px) calc(env(safe-area-inset-bottom, 0px) + 24px) 36px;
   }
-  .rail .np { margin: 0; min-width: 0; overflow: hidden; max-width: none; font-size: 12px; }
-  .rail .np .lbl, .rail .np .by, .rail .np .bpm { display: block; }
-  .rail .np b { display: block; margin: 4px 0 2px; font-size: 19px; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .rail .np .by { color: var(--ink); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .rail .np .bpm { margin-top: 2px; }
-  .rail .meter { width: 100%; flex: 1 1 0; min-height: 28px; height: 0; margin-top: 14px; }   /* the bars take what's left */
-  .rail .scroll {
+  :root:not([data-layout="sleeve"]) .rail .np { margin: 0; min-width: 0; overflow: hidden; max-width: none; font-size: 12px; }
+  :root:not([data-layout="sleeve"]) .rail .np .lbl, :root:not([data-layout="sleeve"]) .rail .np .by, :root:not([data-layout="sleeve"]) .rail .np .bpm { display: block; }
+  :root:not([data-layout="sleeve"]) .rail .np b { display: block; margin: 4px 0 2px; font-size: 19px; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  :root:not([data-layout="sleeve"]) .rail .np .by { color: var(--ink); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  :root:not([data-layout="sleeve"]) .rail .np .bpm { margin-top: 2px; }
+  :root:not([data-layout="sleeve"]) .rail .meter { width: 100%; flex: 1 1 0; min-height: 28px; height: 0; margin-top: 14px; }   /* the bars take what's left */
+  :root:not([data-layout="sleeve"]) .rail .scroll {
     min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
     padding: calc(env(safe-area-inset-top, 0px) + 10px) calc(env(safe-area-inset-right, 0px) + 32px) 28px 36px;
   }
-  .rail .body { min-height: 100%; display: flex; flex-direction: column; gap: 22px; padding-top: 26px; }
-  .rail .body > *, .rail .say * { min-width: 0; }
-  .rail .mast { gap: 4px; min-width: 0; }
-  .rail .mast > a { font-size: 26px; line-height: 1.05; }
-  .rail:has(.say:not([hidden])) .mast, .rail:has(.say:not([hidden])) .intro { display: none; }   /* who I am: home only */
-  .rail .intro { display: block; }
-  .rail .intro p { margin: 0 0 14px; max-width: 40ch; }
-  .rail .intro .lede { font-size: 17px; }
-  .rail .intro .hint { font: 12px/1.7 var(--font-mono); color: var(--muted); }
-  .rail .say { position: static; overflow: visible; border: 0; border-radius: 0; padding: 0; animation: fade 0.25s ease-out; }
-  .rail .close { margin: 0 0 6px 10px; }
-  .rail .more { display: block; margin: auto 0 0; font: 11px var(--font-mono); color: var(--tone); }
-  .rail .mastnav { display: grid; gap: 16px; border-top: 2px solid var(--ink); padding-top: 22px; margin-top: 8px; }
-  .rail .mastnav a { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0 10px; align-items: baseline; text-decoration: none; }
-  .rail .mastnav a b { font: 700 18px var(--font-body); margin: 0; grid-row: span 2; }
-  .rail .mastnav a span { font: 400 16px var(--font-display); }
-  .rail .mastnav small { display: block; font: 12px/1.5 var(--font-mono); color: var(--muted); }
-  .rail .mastnav a:hover span { text-decoration: underline; text-decoration-color: var(--spot); text-decoration-thickness: 2px; }
+  :root:not([data-layout="sleeve"]) .rail .body { min-height: 100%; display: flex; flex-direction: column; gap: 22px; padding-top: 26px; }
+  :root:not([data-layout="sleeve"]) .rail .body > *, :root:not([data-layout="sleeve"]) .rail .say * { min-width: 0; }
+  :root:not([data-layout="sleeve"]) .rail .mast { gap: 4px; min-width: 0; }
+  :root:not([data-layout="sleeve"]) .rail .mast > a { font-size: 26px; line-height: 1.05; }
+  :root:not([data-layout="sleeve"]) .rail:has(.say:not([hidden])) .mast, :root:not([data-layout="sleeve"]) .rail:has(.say:not([hidden])) .intro { display: none; }   /* who I am: home only */
+  :root:not([data-layout="sleeve"]) .rail .intro { display: block; }
+  :root:not([data-layout="sleeve"]) .rail .intro p { margin: 0 0 14px; max-width: 40ch; }
+  :root:not([data-layout="sleeve"]) .rail .intro .lede { font-size: 17px; }
+  :root:not([data-layout="sleeve"]) .rail .intro .hint { font: 12px/1.7 var(--font-mono); color: var(--muted); }
+  :root:not([data-layout="sleeve"]) .rail .say { position: static; overflow: visible; border: 0; border-radius: 0; padding: 0; animation: fade 0.25s ease-out; }
+  :root:not([data-layout="sleeve"]) .rail .close { margin: 0 0 6px 10px; }
+  :root:not([data-layout="sleeve"]) .rail .more { display: block; margin: auto 0 0; font: 11px var(--font-mono); color: var(--tone); }
+  :root:not([data-layout="sleeve"]) .rail .mastnav { display: grid; gap: 16px; border-top: 2px solid var(--ink); padding-top: 22px; margin-top: 8px; }
+  :root:not([data-layout="sleeve"]) .rail .mastnav a { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0 10px; align-items: baseline; text-decoration: none; }
+  :root:not([data-layout="sleeve"]) .rail .mastnav a b { font: 700 18px var(--font-body); margin: 0; grid-row: span 2; }
+  :root:not([data-layout="sleeve"]) .rail .mastnav a span { font: 400 16px var(--font-display); }
+  :root:not([data-layout="sleeve"]) .rail .mastnav small { display: block; font: 12px/1.5 var(--font-mono); color: var(--muted); }
+  :root:not([data-layout="sleeve"]) .rail .mastnav a:hover span { text-decoration: underline; text-decoration-color: var(--spot); text-decoration-thickness: 2px; }
 }
+/* Layouts, one per design branch (D.layout, also set on <html data-layout>):
+   deck    the rail ends in a music deck (30%)
+   record  the record is the player: the track is printed round its rim, level bars ring its edge; no music box
+   strip   a slim player strip across the foot of the page
+   liner   the rail opens with a one-line credit for what's playing
+   sleeve  no rail: an open project slides out beside the record as a square sleeve; the nav sits in the corners */
+@media (min-width: 900px) {
+  :root[data-layout="record"] .rail { grid-template-rows: minmax(0, 1fr); }
+  :root[data-layout="record"] .rail .deck { display: none; }
+
+  :root[data-layout="liner"] .rail { grid-template-rows: auto minmax(0, 1fr); }
+  :root[data-layout="liner"] .rail .deck { order: -1; border-top: 0; border-bottom: 1.5px solid var(--soft); padding: calc(env(safe-area-inset-top, 0px) + 30px) 32px 16px 36px; }
+  :root[data-layout="liner"] .rail .meter { display: none; }
+  :root[data-layout="liner"] .rail .np { font-size: 12px; line-height: 1.6; }
+  :root[data-layout="liner"] .rail .np b { font-size: 15px; margin: 2px 0 0; }
+  :root[data-layout="liner"] .rail .np .by, :root[data-layout="liner"] .rail .np .bpm { display: inline; font-size: 12px; color: var(--muted); }
+  :root[data-layout="liner"] .rail .np .bpm::before { content: " · "; }
+
+  :root[data-layout="strip"] .rail { bottom: 46px; grid-template-rows: minmax(0, 1fr); }
+  :root[data-layout="strip"] .rail .deck {
+    position: fixed; z-index: 3; top: auto; left: 0; right: 0; bottom: 0; height: calc(46px + env(safe-area-inset-bottom, 0px));
+    flex-direction: row; align-items: center; gap: 18px; background: var(--paper); border-top: 2px solid var(--ink);
+    padding: 0 calc(env(safe-area-inset-right, 0px) + 32px) env(safe-area-inset-bottom, 0px) calc(env(safe-area-inset-left, 0px) + 32px);
+  }
+  :root[data-layout="strip"] .rail .np { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  :root[data-layout="strip"] .rail .np .lbl, :root[data-layout="strip"] .rail .np b, :root[data-layout="strip"] .rail .np .by, :root[data-layout="strip"] .rail .np .bpm { display: inline; }
+  :root[data-layout="strip"] .rail .np b { font-size: 14px; margin: 0 4px; }
+  :root[data-layout="strip"] .rail .np .by::before, :root[data-layout="strip"] .rail .np .bpm::before { content: "· "; }
+  :root[data-layout="strip"] .rail .meter { flex: none; width: 180px; height: 22px; margin: 0; }
+
+  :root[data-layout="sleeve"] .rail, :root[data-layout="sleeve"] .scroll, :root[data-layout="sleeve"] .body { display: contents; }
+  :root[data-layout="sleeve"] .deck, :root[data-layout="sleeve"] .intro, :root[data-layout="sleeve"] .more { display: none; }
+  :root[data-layout="sleeve"] .mast { top: calc(env(safe-area-inset-top, 0px) + 28px); left: calc(env(safe-area-inset-left, 0px) + 32px); }
+  :root[data-layout="sleeve"] .mastnav { inset: 0; pointer-events: none; }
+  :root[data-layout="sleeve"] .mastnav a { position: fixed; pointer-events: auto; font-size: 13px; }
+  :root[data-layout="sleeve"] .mastnav a span { margin-left: 4px; }
+  :root[data-layout="sleeve"] .mastnav a:nth-child(1) { top: calc(env(safe-area-inset-top, 0px) + 30px); right: calc(env(safe-area-inset-right, 0px) + 32px); }
+  :root[data-layout="sleeve"] .mastnav a:nth-child(2) { bottom: calc(env(safe-area-inset-bottom, 0px) + 26px); left: calc(env(safe-area-inset-left, 0px) + 32px); }
+  :root[data-layout="sleeve"] .mastnav a:nth-child(3) { bottom: calc(env(safe-area-inset-bottom, 0px) + 26px); right: calc(env(safe-area-inset-right, 0px) + 32px); }
+  /* the sleeve: square, flat, printed like liner notes; it slides out from the record's side */
+  :root[data-layout="sleeve"] .say { border-radius: 0; border-width: 2.5px; padding: 30px 32px 32px; animation: slide 0.35s cubic-bezier(.2, .8, .2, 1); }
+  :root[data-layout="sleeve"] .say::before { content: "LINER NOTES"; display: block; font: 500 10px var(--font-mono); letter-spacing: 0.2em; color: var(--muted); margin-bottom: 6px; }
+}
+@keyframes slide { from { transform: translateX(-90px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { :root[data-layout="sleeve"] .say { animation: none; } }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .rail .say { animation: none; } }
 .np .by::before { content: "· "; }
@@ -349,15 +394,21 @@ let W = 0, H = 0, dpr = 1;
 let cx = 0, cy = 0, R = 0;          // drawn
 let tx = 0, ty = 0, tR = 0;         // target
 const CAM = 3.2, K = Math.sqrt(CAM * CAM - 1);   // camera distance; K makes the ball's silhouette exactly R
+const LAYOUT = D.layout || "deck";
 const wide = () => W >= 900;          // the same break as the rail's CSS
 const AREA = 0.7;                    // the record's share of a wide screen
 const GAP = 56;                     // blank paper between the ball and the bubble
 function layout() {
   const open = !sayEl.hidden;
-  if (wide()) {
+  if (wide() && LAYOUT === "sleeve") {
+    // no rail: the record alone in the middle; an open project's sleeve slides out to its right
+    if (!open) { tR = Math.min(W, H) / 2 - 90; tx = W / 2; ty = H / 2; }
+    else { tR = Math.max(80, Math.min(H / 2 - 90, W * 0.24)); tx = W * 0.06 + tR + 30; ty = H / 2; }
+  } else if (wide()) {
     // 7-3: centred in the left 70%, with room for the tonearm; the rail on the right holds everything else
-    tR = Math.max(80, Math.min(W * AREA / 2 - 70, H / 2 - 48));
-    tx = W * AREA / 2 - 10; ty = H / 2;
+    const foot = LAYOUT === "strip" ? 46 : 0;
+    tR = Math.max(80, Math.min(W * AREA / 2 - 70, (H - foot) / 2 - 48));
+    tx = W * AREA / 2 - 10; ty = (H - foot) / 2;
   } else if (!open) { tx = W / 2; ty = H / 2; tR = Math.min(W, H) / 2 - 28; }
   else {
     tR = Math.max(70, Math.min(W / 2 - 20, H * 0.19));
@@ -368,7 +419,11 @@ function layout() {
 function placeSay() {
   if (sayEl.hidden) return;
   const s = sayEl.style;
-  if (wide()) {
+  if (wide() && LAYOUT === "sleeve") {
+    // a square the height of the record, beside it
+    const side = Math.min(2 * tR, W - (tx + tR + 40) - 40), top = Math.max(24, ty - side / 2);
+    Object.assign(s, { left: (tx + tR + 40) + "px", width: side + "px", right: "auto", top: top + "px", height: side + "px", bottom: "auto" });
+  } else if (wide()) {
     s.cssText = "";                  // it sits in the rail
   } else {
     Object.assign(s, { left: "12px", right: "12px", width: "auto", top: (ty + tR + GAP * 0.6) + "px", bottom: "12px", height: "auto" });
@@ -486,6 +541,7 @@ function draw(now = performance.now()) {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.fillStyle = col["--paper"]; ctx.fillRect(0, 0, W, H);
   if (music) drawGrooves(now);
+  if (music && (LAYOUT === "record" || LAYOUT === "sleeve")) drawRimPlayer(now);
 
   // the steel ball: three grooves on its surface, turning with it (a record has its own grooves instead)
   if (!music) for (const plane of [[1, 0, 0], [0, 1, 0], [0, 0, 1]]) {
@@ -621,7 +677,7 @@ function draw(now = performance.now()) {
   }
 
   // until the first click or drag, one quiet line under the ball says what to do
-  if (!touched && sayEl.hidden && !wide()) {
+  if (!touched && sayEl.hidden && (!wide() || LAYOUT === "sleeve")) {
     ctx.font = `13px ${mono}`; ctx.fillStyle = col["--muted"]; ctx.textAlign = "center"; ctx.textBaseline = "top";
     const hint = "Every project I've built, placed by the skills it took. Click a name.";
     if (ctx.measureText(hint).width < W - 32) ctx.fillText(hint, cx, cy + R + 14);
@@ -868,6 +924,41 @@ function drawGrooves(now) {
   }
   ctx.globalAlpha = 1;
 }
+// The record as the player (layouts "record" and "sleeve"): what's playing is printed round the top of the rim,
+// the way a label prints its text, and level bars ring the rest of the edge, pumping with the beat.
+function drawRimPlayer(now) {
+  if (!music.title) return;
+  const parts = [music.is_playing ? "NOW PLAYING" : "LAST PLAYED", music.title, music.artist];
+  if (music.bpm) parts.push(music.bpm + " BPM");
+  let text = parts.join("  ·  ").toUpperCase();
+  const rr = R + 20;
+  ctx.font = `500 12px ${fonts["--font-mono"]}`;
+  const w = c => ctx.measureText(c).width + 1.6;
+  while ([...text].reduce((a, c) => a + w(c), 0) / rr > Math.PI * 0.95 && text.length > 12) text = text.slice(0, -2).trimEnd() + "…";
+  const chars = [...text], span = chars.reduce((a, c) => a + w(c), 0) / rr;
+  ctx.fillStyle = col["--muted"]; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  let a = -Math.PI / 2 - span / 2;
+  for (const c of chars) {
+    const th = a + w(c) / 2 / rr;
+    ctx.save(); ctx.translate(cx + rr * Math.cos(th), cy + rr * Math.sin(th)); ctx.rotate(th + Math.PI / 2); ctx.fillText(c, 0, 0); ctx.restore();
+    a += w(c) / rr;
+  }
+  if (!music.is_playing) return;
+  // the bars: low frequencies at the bottom of the record, high ones up toward the text
+  const N = 132, clear = span / 2 + 0.1;
+  ctx.strokeStyle = col["--ink"]; ctx.lineCap = "butt"; ctx.lineWidth = Math.max(1.5, (2 * Math.PI * R / N) * 0.45);
+  for (let k = 0; k < N; k++) {
+    const th = -Math.PI / 2 + (k / N) * 2 * Math.PI;
+    const d = Math.abs(Math.atan2(Math.sin(th + Math.PI / 2), Math.cos(th + Math.PI / 2)));   // angle from the top
+    if (d < clear) continue;
+    const f = (d - clear) / (Math.PI - clear), li = Math.round((1 - f) * (BARS - 1));
+    const L = 2 + level[li] * R * 0.09;
+    ctx.globalAlpha = 0.55;
+    ctx.beginPath(); ctx.moveTo(cx + (R + 6) * Math.cos(th), cy + (R + 6) * Math.sin(th)); ctx.lineTo(cx + (R + 6 + L) * Math.cos(th), cy + (R + 6 + L) * Math.sin(th)); ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+}
+
 // the tonearm: pivots just above the record's top right edge (clear of the bubble); the stylus rides from the outer groove inward as the song goes on.
 // When nothing plays it lifts back to its rest beside the record.
 function drawArm(now) {
@@ -1041,9 +1132,6 @@ const meter = document.getElementById("meter"), mctx = meter.getContext("2d");
 const BARS = 28, level = new Float32Array(BARS), peak = new Float32Array(BARS);
 let meterLast = performance.now();
 function drawMeter(now) {
-  const w = meter.clientWidth, h = meter.clientHeight;
-  if (!w || !h) return;
-  if (meter.width !== Math.round(w * dpr) || meter.height !== Math.round(h * dpr)) { meter.width = Math.round(w * dpr); meter.height = Math.round(h * dpr); }
   const dt = Math.min(0.1, (now - meterLast) / 1000); meterLast = now;
   const live = music && music.is_playing && rec.vis > 0.5;     // quiet while the record is being changed
   const beats = live && music.bpm ? songAt(now) * music.bpm / 60 : now / 1000 * 1.6;
@@ -1057,6 +1145,9 @@ function drawMeter(now) {
     level[i] += (want - level[i]) * (want > level[i] ? 1 - Math.exp(-dt * 40) : 1 - Math.exp(-dt * 7));   // fast attack, slow release
     peak[i] = Math.max(level[i], peak[i] - dt * 0.45);
   }
+  const w = meter.clientWidth, h = meter.clientHeight;
+  if (!w || !h) return;
+  if (meter.width !== Math.round(w * dpr) || meter.height !== Math.round(h * dpr)) { meter.width = Math.round(w * dpr); meter.height = Math.round(h * dpr); }
   mctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   mctx.clearRect(0, 0, w, h);
   const bw = w / BARS;
