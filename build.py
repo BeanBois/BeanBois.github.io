@@ -499,7 +499,7 @@ def volume_page(n, vol, ch, log):
         eps.append(f'''<section class="tobira" aria-labelledby="ep{ep["n"]}"><div class="ep jp">第{ep["n"]}話</div><h2 id="ep{ep["n"]}">{esc(ep["title"])}</h2>
 <div class="stamps"><span class="stamp{" live" if live else ""}">{STATUS.get(n.get("status"))}</span>{"" if n.get("verified") else '<span class="stamp draft">draft</span>'}</div></section>
 <div class="page">{panels}</div>
-<div class="tsuzuku"><span class="muted mono" style="font-size:12px">{"still being written" if live else "the end"}</span><span class="big">{"つづく" if live else "完"}</span></div>
+<div class="tsuzuku"><span class="muted mono" style="font-size:var(--fs-sm)">{"still being written" if live else "the end"}</span><span class="big">{"つづく" if live else "完"}</span></div>
 {f'<div class="next"><span class="lbl jp">次回予告</span><span>Next time: {esc(ep["next"])}</span></div>' if ep.get("next") else ""}''')
     events = "".join(f"<li><time>{d}</time>{esc(msg)}</li>" for d, i, msg in sorted(log, reverse=True) if i == n["id"])
     blurb = (f'<div class="blurb"><h2>あらすじ · the story so far</h2><p>{inline_md(n["what"])}</p>'
@@ -508,7 +508,7 @@ def volume_page(n, vol, ch, log):
             + f'<div class="back"><div><h3>stack</h3><div class="chips">{"".join(f"<span>{esc(s)}</span>" for s in n["stack"])}</div></div>'
             + (f'<div><h3>log</h3><ol>{events}</ol></div>' if events else "")
             + f'<div><h3>elsewhere</h3><ul><li><a href="./#{n["id"]}">find it on the record →</a></li><li><a href="contents.html">back to the shelf →</a></li></ul>'
-            + ("" if n.get("verified") else f'<p class="muted" style="font-size:13px;margin-top:10px">{esc(cfg("pages.draft_note"))}</p>') + '</div></div>')
+            + ("" if n.get("verified") else f'<p class="muted" style="font-size:var(--fs-md);margin-top:8px">{esc(cfg("pages.draft_note"))}</p>') + '</div></div>')
     main = split(f'<div class="book"><div class="obj">{spine(n, vol)}</div><div class="obj">{cover_wallet(n, vol, ch["kana"], ch["obi"])}</div></div>' + "".join(eps), rail, rail_first=False)
     page(f'vol-{n["id"]}.html', f'{n["title"]} · Vol. {vol}', f'Vol. {vol} · {esc(n["title"])}', main)
 
@@ -530,8 +530,8 @@ def author_page(data, groups, pdfs):
     rail = f'''<div class="pt"><h1>作者紹介</h1><p>{esc(cfg("pages.author_intro"))}</p></div>
 <div class="flap">
   <div class="seal" aria-hidden="true">KS</div>
-  <div><h2 style="margin:0 0 4px;font-size:28px">{esc(p["name"])}</h2><p class="mono muted" style="margin:0;font-size:12px">{esc(cfg("you.role_short"))}</p></div>
-  <div class="comment"><span class="mono muted" style="font-size:11px">{esc(cfg("pages.author_comment_label"))}</span><br>{esc(cfg("you.one_liner"))}</div>
+  <div><h2 style="margin:0 0 4px;font-size:var(--fs-xl)">{esc(p["name"])}</h2><p class="mono muted" style="margin:0;font-size:var(--fs-sm)">{esc(cfg("you.role_short"))}</p></div>
+  <div class="comment"><span class="mono muted" style="font-size:var(--fs-xs)">{esc(cfg("pages.author_comment_label"))}</span><br>{esc(cfg("you.one_liner"))}</div>
   <div><h3>年譜 · the years</h3><ol class="years">{yrs}</ol></div>
   <div><h3>contact</h3><div class="contact">
     <div class="row"><span class="select" id="email">{esc(p["email"])}</span><button type="button" class="btn" id="copy">copy</button></div>
@@ -636,7 +636,7 @@ def ordinal(n):
 def colophon_page(n_entries, n_public, n_vols):
     git = lambda *a: subprocess.run(["git", *a], cwd=HERE, capture_output=True, text=True).stdout.strip()
     count, short = git("rev-list", "--count", "HEAD") or "0", git("rev-parse", "--short", "HEAD") or "uncommitted"
-    pages = "".join(f'<li><a href="{HOME if f == "index.html" else f}">{esc(k)} · {esc(e)}</a> <span class="muted mono" style="font-size:12px">p. {i + 1}</span></li>' for i, (f, e, k) in enumerate(PAGES))
+    pages = "".join(f'<li><a href="{HOME if f == "index.html" else f}">{esc(k)} · {esc(e)}</a> <span class="muted mono" style="font-size:var(--fs-sm)">p. {i + 1}</span></li>' for i, (f, e, k) in enumerate(PAGES))
     box = f'''<div class="okuzuke obj"><div class="seal-c" aria-hidden="true"><b>第{count}刷</b><small>printing</small></div>
 <h2>奥付</h2><p class="sub">Colophon. Japanese books end with this page: who made the book, and when it was printed.</p>
 <dl>
