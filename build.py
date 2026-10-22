@@ -426,7 +426,9 @@ def volume_page(n, vol, ch, log, byid):
             + (f'<div><h3>log</h3><ol>{events}</ol></div>' if events else "")
             + f'<div><h3>elsewhere</h3><ul><li><a href="./#{n["id"]}">find it on the record →</a></li><li><a href="contents.html">back to the shelf →</a></li></ul>'
             + ("" if n.get("verified") else f'<p class="muted" style="font-size:13px;margin-top:10px">{esc(cfg("pages.draft_note"))}</p>') + '</div></div>')
-    main = split(f'<div class="book"><div class="obj">{spine(n, vol)}</div><div class="obj">{cover_wallet(n, vol, ch["kana"], ch["obi"], cfg("you.name")) if ch.get("cover") == "wallet" else cover(n, vol, ch, cfg("you.name"))}</div></div>' + "".join(eps), rail, rail_first=False)
+    first, final = ch["episodes"][0]["n"], ch["episodes"][-1]["n"]
+    shown = f"第{first}話 収録" if first == final else f"第{first}–{final}話 収録"
+    main = split(f'<div class="book"><div class="obj">{spine(n, vol)}</div><div class="obj">{cover_wallet(n, vol, ch["kana"], ch["obi"], cfg("you.name"), shown) if ch.get("cover") == "wallet" else cover(n, vol, ch, cfg("you.name"))}</div></div>' + "".join(eps), rail, rail_first=False)
     page(f'vol-{n["id"]}.html', f'{n["title"]} · Vol. {vol}', f'Vol. {vol} · {esc(n["title"])}', main)
 
 

@@ -478,7 +478,7 @@
    "status": "shipped",
    "kind": "tool",
    "track": "side",
-   "group": null,
+   "group": "kkp-wallet",
    "size": "small",
    "mix": {
     "product": 0.5,

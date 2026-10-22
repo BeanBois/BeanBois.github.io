@@ -52,7 +52,7 @@ def ledger_rows(x, y, w, n, gap):
     return "".join(out)
 
 
-def cover_wallet(n, vol, kana, obi, name):
+def cover_wallet(n, vol, kana, obi, name, shown="第1話 収録"):
     W, H = 512, 728
     live = n.get("status") == "active"
     obi_fill, obi_text = (SPOT, ONSPOT) if live else (INK, PAPER)
@@ -76,7 +76,7 @@ def cover_wallet(n, vol, kana, obi, name):
 <text x="24" y="{H - 98}" style="{obi_text};font:400 31px var(--font-display)">{esc(obi)}</text>
 <text x="24" y="{H - 64}" style="{obi_text};font:400 14px var(--font-body)">{esc(tag1)}</text>
 <text x="24" y="{H - 44}" style="{obi_text};font:400 14px var(--font-body)">{esc(tag2)}</text>
-<text x="{W - 22}" y="{H - 18}" text-anchor="end" style="{obi_text};font:700 14px var(--font-body)">第1話 収録</text>
+<text x="{W - 22}" y="{H - 18}" text-anchor="end" style="{obi_text};font:700 14px var(--font-body)">{shown}</text>
 </svg>'''
 
 
