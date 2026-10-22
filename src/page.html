@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{{title}}</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%2215%22 fill=%22%232a1b3d%22/%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%225%22 fill=%22%23d9507f%22/%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%221.5%22 fill=%22%232a1b3d%22/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=IBM+Plex+Mono:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
@@ -226,6 +227,7 @@ section + section .shelfname { margin-top: 40px; }
 /* ---------- 奥付 ---------- */
 .seal-c { position: absolute; top: -26px; right: -22px; width: 92px; height: 92px; border: 2.5px solid var(--ink); border-radius: 50%; background: var(--paper);
   display: grid; place-content: center; text-align: center; transform: rotate(-10deg); z-index: 1; }
+@media (max-width: 860px) { .seal-c { right: -6px; } }   /* the stamp stays on a phone's screen */
 .seal-c b { font: 700 18px var(--font-body); }
 .seal-c small { font: 10px var(--font-mono); color: var(--muted); letter-spacing: 0.1em; }
 .okuzuke { max-width: 620px; margin: 30px 0 0; border: 3px double var(--ink); border-width: 6px; padding: 26px clamp(16px, 4vw, 34px); }

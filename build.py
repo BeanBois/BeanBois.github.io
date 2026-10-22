@@ -724,6 +724,28 @@ document.addEventListener("visibilitychange", poll);
     (DIST / "index.html").write_text(t.replace("</body>", music_js + "\n</body>"))
 
 
+FONTS = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=IBM+Plex+Mono:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">'
+
+
+def subset_fonts():
+    """Ask Google Fonts for only the characters the site uses. The Japanese families otherwise come with a 115 KB
+    stylesheet of character ranges that blocks the first paint. Text that arrives later (a song title in Japanese,
+    say) falls back to the system's Japanese font."""
+    pages = sorted(DIST.glob("*.html"))
+    chars = set(map(chr, range(32, 127))) | set("·–—…→←↑↓×’“”")
+    for f in pages:
+        chars |= {c for c in html.unescape(f.read_text()) if c.isprintable() and not c.isspace()}
+    text = "".join(sorted(chars))
+    from urllib.parse import quote
+    link = ('<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap">\n'
+            f'<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@400;500;700&text={quote(text)}&display=swap">')
+    for f in pages:
+        s = f.read_text()
+        if FONTS not in s:
+            raise SystemExit(f"{f.name}: the Google Fonts link has changed; update FONTS in build.py")
+        f.write_text(s.replace(FONTS, link))
+
+
 def main():
     CFG.clear(); CFG.update(load_config())
     data = json.loads((CONTENT / "site.json").read_text())
@@ -750,6 +772,7 @@ def main():
     groups = {k: dict(v, id=k) for k, v in data["groups"].items()}
     author_page(data, groups, PDFS)
     colophon_page(data["counts"]["entries"], data["counts"]["public"], len(nodes))
+    subset_fonts()
     print(f"{len(PAGES)} pages, {len(nodes)} volumes, {len(chapters)} written -> dist/")
 
 
