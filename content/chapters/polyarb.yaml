@@ -1,0 +1,17 @@
+# Volume for bank/projects/polyarb.md. Panel text from that entry; captions editorial.
+entry: polyarb
+kana: 裁定
+obi: Paper first. Live behind a flag.
+cover: set
+episodes:
+  - n: 1
+    title: The complete set
+    panels:
+      - span: 3
+        art: set
+        caption: The trade
+        text: A Polymarket complete-set arbitrage engine. Depth-aware VWAP-at-size bundle costing, and live opportunity detection from the order book.
+      - span: 3
+        art: legs
+        caption: The risk
+        text: Risk controls for non-atomic multi-leg execution. Paper trading by default, live trading only behind an explicit safety flag, with SQLite persistence and metrics.

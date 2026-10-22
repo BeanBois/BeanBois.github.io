@@ -1,0 +1,40 @@
+# Volume for bank/projects/tradingjoe.md. Panel text from that entry; captions editorial.
+entry: tradingjoe
+kana: トレジョー
+obi: The red team retracted my own results.
+cover: retract
+episodes:
+  - n: 1
+    title: The system
+    panels:
+      - span: 6
+        art: strategies
+        caption: The machine
+        text: A modular portfolio system for Bursa Malaysia and US equities. Black-Litterman, Fama-French, momentum and mean-reversion, and a meta-strategy blending them.
+      - span: 3
+        art: views
+        caption: The views
+        text: GNN and LLM view generators feed Black-Litterman, with SEC Form 4 insider buys and analyst targets as views.
+      - span: 3
+        art: walkforward
+        caption: The test
+        text: Walk-forward backtests, then paper or live trading through Moomoo.
+  - n: 2
+    title: The retraction
+    panels:
+      - span: 6
+        art: claim
+        caption: The claim
+        text: A backtest said "5/5 beats MinVar".
+      - span: 4
+        art: redteam
+        caption: The red team
+        text: Five agents went over my own results, on leakage, finance, ML, LLM and execution. They found no demonstrated out-of-sample edge.
+      - span: 2
+        art: ghost
+        caption: The ghost
+        text: They also found an LLM citing documents that had never been ingested.
+      - span: 6
+        art: retract
+        caption: In writing
+        text: I published the retraction in the repo, replaced the fabricated citations with an honest "no documents found", and disabled the affected strategy pending fixes.

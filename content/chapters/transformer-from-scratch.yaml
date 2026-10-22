@@ -1,0 +1,18 @@
+# Volume for bank/projects/transformer-from-scratch.md. Panel text from that entry; captions editorial.
+entry: transformer-from-scratch
+kana: 注意
+obi: Trained on fourteen seasons of Archer.
+cover: subtitles
+episodes:
+  - n: 1
+    title: The paper, rebuilt
+    panels:
+      - span: 3
+        art: attention
+        caption: The model
+        text: The original Transformer, encoder, decoder and attention, reimplemented from the paper in PyTorch, with training and evaluation scripts.
+      - span: 3
+        art: subtitles
+        caption: The data
+        text: The training data is fourteen seasons of Archer subtitles.
+    next: BERT from scratch.

@@ -1,0 +1,98 @@
+# Volume for the Tencent model-deployment platform: bank/experience/tencent.md (What it is, Story) and the four work
+# items it folds in. Panel text comes from those entries; captions are editorial. No internal names, ever.
+id: ai-platform
+entry: tencent
+members: [tencent-autoscaler, tencent-multitenancy, tencent-cloning, tencent-reliability]
+title: AI Model Deployment Platform
+tagline: The platform that deploys, scales and tears down GPU model serving for several business units
+kana: モデル基盤
+obi: The log of what fired is the lock.
+cover: lock
+episodes:
+  - n: 1
+    title: Inheriting the platform
+    panels:
+      - span: 4
+        art: racks
+        caption: The platform
+        text: The team's model-serving platform deploys, scales, health-checks and tears down GPU model-serving services on Kubernetes for several business units, safely over 1,000 GPUs' worth. I build the platform; other teams run the GPUs and the services on it.
+      - span: 2
+        art: commits
+        caption: The handover in
+        text: The codebase dates from 2024. I joined in March 2026, and by October I had written about 450 of its 550 commits.
+  - n: 2
+    entry: tencent-autoscaler
+    title: GPUs that keep time
+    panels:
+      - span: 6
+        art: clock
+        caption: The idea
+        text: Built from scratch. Model-serving services scale their GPUs up and down on a daily schedule, with schedules checked for conflicts and a scheduler that fires several configs per tick.
+      - span: 3
+        art: lock
+        caption: Exactly once
+        text: The scheduler runs on every replica. Redis or ZooKeeper would have been a new dependency for one feature, so a UNIQUE constraint on the execution log is the lock. One INSERT wins; the rest get a duplicate key and skip.
+      - span: 3
+        art: twostep
+        caption: Two steps
+        text: Asking a shared cluster for every GPU at once can starve other workloads or fail on the last few replicas. So scale-up takes 80% first, waits for it to be ready, then asks for the rest.
+      - span: 4
+        art: history
+        caption: The record
+        text: GPU usage history in 30-minute snapshots, and fixed GPU accounting behind the resource reports.
+      - span: 2
+        art: reconcile
+        caption: Clean-up
+        text: Reconciliation turns off schedules whose services have gone.
+  - n: 3
+    entry: tencent-multitenancy
+    title: Whose config is it?
+    panels:
+      - span: 6
+        art: tenants
+        caption: The job
+        text: Turned a single-tenant deployment platform into a multi-tenant one. Every query is scoped by business unit with ownership checks, and environment tags are bound to the clusters each tenant may deploy into.
+      - span: 3
+        art: missingdir
+        caption: The guess
+        text: The obvious way to pick a tenant's config was to join two request labels into a directory name. On the live payload that resolved to a directory that doesn't exist, and nothing reported the failure.
+      - span: 3
+        art: table
+        caption: The fix
+        text: Tenancy now comes from an explicit table keyed on the ID pair every request carries. An undeclared tenant is refused, never served someone else's templates.
+      - span: 6
+        art: pin
+        caption: Don't rebuild it
+        text: I rejected a server-side config-merge layer, because the company's config system already copies shared config into each tenant's group. As a bonus, each tenant can pin a known-good version.
+  - n: 4
+    entry: tencent-cloning
+    title: The copy that broke everything
+    panels:
+      - span: 4
+        art: copy
+        caption: The rule
+        text: Copying a service between environments has to replay it and re-derive everything that belongs where it lands, not copy the row. A copy never carries the source's models, resets values on unsupported GPU types, and refuses copies made stale by a template change.
+      - span: 2
+        art: revert
+        caption: 24 hours
+        text: One version refused any copy whose saved config held values the template no longer declared. Correct in principle, it broke every real copy within 24 hours. I reverted it to report those values instead, and kept the principle.
+  - n: 5
+    entry: tencent-reliability
+    title: Keeping it standing
+    panels:
+      - span: 3
+        art: trace
+        caption: Tracing
+        text: Request-ID tracing across every RPC.
+      - span: 3
+        art: token
+        caption: Self-healing
+        text: The Kubernetes client rebuilds itself when its token expires.
+      - span: 3
+        art: guards
+        caption: Guards
+        text: Namespace guards before deploys, bounded cluster-probe budgets, and a migration for 29 stuck orphaned records. Also one batch call in place of N detail calls, and transactional DAO writes.
+      - span: 3
+        art: handover
+        caption: The handover out
+        text: The platform's bilingual (English and Chinese) handover. Runtime view, release and rollback, eleven recorded design decisions, a runbook, and the known debt.

@@ -1,0 +1,21 @@
+# Volume for bank/projects/chess-ai.md. Panel text from that entry; captions editorial.
+entry: chess-ai
+kana: チェス
+obi: It plays itself.
+cover: selfplay
+episodes:
+  - n: 1
+    title: AlphaZero, at home
+    panels:
+      - span: 2
+        art: board
+        caption: Eyes
+        text: A CNN board encoder.
+      - span: 2
+        art: mcts
+        caption: Search
+        text: Monte-Carlo tree search, a replay buffer and an evaluator.
+      - span: 2
+        art: selfplay
+        caption: Practice
+        text: Parallel self-play, then optimised for the GPU.

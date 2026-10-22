@@ -1,0 +1,17 @@
+# Volume for bank/research/kurf.md. Panel text from that entry; captions editorial.
+entry: kurf
+kana: キング
+obi: Robots, in simulation first.
+cover: arm
+episodes:
+  - n: 1
+    title: The research programme
+    panels:
+      - span: 4
+        art: arm
+        caption: The sim
+        text: Robotic manipulation simulations in CoppeliaSim and PyRep, with reinforcement-learning agents in PyTorch and TensorFlow.
+      - span: 2
+        art: ablate
+        caption: The runs
+        text: Training, evaluation and ablations across agent architectures.

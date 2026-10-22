@@ -1,0 +1,41 @@
+# Volume for bank/research/icl-hyperbolic.md. Panel text from that entry; captions editorial.
+entry: icl-hyperbolic
+title: Hyperbolic In-Context Imitation
+kana: 双曲
+obi: The baseline won. The write-up says so.
+cover: poincare
+episodes:
+  - n: 1
+    title: The question
+    panels:
+      - span: 6
+        art: demos
+        caption: The setting
+        text: MSc research at Imperial, building on Instant Policy, in-context imitation learning with graphs. A robot learns a task from a few demonstrations.
+      - span: 3
+        art: poincare
+        caption: The bet
+        text: Hyperbolic geometry suits hierarchical data. A Hyperbolic Graph Attention Network on the Poincaré ball captures hierarchical temporal dependencies across demonstration actions.
+      - span: 3
+        art: dual
+        caption: Two channels
+        text: A dual-channel architecture embeds actions and observations separately.
+      - span: 3
+        art: product
+        caption: Both geometries
+        text: A Product Manifold Attention module combines Euclidean and hyperbolic channels, keeping each geometry's relational bias.
+      - span: 3
+        art: sarkar
+        caption: No training
+        text: Sarkar's construction gives training-free hyperbolic embeddings, conditioning on the demonstrations and the current observation without fine-tuning the embedding.
+  - n: 2
+    title: The result
+    panels:
+      - span: 4
+        art: versus
+        caption: The benchmark
+        text: Benchmarked against Instant Policy on robotic manipulation tasks. The baseline scored higher.
+      - span: 2
+        art: feasible
+        caption: What it showed
+        text: Non-Euclidean methods are feasible here. An honest negative result, and the write-up says so.

@@ -1,0 +1,13 @@
+# Volume for bank/projects/sales-signatures.md. Panel text from that entry; captions editorial.
+entry: sales-signatures
+kana: シグネチャ
+obi: Sales, predicted from look-alikes.
+cover: signatures
+episodes:
+  - n: 1
+    title: An idea
+    panels:
+      - span: 6
+        art: signatures
+        caption: The notes
+        text: Early notes and code borrowing the Instant Policy idea. Learn signature-to-signature mappings so that similar products' sales histories predict a new one's.

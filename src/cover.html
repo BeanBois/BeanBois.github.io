@@ -1037,7 +1037,7 @@ function render() {
       <h2>${esc(n.title)}</h2>
       <p class="tag">${esc(n.role ? n.role + " · " + n.tagline : n.tagline)}</p>
       ${n.story ? `<div class="story">${paras(n.story)}</div>` : ""}
-      ${D.chapters[n.id] ? `<a class="chap" href="${D.chapters[n.id].href}">Read Vol. ${D.chapters[n.id].vol}, 第1話 →</a>` : ""}
+      ${D.chapters[n.id] ? `<a class="chap" href="${D.chapters[n.id].href}">Read Vol. ${D.chapters[n.id].vol}, 第${D.chapters[n.id].ep}話 →</a>` : ""}
       ${n.what ? `<div class="sec"><h4>spec</h4>${paras(n.what)}</div>` : ""}
       ${n.bullets.length ? `<div class="sec"><h4>output</h4><ul>${n.bullets.map(b => `<li>${md(b)}</li>`).join("")}</ul></div>` : ""}
       <div class="sec"><h4>position</h4>${calcBlock(n)}</div>

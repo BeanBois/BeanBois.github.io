@@ -1,0 +1,21 @@
+# Volume for bank/projects/fps-rl-agent.md. Panel text from that entry; captions editorial.
+entry: fps-rl-agent
+kana: 強化学習
+obi: Three machines, one policy.
+cover: fps
+episodes:
+  - n: 1
+    title: Learning to play
+    panels:
+      - span: 4
+        art: fps
+        caption: The agent
+        text: An RNN actor-critic agent in PyTorch for a partially observable 3D first-person environment with continuous actions.
+      - span: 2
+        art: machines
+        caption: The speed-up
+        text: Distributed training across 3 machines with asynchronous, A3C-style updates cut wall-clock training time by about 60%.
+      - span: 6
+        art: ablate
+        caption: The judging
+        text: Evaluated by numbers (reward, episode length, policy entropy) and by watching (emergent behaviours).

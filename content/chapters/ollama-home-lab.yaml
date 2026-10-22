@@ -1,0 +1,13 @@
+# Volume for bank/projects/ollama-home-lab.md. Panel text from that entry; captions editorial.
+entry: ollama-home-lab
+kana: ホームラボ
+obi: My own GPU, on my own mesh.
+cover: homelab
+episodes:
+  - n: 1
+    title: The box
+    panels:
+      - span: 6
+        art: homelab
+        caption: The setup
+        text: A private LLM serving box, Ollama on Windows and WSL, reachable from my devices over a Tailscale mesh. It's the default inference backend for RE-News (qwen3:32b).

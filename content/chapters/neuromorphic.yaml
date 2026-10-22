@@ -1,0 +1,33 @@
+# Volume for bank/research/neuromorphic.md, with bank/projects/irecognise.md folded in (Kai Shun, 2026-10-20:
+# show them together). Panel text from those entries; captions editorial.
+entry: neuromorphic
+members: [irecognise]
+title: Neuromorphic Computing
+tagline: Spiking neural networks, from Intel's Loihi stack to a face recogniser that learns from motion
+kana: スパイク
+obi: Only what moved.
+cover: spikes
+episodes:
+  - n: 1
+    title: Spikes
+    panels:
+      - span: 3
+        art: chip
+        caption: The study
+        text: An independent study of the hardware and software advances in neuromorphic computing, Intel Loihi 2 and Lava, for inference at the edge.
+      - span: 3
+        art: spikes
+        caption: The network
+        text: A winner-take-all spiking neural network in Lava for face-mask classification.
+  - n: 2
+    entry: irecognise
+    title: iRecognise
+    panels:
+      - span: 4
+        art: motionface
+        caption: The idea
+        text: Face recognition from motion, the neuromorphic way. A spiking network learning with reward-modulated STDP.
+      - span: 2
+        art: federated
+        caption: Together
+        text: Plus a federated training server.
