@@ -57,7 +57,7 @@ you:
 
 ## Changing a project's facts
 
-1. Edit the entry in `~/Desktop/works/portfolio/bank/`. The schema is in that folder's `README.md`. When you've checked an entry, remove its `# DRAFT` notes.
+1. Edit the entry in `~/Desktop/works/portfolio/bank/`. The schema is in that folder's `README.md`. When you've checked an entry, remove its `# DRAFT` notes and add `verified: <today's date>` to its front matter (e.g. `verified: 2026-10-25`): that takes the "draft" stamp off it on the site. The check refuses a verified entry that still has a DRAFT note.
 2. Export the public part to the site:
 
    ```sh

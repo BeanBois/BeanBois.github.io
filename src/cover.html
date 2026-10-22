@@ -1092,7 +1092,7 @@ function calcBlock(n) {
 r   = ${DEPTH}·|p| = <b>${c.r.toFixed(3)}</b>${c.twins ? `
     + spread ${c.spread.toFixed(3)}   <span class="c">${c.twins} other${c.twins > 1 ? "s" : ""} share this mix</span>` : ""}
 d   = 2·atanh(|x|) = <b>${dist.toFixed(2)}</b>   <span class="c">hyperbolic distance from Kai Shun</span></div></div>
-<p class="note">u<sub>k</sub> are the four anchors, the corners of a tetrahedron on the ball's boundary. The mix is a draft for Kai Shun to correct.</p>`;
+<p class="note">u<sub>k</sub> are the four anchors, the corners of a tetrahedron on the ball's boundary. ${n.verified ? "" : "The mix is a draft for Kai Shun to correct."}</p>`;
 }
 
 function render() {
@@ -1142,7 +1142,7 @@ function render() {
     const g = n.group ? groups[n.group] : null;
     body.innerHTML = `
       <div class="path"><span>${esc(n.track)}</span>${g ? `<span>·</span><button type="button" data-group="${esc(g.id)}">${esc(g.title)}</button>` : ""}<span>·</span><span>${esc(n.period)}</span></div>
-      <div class="stamps"><span class="stamp" style="${st.style === "solid" ? "border-color:var(--live-edge);" : ""}color:${st.style === "solid" ? "var(--live-text)" : st.style === "faint" ? "var(--muted)" : "var(--ink)"}">${st.label}</span><span class="stamp draft">draft</span></div>
+      <div class="stamps"><span class="stamp" style="${st.style === "solid" ? "border-color:var(--live-edge);" : ""}color:${st.style === "solid" ? "var(--live-text)" : st.style === "faint" ? "var(--muted)" : "var(--ink)"}">${st.label}</span>${n.verified ? "" : `<span class="stamp draft">draft</span>`}</div>
       <h2>${esc(n.title)}</h2>
       <p class="tag">${esc(n.role ? n.role + " · " + n.tagline : n.tagline)}</p>
       ${n.story ? `<div class="story">${paras(n.story)}</div>` : ""}

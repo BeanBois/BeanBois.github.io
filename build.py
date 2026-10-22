@@ -438,7 +438,8 @@ def contents_page(nodes, vols, chapters):
             books.append(f'<div class="slot{" big" if n.get("size") == "big" else ""}" style="--sh:{spine_h(n):.0f}px">{spine(n, vols[n["id"]], href, extra)}</div>')
             pulls[n["id"]] = {"title": n["title"], "vol": vols[n["id"]], "tagline": n["tagline"], "role": n.get("role"), "period": n["period"],
                               "status": STATUS.get(n.get("status"), ""), "live": n.get("status") == "active", "big": n.get("size") == "big",
-                              "what": n["what"], "bullets": [inline_md(b) for b in n["bullets"]], "stack": n["stack"], "repo": n.get("repo")}
+                              "what": n["what"], "bullets": [inline_md(b) for b in n["bullets"]], "stack": n["stack"], "repo": n.get("repo"),
+                              "draft": not n.get("verified")}
         shelves.append(f'<section aria-labelledby="sh-{track}"><div class="shelfname"><h2 id="sh-{track}"><span class="jp">{kana}</span> {name}</h2><span>{len(items)} volumes</span></div>'
                        f'<div class="shelf">{"".join(books)}</div></section>')
     statuses = [("all", "all")] + [(k, v) for k, v in [("active", "running"), ("shipped", "completed"), ("paused", "paused"), ("archived", "archived"), ("idea", "pending")]]
@@ -467,7 +468,7 @@ function show(btn) {
     ${n.stack.length ? `<div class="chips" style="margin-top:12px">${n.stack.map(s => `<span>${esc(s)}</span>`).join("")}</div>` : ""}
     ${n.big ? `<p class="meta" style="margin-top:12px">This is a big one; its chapter isn't written yet.</p>` : ""}</div>
     <div class="side"><button type="button" class="x" aria-label="Put it back">×</button>
-      <span class="stamp${n.live ? " live" : ""}">${esc(n.status)}</span><span class="stamp draft">draft</span>
+      <span class="stamp${n.live ? " live" : ""}">${esc(n.status)}</span>${n.draft ? `<span class="stamp draft">draft</span>` : ""}
       <a href="./#${id}">find it on the ball →</a>${n.repo ? `<a href="${esc(n.repo)}" target="_blank" rel="noopener">repo →</a>` : ""}</div>`;
   pull.hidden = false;
   body.querySelector(".x").onclick = () => show(btn);
@@ -494,7 +495,7 @@ def volume_page(n, vol, ch, log):
         panels = "".join(f'<figure class="panel s{p["span"]}" style="margin:0">{panel_art(p["art"])}<figcaption class="txt"><span class="cap">{esc(p["caption"])}</span><p>{esc(p["text"])}</p></figcaption></figure>' for p in ep["panels"])
         live = n.get("status") == "active"
         eps.append(f'''<section class="tobira" aria-labelledby="ep{ep["n"]}"><div class="ep jp">第{ep["n"]}話</div><h2 id="ep{ep["n"]}">{esc(ep["title"])}</h2>
-<div class="stamps"><span class="stamp{" live" if live else ""}">{STATUS.get(n.get("status"))}</span><span class="stamp draft">draft</span></div></section>
+<div class="stamps"><span class="stamp{" live" if live else ""}">{STATUS.get(n.get("status"))}</span>{"" if n.get("verified") else '<span class="stamp draft">draft</span>'}</div></section>
 <div class="page">{panels}</div>
 <div class="tsuzuku"><span class="muted mono" style="font-size:12px">{"still being written" if live else "the end"}</span><span class="big">{"つづく" if live else "完"}</span></div>
 {f'<div class="next"><span class="lbl jp">次回予告</span><span>Next time: {esc(ep["next"])}</span></div>' if ep.get("next") else ""}''')
@@ -505,7 +506,7 @@ def volume_page(n, vol, ch, log):
             + f'<div class="back"><div><h3>stack</h3><div class="chips">{"".join(f"<span>{esc(s)}</span>" for s in n["stack"])}</div></div>'
             + (f'<div><h3>log</h3><ol>{events}</ol></div>' if events else "")
             + f'<div><h3>elsewhere</h3><ul><li><a href="./#{n["id"]}">find it on the record →</a></li><li><a href="contents.html">back to the shelf →</a></li></ul>'
-            + f'<p class="muted" style="font-size:13px;margin-top:10px">{esc(cfg("pages.draft_note"))}</p></div></div>')
+            + ("" if n.get("verified") else f'<p class="muted" style="font-size:13px;margin-top:10px">{esc(cfg("pages.draft_note"))}</p>') + '</div></div>')
     main = split(f'<div class="book"><div class="obj">{spine(n, vol)}</div><div class="obj">{cover_wallet(n, vol, ch["kana"], ch["obi"])}</div></div>' + "".join(eps), rail, rail_first=False)
     page(f'vol-{n["id"]}.html', f'{n["title"]} · Vol. {vol}', f'Vol. {vol} · {esc(n["title"])}', main)
 

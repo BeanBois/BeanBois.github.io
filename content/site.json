@@ -40,7 +40,8 @@
     "Integrated a third-party game API and built an automated integration-test suite, raising test coverage from 40% to 85%."
    ],
    "story": "",
-   "playlist": null
+   "playlist": null,
+   "verified": null
   },
   {
    "id": "robocup",
@@ -70,7 +71,8 @@
     "Worked on robot perception: person identification and room detection with ROS/rospy."
    ],
    "story": "",
-   "playlist": null
+   "playlist": null,
+   "verified": null
   },
   {
    "id": "tencent-autoscaler",
@@ -99,7 +101,8 @@
     "Built GPU usage history (30-minute snapshots) and fixed the GPU accounting behind resource reports."
    ],
    "story": "**Exactly-once without new infrastructure.** The scheduler runs on every replica. Redis or ZooKeeper would have been a new dependency for one feature, so a UNIQUE constraint on the execution log is the lock: one INSERT wins, the rest skip. **Scale up in two steps.** Asking a shared cluster for every GPU at once can starve other workloads or fail on the last few replicas, so scale-up takes 80% first, then the rest.",
-   "playlist": null
+   "playlist": null,
+   "verified": null
   },
   {
    "id": "tencent-cloning",
@@ -126,7 +129,8 @@
     "Hardened cross-environment service cloning so a copy never carries the source's models, resets values on unsupported GPU types, and refuses copies made stale by a template change."
    ],
    "story": "**The copy that broke everything.** One version refused any copy whose saved config held values the template no longer declared. Correct in principle, it broke every real copy within 24 hours. Reverted to *report* those values instead, and kept the principle.",
-   "playlist": null
+   "playlist": null,
+   "verified": null
   },
   {
    "id": "tencent-conversation-service",
@@ -156,7 +160,8 @@
     "Since Oct 2026, second-in-command on a new Go/tRPC/Protobuf query service for gameplay-session conversation data; first fixes: timezone-wrong MySQL DATETIME writes (with a tested migration runbook) and LLM worker timeouts."
    ],
    "story": "",
-   "playlist": null
+   "playlist": null,
+   "verified": null
   },
   {
    "id": "tencent-multitenancy",
@@ -184,7 +189,8 @@
     "Made the platform multi-tenant: every query scoped by business unit with ownership checks, configuration resolved per tenant from a shared base layer, and environment tags bound to the clusters each tenant may deploy into."
    ],
    "story": "**Don't guess who the tenant is.** Joining two request labels into a config directory resolved to a directory that doesn't exist on live traffic, and nothing reported it. Tenancy now comes from an explicit table keyed on IDs every request carries; an undeclared tenant is refused. **Don't rebuild what the platform has:** a server-side config-merge layer was rejected because the company's config system already does it, with per-tenant version pinning as a bonus.",
-   "playlist": null
+   "playlist": null,
+   "verified": null
   },
   {
    "id": "tencent-reliability",
@@ -214,7 +220,8 @@
     "Wrote the platform's bilingual (English/Chinese) handover: runtime view, release and rollback, eleven recorded design decisions, runbook, known debt."
    ],
    "story": "",
-   "playlist": null
+   "playlist": null,
+   "verified": null
   },
   {
    "id": "aki-predictor",
@@ -246,7 +253,8 @@
     "Wrote the postmortem for a model failure during live deployment: impact, root cause, resolution."
    ],
    "story": "",
-   "playlist": null
+   "playlist": null,
+   "verified": null
   },
   {
    "id": "icl-hyperbolic",
@@ -278,7 +286,8 @@
     "Benchmarked against Instant Policy on robotic manipulation tasks: the baseline scored higher, and the work showed non-Euclidean methods are feasible here."
    ],
    "story": "An honest negative result. The hyperbolic model lost to the baseline, and the write-up says so. Good material for the website: what the geometry bought, what it cost, and what I'd try next.",
-   "playlist": null
+   "playlist": null,
+   "verified": null
   },
   {
    "id": "kurf",
@@ -308,7 +317,8 @@
     "Ran training, evaluation and ablations across agent architectures."
    ],
    "story": "",
-   "playlist": null
+   "playlist": null,
+   "verified": null
   },
   {
    "id": "neuromorphic",
@@ -338,7 +348,8 @@
     "Implemented a winner-take-all spiking neural network in Lava for face-mask classification."
    ],
    "story": "",
-   "playlist": null
+   "playlist": null,
+   "verified": null
   },
   {
    "id": "blockhub",
@@ -365,7 +376,8 @@
     "Co-designed and built a decentralised open-source collaboration platform with on-chain contributor voting and reputation; built backend and frontend. 1st place of 50+ teams at the Polygon × EasyA hackathon."
    ],
    "story": "",
-   "playlist": null
+   "playlist": null,
+   "verified": null
   },
   {
    "id": "car-designer",
@@ -394,7 +406,8 @@
     "Building a fully offline iOS app that scans a car with LiDAR (photogrammetry fallback), lets you design paint and livery in 3D, and shows it at real scale in AR."
    ],
    "story": "",
-   "playlist": null
+   "playlist": null,
+   "verified": null
   },
   {
    "id": "chess-ai",
@@ -421,7 +434,8 @@
     "Implemented an AlphaZero-style chess agent from scratch: CNN board encoder, Monte-Carlo tree search, replay buffer, parallel self-play and an evaluator, then optimised self-play for the GPU."
    ],
    "story": "",
-   "playlist": null
+   "playlist": null,
+   "verified": null
   },
   {
    "id": "data-terminal",
@@ -452,7 +466,8 @@
     "Wrote a C++ market-data terminal that streams live ticks from Finnhub (with a Yahoo Finance source), re-serves them over a TCP socket server, and feeds a Python live plotter."
    ],
    "story": "",
-   "playlist": null
+   "playlist": null,
+   "verified": null
   },
   {
    "id": "expense-tracker",
@@ -480,7 +495,8 @@
     "Wrote a personal-finance TUI in Go (Bubble Tea) on pure-Go SQLite, with monthly trackings that carry budgets forward."
    ],
    "story": "",
-   "playlist": null
+   "playlist": null,
+   "verified": null
   },
   {
    "id": "fps-rl-agent",
@@ -509,7 +525,8 @@
     "Evaluated quantitatively (reward, episode length, policy entropy) and qualitatively (emergent behaviours)."
    ],
    "story": "",
-   "playlist": null
+   "playlist": null,
+   "verified": null
   },
   {
    "id": "irecognise",
@@ -537,7 +554,8 @@
     "Built a motion-based facial-recognition model in the neuromorphic paradigm: spiking network with reward-modulated STDP learning, plus a federated training server."
    ],
    "story": "",
-   "playlist": null
+   "playlist": null,
+   "verified": null
   },
   {
    "id": "kkp-wallet",
@@ -571,7 +589,8 @@
     "Money is integer minor units end to end, decided and recorded on day one."
    ],
    "story": "Statements are monthly and retrospective, so the roadmap splits into what works from statements alone and what needs live capture (bank notifications). Phase 1 shipped from real statements, and live capture is now running on an iPhone. Also: a docs tree where each leaf names the code it covers, queryable by a script, so every session reads only what it touches.",
-   "playlist": null
+   "playlist": null,
+   "verified": null
   },
   {
    "id": "mybudixc",
@@ -598,7 +617,8 @@
     "Built a Go exchange engine: a price-time-priority order book for instant matches, and a deadline-aware batch matcher that globally pairs unmatched orders every N minutes to maximise volume, with a WebSocket market feed."
    ],
    "story": "",
-   "playlist": null
+   "playlist": null,
+   "verified": null
   },
   {
    "id": "ollama-home-lab",
@@ -627,7 +647,8 @@
     "Run a private LLM serving box (Ollama on Windows + WSL) reachable from my devices over a Tailscale mesh, the default inference backend for RE-News (qwen3:32b)."
    ],
    "story": "",
-   "playlist": null
+   "playlist": null,
+   "verified": null
   },
   {
    "id": "plate-recognition",
@@ -655,7 +676,8 @@
     "Built an end-to-end OCR pipeline for Malaysian plates: YOLOv8 detection plus a custom CNN character recogniser, 94% character-level accuracy on 2,000+ self-collected images in varied lighting."
    ],
    "story": "",
-   "playlist": null
+   "playlist": null,
+   "verified": null
   },
   {
    "id": "polyarb",
@@ -684,7 +706,8 @@
     "Added risk controls for non-atomic multi-leg execution, with live trading behind an explicit safety flag, plus SQLite persistence and metrics."
    ],
    "story": "",
-   "playlist": null
+   "playlist": null,
+   "verified": null
   },
   {
    "id": "re-news",
@@ -717,7 +740,8 @@
     "Made the model backend switchable per stage: a local qwen3:32b on the home-lab GPU by default, Claude as an opt-in."
    ],
    "story": "\"Grey is correct\": the system shows nothing rather than an extrapolation. Ties to the home lab, which the LLM runs on.",
-   "playlist": null
+   "playlist": null,
+   "verified": null
   },
   {
    "id": "sales-signatures",
@@ -740,7 +764,8 @@
    "what": "Early notes and code borrowing the Instant Policy idea: learn signature-to-signature mappings so similar products' sales histories predict a new one's.",
    "bullets": [],
    "story": "",
-   "playlist": null
+   "playlist": null,
+   "verified": null
   },
   {
    "id": "srgan",
@@ -770,7 +795,8 @@
     "Ran ablations of pixel-wise MSE vs. perceptual loss, quantifying the perceptual-quality/PSNR trade-off."
    ],
    "story": "",
-   "playlist": null
+   "playlist": null,
+   "verified": null
   },
   {
    "id": "tradingjoe",
@@ -803,7 +829,8 @@
     "Ran a five-agent red team over my own results (leakage, finance, ML, LLM, execution), found no demonstrated out-of-sample edge, retracted the claims in writing, and disabled the affected strategy pending fixes."
    ],
    "story": "The best story in the bank. A backtest said \"5/5 beats MinVar\". The red team found leakage and an LLM citing documents that had never been ingested. I published the retraction in the repo and replaced fabricated citations with an honest \"no documents found\". This is the one for the website.",
-   "playlist": null
+   "playlist": null,
+   "verified": null
   },
   {
    "id": "transformer-from-scratch",
@@ -829,7 +856,8 @@
     "Reimplemented the original Transformer (encoder, decoder, attention) from the paper in PyTorch, with training and evaluation scripts, and trained it on a subtitle corpus."
    ],
    "story": "The training data is fourteen seasons of Archer subtitles. Lead with that on the website.",
-   "playlist": null
+   "playlist": null,
+   "verified": null
   }
  ],
  "groups": {
