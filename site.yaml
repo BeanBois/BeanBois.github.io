@@ -76,6 +76,8 @@ colours:
     spot: "#d9507f"       # light raspberry: only what's live or chosen
     spot_edge: "#f2a7c0"  # pink border round the red
     on_spot: "#ffffff"    # text on red
+    live:
+      text: "#b03463"     # a darker red for words, so they pass contrast
   dark:
     paper: "#0c1511"      # green-black
     ink: "#e2ebe5"
