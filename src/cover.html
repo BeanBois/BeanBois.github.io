@@ -37,22 +37,14 @@ button:focus-visible, a:focus-visible, canvas:focus-visible { outline: 3px solid
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .sr:focus-within { position: fixed; left: 16px; top: 16px; width: auto; height: auto; clip: auto; z-index: 5; background: var(--paper); border: 2px solid var(--ink); padding: 8px; max-height: 80vh; overflow: auto; }
 
-/* the speech bubble: positioned by script beside the selected point, tail aimed at it */
-.say {
-  position: fixed; z-index: 3;
-  background: var(--paper); border: 3px solid var(--ink); border-radius: 26px;
-  padding: 22px 26px 26px; overflow: auto; overscroll-behavior: contain;
-  animation: pop 0.22s cubic-bezier(.2, 1.4, .4, 1);
-}
 @keyframes pop { from { transform: scale(0.92); opacity: 0; } to { transform: none; opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { .say { animation: none; } }
 .pick { position: fixed; z-index: 4; background: var(--paper); border: 2.5px solid var(--ink); border-radius: 16px; padding: 6px; min-width: 220px; max-width: min(340px, calc(100vw - 24px)); max-height: 50vh; overflow: auto; animation: pop 0.16s ease-out; }
 .pick button { display: grid; grid-template-columns: 12px minmax(0, 1fr); gap: 10px; align-items: start; width: 100%; text-align: left; font: inherit; color: var(--ink); background: none; border: 0; border-radius: 10px; padding: 7px 10px; cursor: pointer; }
 .pick button:hover, .pick button:focus-visible { background: var(--soft); }
 .pick .glyph { width: 12px; height: 12px; margin-top: 5px; }
 .pick b { font: 500 13px var(--font-mono); display: block; }
 .pick small { display: block; color: var(--muted); font-size: 12px; line-height: 1.4; }
-.close { float: right; margin: -8px -10px 6px 10px; width: 34px; height: 34px; border-radius: 50%; font: 400 15px var(--font-display); color: var(--paper); background: var(--ink); border: 0; cursor: pointer; }
+.close { float: right; margin: 0 0 6px 10px; width: 34px; height: 34px; border-radius: 50%; font: 400 15px var(--font-display); color: var(--paper); background: var(--ink); border: 0; cursor: pointer; }
 .path { font: 12px var(--font-mono); color: var(--muted); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .path button { font: inherit; color: var(--ink); background: none; border: 0; border-bottom: 2px solid var(--live-red); padding: 0; cursor: pointer; }
 .stamps { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
@@ -105,71 +97,61 @@ dl.meta dd { margin: 0; min-width: 0; }
 .events time { color: var(--muted); margin-right: 6px; font-variant-numeric: tabular-nums; }
 .events .svc { color: var(--live-text); margin-right: 6px; font-weight: 600; }
 
-.mast { position: fixed; z-index: 2; left: max(20px, calc(env(safe-area-inset-left, 0px) + 12px)); top: calc(env(safe-area-inset-top, 0px) + 18px); display: grid; gap: 2px; pointer-events: none; }
-.mast a { pointer-events: auto; font: 400 20px var(--font-display); color: var(--ink); text-decoration: none; letter-spacing: 0.02em; }
-.mast span { font: 12px var(--font-mono); color: var(--muted); }
-.mastnav { position: fixed; z-index: 2; left: max(20px, calc(env(safe-area-inset-left, 0px) + 12px)); bottom: calc(env(safe-area-inset-bottom, 0px) + 18px); display: flex; gap: 18px; flex-wrap: wrap; font: 12px var(--font-mono); }
-.mastnav a { color: var(--ink); text-decoration: none; }
-.mastnav a b { font: 700 13px var(--font-body); margin-right: 4px; }
-.mastnav a:hover { text-decoration: underline; text-decoration-color: var(--live-red); text-decoration-thickness: 2px; }
-.np { margin: 6px 0 0; max-width: min(60ch, calc(100vw - 40px)); font: 12px/1.5 var(--font-mono); color: var(--muted); pointer-events: auto; }
-.np b { font: 400 13px var(--font-display); color: var(--ink); }
-.np a { font: inherit; letter-spacing: normal; color: inherit; text-decoration: none; }
-.deck { position: fixed; z-index: 2; left: max(20px, calc(env(safe-area-inset-left, 0px) + 12px)); top: calc(env(safe-area-inset-top, 0px) + 66px); pointer-events: auto; }
-.mastnav small { display: none; }
-/* Wide screens: the record (circle) half pulled out of its sleeve (square), with triangles in the corners pointing
-   the way out. The sleeve is what you read: the intro on home, a project's liner notes when one is open. JS sizes it
-   and cuts a hole where the record sits in front of it. Phones get the column below the record instead. */
-.intro, .more { display: none; }
-.shade { display: none; }
-@media (min-width: 900px) {
-  .rail {
-    position: fixed; z-index: 2; display: grid; grid-template-rows: minmax(0, 1fr); grid-template-columns: minmax(0, 1fr); overflow: hidden;
-    background: var(--sleeve-paper); color: var(--sleeve-text); border: 2.5px solid var(--sleeve-border);
-  }
-  .rail .deck { display: none; }
-  .rail .mast { position: static; pointer-events: auto; gap: 4px; min-width: 0; }
-  .rail .mast > a { font-size: 26px; line-height: 1.05; }
-  .rail .scroll { position: relative; z-index: 1; min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; padding: 34px var(--sleeve-pad, 40%) 30px 34px; }
-  .rail .body { min-height: 100%; display: flex; flex-direction: column; gap: 22px; padding-top: 26px; }
-  .rail .body > *, .rail .say * { min-width: 0; }
-  .rail:has(.say:not([hidden])) .mast, .rail:has(.say:not([hidden])) .intro { display: none; }   /* who I am: home only */
-  .rail .intro { display: block; }
-  .rail .intro p { margin: 0 0 14px; max-width: 40ch; }
-  .rail .intro .lede { font-size: 17px; }
-  .rail .intro .hint { font: 12px/1.7 var(--font-mono); color: var(--muted); }
-  .rail .say { position: static; overflow: visible; border: 0; border-radius: 0; padding: 0; }
-  .rail .say::before { content: "{{cover.sleeve_heading}}"; display: block; font: 500 10px var(--font-mono); letter-spacing: 0.2em; color: var(--muted); margin-bottom: 6px; }
-  .rail .say:not([hidden]) { animation: sleeve-in 0.4s cubic-bezier(.2, .8, .2, 1); }
-  .rail .close { margin: 0 0 6px 10px; }
-  .shade {
-    display: block; position: fixed; z-index: 1; pointer-events: none;
-    background-image: radial-gradient(var(--shadows-shadow) 1px, transparent 1.4px); background-size: 5px 5px; opacity: 0.55;
-  }
-  .rail .crescent {
-    position: absolute; z-index: 0; border-radius: 50%; pointer-events: none;
-    background-image: radial-gradient(var(--shadows-shadow) 1px, transparent 1.4px); background-size: 4px 4px; opacity: 0.6;
-  }
-  .mastnav { inset: 0; pointer-events: none; display: block; }
-  .mastnav a { position: fixed; pointer-events: auto; display: flex; gap: 8px; align-items: center; color: var(--corners-labels); text-decoration: none; font: 13px var(--font-mono); }
-  .mastnav a b { font: 700 14px var(--font-body); margin: 0; }
-  .mastnav a::before { content: ""; width: 11px; height: 11px; background: var(--corners-triangles); flex: none; }
-  .mastnav a:hover { text-decoration: none; }
-  .mastnav a:hover::before { background: var(--corners-current); box-shadow: 0 0 0 2px var(--live-edge); }
-  .mastnav a:nth-child(1) { top: calc(env(safe-area-inset-top, 0px) + 30px); right: calc(env(safe-area-inset-right, 0px) + 34px); flex-direction: row-reverse; }
-  .mastnav a:nth-child(1)::before { clip-path: polygon(0 0, 100% 0, 100% 100%); }
-  .mastnav a:nth-child(2) { bottom: calc(env(safe-area-inset-bottom, 0px) + 28px); left: calc(env(safe-area-inset-left, 0px) + 34px); }
-  .mastnav a:nth-child(2)::before { clip-path: polygon(0 0, 0 100%, 100% 100%); }
-  .mastnav a:nth-child(3) { bottom: calc(env(safe-area-inset-bottom, 0px) + 28px); right: calc(env(safe-area-inset-right, 0px) + 34px); flex-direction: row-reverse; }
-  .mastnav a:nth-child(3)::before { clip-path: polygon(100% 0, 100% 100%, 0 100%); }
+/* The record (circle) half pulled out of its sleeve (square), with triangles in the corners pointing the way out.
+   The sleeve is what you read: the intro on home, a project's liner notes when one is open. JS sizes it and cuts a
+   hole where the record sits in front of it. Wide screens: the sleeve left, the record out of its right side.
+   Phones: the record on top, out of the sleeve's top edge; the sleeve grows up the screen when a project opens. */
+.rail {
+  position: fixed; z-index: 2; display: grid; grid-template-rows: minmax(0, 1fr); grid-template-columns: minmax(0, 1fr); overflow: hidden;
+  background: var(--sleeve-paper); color: var(--sleeve-text); border: 2.5px solid var(--sleeve-border);
 }
+.rail .scroll { position: relative; z-index: 1; min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; padding: var(--sleeve-pad-t, 34px) 22px 24px 22px; }
+.rail .body { min-height: 100%; display: flex; flex-direction: column; gap: 18px; }
+.rail .body > *, .rail .say * { min-width: 0; }
+.rail:has(.say:not([hidden])) .mast, .rail:has(.say:not([hidden])) .intro { display: none; }   /* who I am: home only */
+.mast { display: grid; gap: 4px; min-width: 0; }
+.mast a { font: 400 22px/1.05 var(--font-display); color: var(--ink); text-decoration: none; letter-spacing: 0.02em; }
+.mast span { font: 12px var(--font-mono); color: var(--muted); }
+.intro p { margin: 0 0 12px; max-width: 40ch; }
+.intro .lede { font-size: 16px; }
+.intro .hint { font: 12px/1.7 var(--font-mono); color: var(--muted); }
+.say::before { content: "{{cover.sleeve_heading}}"; display: block; font: 500 10px var(--font-mono); letter-spacing: 0.2em; color: var(--muted); margin-bottom: 6px; }
+.say:not([hidden]) { animation: sleeve-in 0.4s cubic-bezier(.2, .8, .2, 1); }
 @keyframes sleeve-in { from { transform: translateY(14px); opacity: 0; } to { transform: none; opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { .rail .say:not([hidden]) { animation: none; } }
-.np .by::before { content: "· "; }
-.np .bpm::before { content: "· "; }
-.meter { display: block; width: 160px; height: 18px; margin-top: 6px; }
-.np .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--live-red); box-shadow: 0 0 0 2px var(--live-edge); margin-right: 6px; vertical-align: 1px; }
-.np button { font: inherit; color: var(--muted); background: none; border: 0; border-bottom: 1px dashed var(--tone); padding: 0; margin-left: 8px; cursor: pointer; }
+@media (prefers-reduced-motion: reduce) { .say:not([hidden]) { animation: none; } }
+.shade {
+  position: fixed; z-index: 1; pointer-events: none;
+  background-image: radial-gradient(var(--shadows-shadow) 1px, transparent 1.4px); background-size: 5px 5px; opacity: 0.55;
+}
+.rail .crescent {
+  position: absolute; z-index: 0; border-radius: 50%; pointer-events: none;
+  background-image: radial-gradient(var(--shadows-shadow) 1px, transparent 1.4px); background-size: 4px 4px; opacity: 0.6;
+}
+.more { display: none; }
+.mastnav { position: fixed; inset: 0; z-index: 2; pointer-events: none; }
+.mastnav a { position: fixed; pointer-events: auto; display: flex; gap: 8px; align-items: center; color: var(--corners-labels); text-decoration: none; font: 12px var(--font-mono); }
+.mastnav a b { font: 700 13px var(--font-body); }
+.mastnav a::before { content: ""; width: 11px; height: 11px; background: var(--corners-triangles); flex: none; }
+.mastnav a:hover::before { background: var(--corners-current); box-shadow: 0 0 0 2px var(--live-edge); }
+.mastnav a:nth-child(1) { top: calc(env(safe-area-inset-top, 0px) + 18px); right: calc(env(safe-area-inset-right, 0px) + 18px); flex-direction: row-reverse; }
+.mastnav a:nth-child(1)::before { clip-path: polygon(0 0, 100% 0, 100% 100%); }
+.mastnav a:nth-child(2) { bottom: calc(env(safe-area-inset-bottom, 0px) + 18px); left: calc(env(safe-area-inset-left, 0px) + 18px); }
+.mastnav a:nth-child(2)::before { clip-path: polygon(0 0, 0 100%, 100% 100%); }
+.mastnav a:nth-child(3) { bottom: calc(env(safe-area-inset-bottom, 0px) + 18px); right: calc(env(safe-area-inset-right, 0px) + 18px); flex-direction: row-reverse; }
+.mastnav a:nth-child(3)::before { clip-path: polygon(100% 0, 100% 100%, 0 100%); }
+.mastnav small { display: none; }
+@media (min-width: 900px), (min-width: 600px) and (min-aspect-ratio: 1/1) {
+  .rail .scroll { padding: 34px var(--sleeve-pad, 40%) 30px 34px; }
+  .rail .body { gap: 22px; padding-top: 26px; }
+  .mast a { font-size: 26px; }
+  .intro p { margin-bottom: 14px; }
+  .intro .lede { font-size: 17px; }
+  .mastnav a { font-size: 13px; }
+  .mastnav a b { font-size: 14px; }
+  .mastnav a:nth-child(1) { top: calc(env(safe-area-inset-top, 0px) + 30px); right: calc(env(safe-area-inset-right, 0px) + 34px); }
+  .mastnav a:nth-child(2) { bottom: calc(env(safe-area-inset-bottom, 0px) + 28px); left: calc(env(safe-area-inset-left, 0px) + 34px); }
+  .mastnav a:nth-child(3) { bottom: calc(env(safe-area-inset-bottom, 0px) + 28px); right: calc(env(safe-area-inset-right, 0px) + 34px); }
+}
 .chap { display: inline-block; margin-top: 14px; font: 400 15px var(--font-display); color: var(--paper); background: var(--ink); padding: 6px 14px 5px; text-decoration: none; }
 .chap:hover { background: var(--live-red); box-shadow: 0 0 0 2px var(--live-edge); }
 </style>
@@ -191,7 +173,7 @@ dl.meta dd { margin: 0; min-width: 0; }
 <p class="more" aria-hidden="true">目次 · 作者 · 奥付 further down ↓</p>
 </div>
 </div>
-<section class="deck" aria-label="Now playing"><p class="np" id="np" aria-live="polite"></p><canvas class="meter" id="meter" aria-hidden="true"></canvas></section>
+<section class="deck sr" aria-label="Now playing"><p class="np" id="np" aria-live="polite"></p></section>
 </div>
 <nav class="mastnav" aria-label="Volume">
   <a href="contents.html"><b>目次</b><span>contents</span><small id="navvols">{{cover.directory.contents}}</small></a>
@@ -332,37 +314,47 @@ function readColours() {
 }
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", readColours);
 new MutationObserver(readColours).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-document.fonts?.ready.then(() => draw());
+document.fonts?.ready.then(() => { if (W) layout(); draw(); });
 
-/* ---------- layout: the ball alone, or the ball beside a speech bubble ---------- */
+/* ---------- layout: the record and its sleeve ---------- */
 const sayEl = document.getElementById("say");
 let W = 0, H = 0, dpr = 1;
 let cx = 0, cy = 0, R = 0;          // drawn
 let tx = 0, ty = 0, tR = 0;         // target
 const CAM = 3.2, K = Math.sqrt(CAM * CAM - 1);   // camera distance; K makes the ball's silhouette exactly R
-const wide = () => W >= 900;          // the same break as the sleeve's CSS
-const GAP = 56;                     // blank paper between the ball and the bubble
+const wide = () => W >= 900 || (W >= 600 && W >= H);   // the same break as the CSS
+let sw = 0, sh = 0, tSw = 0, tSh = 0;   // the sleeve's size: drawn, target (it eases with the record)
+const mastEl = document.querySelector(".mast"), introEl = document.getElementById("intro");
 function layout() {
   const open = !sayEl.hidden;
   if (wide()) {
-    // the sleeve, a square, sits left of centre; the record is pulled two-thirds out of it, to the right
-    const S = Math.min(H - 110, W * 0.44), R0 = S * 0.485;
-    tR = R0; tx = W * 0.07 + S + R0 * 0.3; ty = H / 2;
-  } else if (!open) { tx = W / 2; ty = H / 2; tR = Math.min(W, H) / 2 - 28; }
-  else {
-    tR = Math.max(70, Math.min(W / 2 - 20, H * 0.19));
-    tx = W / 2; ty = tR + 20;
+    // the sleeve, a square, sits left of centre; the record is pulled two-thirds out of it, to the right.
+    // On a short screen (a phone on its side) the sleeve widens instead, so the intro still has room.
+    const S = Math.min(H - 110, W * 0.44);
+    tR = S * 0.485; tSh = H < 600 ? H - 150 : S; tSw = H < 600 ? Math.max(S, W * 0.5) : S;
+    tx = W * 0.07 + tSw + tR * 0.3; ty = H / 2;
+    return;
   }
-  placeSay();
-}
-function placeSay() {
-  if (sayEl.hidden) return;
-  const s = sayEl.style;
-  if (wide()) {
-    s.cssText = "";                  // it's printed on the sleeve
+  // a phone: the record on top, two-thirds out of the sleeve's top edge, the track round its rim above it.
+  // Closed, the sleeve is square if the intro fits (the record shrinks a little first if it doesn't); open, the
+  // record shrinks and the sleeve takes the rest of the screen.
+  const top = 52, foot = 60, rim = 26, room = H - top - foot - rim;
+  tSw = Math.min(W - 32, 520); tx = W / 2;
+  if (!open) {
+    const words = mastEl.offsetHeight + 18 + introEl.offsetHeight + 36;          // what the sleeve has to show
+    tR = Math.max(80, Math.min(W / 2 - 44, tSw * 0.42, (room - 25 - words) / 2));
+    tSh = Math.min(room - 1.3 * tR, Math.max(tSw, 0.7 * tR + 25 + words));
+    ty = top + Math.max(0, (room - 1.3 * tR - tSh) / 2) + rim + tR;
   } else {
-    Object.assign(s, { left: "12px", right: "12px", width: "auto", top: (ty + tR + GAP * 0.6) + "px", bottom: "12px", height: "auto" });
+    tR = Math.max(60, Math.min(W / 2 - 44, tSw * 0.42, H * 0.14));
+    ty = top + rim + tR;
+    tSh = H - foot - (ty + 0.3 * tR);
   }
+}
+// the sleeve's box, from where the record is drawn now, so the two move together
+function sleeveBox() {
+  if (wide()) return { left: cx - R * 0.3 - sw, top: cy - sh / 2, w: sw, h: sh };
+  return { left: (W - sw) / 2, top: cy + 0.3 * R, w: sw, h: sh };
 }
 function resize() {
   const r = cv.getBoundingClientRect();
@@ -370,7 +362,7 @@ function resize() {
   W = r.width; H = r.height;
   cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
   layout();
-  if (!R) { cx = tx; cy = ty; R = tR; }
+  if (!R) { cx = tx; cy = ty; R = tR; sw = tSw; sh = tSh; }
   draw();
 }
 new ResizeObserver(resize).observe(cv);
@@ -475,7 +467,7 @@ function draw(now = performance.now()) {
   const time = (now - t0) / 1000;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.fillStyle = col["--paper"]; ctx.fillRect(0, 0, W, H);
-  if (wide()) { drawBlot(); placeSleeve(); }
+  drawBlot(); placeSleeve();
   if (music) { drawGrooves(now); drawRimPlayer(now); }
 
   // the steel ball: three grooves on its surface, turning with it (a record has its own grooves instead)
@@ -592,22 +584,6 @@ function draw(now = performance.now()) {
 
   if (music) drawArm(now);
 
-  // the line from the selected point to its bubble
-  if (sel && !sayEl.hidden && !wide()) {
-    const v = view(sel.z), s = proj(v), b = sayEl.getBoundingClientRect();
-    const ey = b.top, ex = Math.max(b.left + 36, Math.min(b.right - 36, s.x));
-    const ang = Math.atan2(ey - s.y, ex - s.x);
-    let reach;
-    if (sel === ME) reach = (music && rec.on === ME ? labelR(v, s) : Math.max(6, 24 * conf(v) * s.s)) + 12;
-    else if (music && sel === rec.on && rec.vis > 0.5) reach = labelR(v, s) + 12;
-    else { ctx.font = `500 12px ${mono}`; const hw = tagWidth(sel, 1) / 2, hh = 11; reach = Math.min(hw / Math.max(1e-6, Math.abs(Math.cos(ang))), hh / Math.max(1e-6, Math.abs(Math.sin(ang)))) + 8; }
-    const sx = s.x + Math.cos(ang) * reach, sy = s.y + Math.sin(ang) * reach;
-    ctx.strokeStyle = col["--ink"]; ctx.lineWidth = 2; ctx.lineCap = "round";
-    ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.stroke();
-    ctx.fillStyle = col["--ink"];
-    ctx.beginPath(); ctx.arc(sx, sy, 3.5, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(ex, ey, 5, 0, Math.PI * 2); ctx.fill();
-  }
 }
 
 function loop(now) {
@@ -649,7 +625,7 @@ function loop(now) {
   }
   // ease the ball toward its layout
   const ease = reduce ? 1 : 0.16;
-  cx += (tx - cx) * ease; cy += (ty - cy) * ease; R += (tR - R) * ease;
+  cx += (tx - cx) * ease; cy += (ty - cy) * ease; R += (tR - R) * ease; sw += (tSw - sw) * ease; sh += (tSh - sh) * ease;
   draw(now);
   if (!reduce || music || anim || trip || Math.abs(tx - cx) + Math.abs(ty - cy) + Math.abs(tR - R) > 0.5) requestAnimationFrame(loop);
 }
@@ -863,8 +839,8 @@ function drawGrooves(now) {
 // the record as it eases: it sits behind, with a hole cut where the record lies in front of it, the record's
 // shadow on it, and its own shadow on the page.
 function drawBlot() {
-  const S = R / 0.485, left = cx - R * 0.3 - S, top = cy - S / 2;
-  const bx = left + S * 0.04, by = top + S * 0.98, br = S * 0.3;   // peeking out from under the sleeve's lower left
+  const { left, top, w, h } = sleeveBox();
+  const bx = left + w * 0.04, by = top + h * 0.98, br = Math.min(w, h) * 0.3;   // peeking out from under the sleeve's lower left
   ctx.save(); ctx.beginPath();
   for (let i = 0; i <= 72; i++) {
     const a = (i / 72) * Math.PI * 2, r = br * (1 + 0.13 * Math.sin(3 * a + 0.6) + 0.07 * Math.sin(5 * a + 2.1) + 0.04 * Math.sin(9 * a));
@@ -876,15 +852,16 @@ function drawBlot() {
 const railEl = document.querySelector(".rail"), shadeEl = document.getElementById("shade"), crescentEl = document.getElementById("crescent");
 let sleeveKey = "";
 function placeSleeve() {
-  const S = R / 0.485, left = cx - R * 0.3 - S, top = cy - S / 2, hole = R + 7, hx = cx - left, hy = cy - top;
-  const key = [S, left, top].map(v => v.toFixed(1)).join();
+  const { left, top, w, h } = sleeveBox(), hole = R + 7, hx = cx - left, hy = cy - top;
+  const key = [w, h, left, top].map(v => v.toFixed(1)).join();
   if (key === sleeveKey) return;
   sleeveKey = key;
   const ring = (x, y, r) => `M${x + r} ${y}A${r} ${r} 0 1 0 ${x - r} ${y}A${r} ${r} 0 1 0 ${x + r} ${y}Z`;
-  const cut = (dx, dy) => `path(evenodd, "M0 0H${S}V${S}H0Z${ring(hx - dx, hy - dy, hole)}")`;
-  Object.assign(railEl.style, { left: left + "px", top: top + "px", width: S + "px", height: S + "px", clipPath: cut(0, 0) });
-  railEl.style.setProperty("--sleeve-pad", (S - (hx - hole) + 28) + "px");
-  Object.assign(shadeEl.style, { left: left + 12 + "px", top: top + 14 + "px", width: S + "px", height: S + "px", clipPath: cut(12, 14) });
+  const cut = (dx, dy) => `path(evenodd, "M0 0H${w}V${h}H0Z${ring(hx - dx, hy - dy, hole)}")`;
+  Object.assign(railEl.style, { left: left + "px", top: top + "px", width: w + "px", height: h + "px", clipPath: cut(0, 0) });
+  railEl.style.setProperty("--sleeve-pad", (w - (hx - hole) + 28) + "px");     // wide: clear of the record on the right
+  railEl.style.setProperty("--sleeve-pad-t", (hy + hole + 18) + "px");         // phone: clear of the record above
+  Object.assign(shadeEl.style, { left: left + 12 + "px", top: top + 14 + "px", width: w + "px", height: h + "px", clipPath: cut(12, 14) });
   Object.assign(crescentEl.style, { left: hx - hole + 9 + "px", top: hy - hole + 11 + "px", width: 2 * hole + "px", height: 2 * hole + "px" });
 }
 
@@ -898,10 +875,16 @@ function drawRimPlayer(now) {
   const rr = R + 20;
   ctx.font = `500 12px ${fonts["--font-mono"]}`;
   const w = c => ctx.measureText(c).width + 1.6;
-  while ([...text].reduce((a, c) => a + w(c), 0) / rr > Math.PI * 0.95 && text.length > 12) text = text.slice(0, -2).trimEnd() + "…";
+  // where the text runs: wide, round the upper right, clear of the sleeve; on a phone, the upper left, clear of the
+  // tonearm; on a phone on its side, just the top, between the sleeve and the tonearm
+  const short = wide() && H < 600;
+  const most = short ? Math.PI * 0.4 : wide() ? Math.PI * 0.95 : Math.PI * 0.6;
+  const mid = short ? -Math.PI / 2 : wide() ? -Math.PI / 3 : -Math.PI * 0.64;
+  const full = text;
+  while ([...text].reduce((a, c) => a + w(c), 0) / rr > most && text.length > 12) text = text.slice(0, -2).trimEnd() + "…";
+  if (text !== full && text.lastIndexOf(" ") > 12) text = text.slice(0, text.lastIndexOf(" ")).replace(/[\s·]+$/, "") + "…";   // cut at a word
   const chars = [...text], span = chars.reduce((a, c) => a + w(c), 0) / rr;
   ctx.fillStyle = col["--rim-player-track-text"]; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-  const mid = -Math.PI / 3;      // round to the upper right, clear of the sleeve
   let a = mid - span / 2;
   for (const c of chars) {
     const th = a + w(c) / 2 / rr;
@@ -1089,14 +1072,13 @@ document.getElementById("srlist").addEventListener("click", ev => {
 
 const wantId = decodeURIComponent(location.hash.slice(1));
 if (wantId === "me" || byId.has(wantId)) setTimeout(() => select(wantId === "me" ? ME : byId.get(wantId)), 500);
-/* ---------- the meter: a row of level bars, like a DJ deck's ----------
-   There's no audio to analyse (the browser can't hear Kai Shun's phone), so the bars are drawn from the tempo:
+/* ---------- the levels: the bars round the rim, like a DJ deck's meter ----------
+   There's no audio to analyse (the browser can't hear Kai Shun's phone), so the levels come from the tempo:
    a kick on every beat in the low bars, a hat between beats in the high ones, each bar with its own decay.
    Without a tempo they sway gently; with nothing playing they lie flat. */
-const meter = document.getElementById("meter"), mctx = meter.getContext("2d");
-const BARS = 28, level = new Float32Array(BARS), peak = new Float32Array(BARS);
+const BARS = 28, level = new Float32Array(BARS);
 let meterLast = performance.now();
-function drawMeter(now) {
+function beat(now) {
   const dt = Math.min(0.1, (now - meterLast) / 1000); meterLast = now;
   const live = music && music.is_playing && rec.vis > 0.5;     // quiet while the record is being changed
   const beats = live && music.bpm ? songAt(now) * music.bpm / 60 : now / 1000 * 1.6;
@@ -1108,21 +1090,9 @@ function drawMeter(now) {
                                : 0.2 + 0.3 * wob;
     if (reduce) want = live ? 0.25 + 0.35 * Math.sin(x * 3.1) * (1 - x * 0.5) : 0.04;
     level[i] += (want - level[i]) * (want > level[i] ? 1 - Math.exp(-dt * 40) : 1 - Math.exp(-dt * 7));   // fast attack, slow release
-    peak[i] = Math.max(level[i], peak[i] - dt * 0.45);
-  }
-  const w = meter.clientWidth, h = meter.clientHeight;
-  if (!w || !h) return;
-  if (meter.width !== Math.round(w * dpr) || meter.height !== Math.round(h * dpr)) { meter.width = Math.round(w * dpr); meter.height = Math.round(h * dpr); }
-  mctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  mctx.clearRect(0, 0, w, h);
-  const bw = w / BARS;
-  for (let i = 0; i < BARS; i++) {
-    const bh = Math.max(1.5, level[i] * h);
-    mctx.fillStyle = col["--rim-player-level-bars"]; mctx.fillRect(i * bw + 1, h - bh, bw - 2, bh);
-    if (live) { mctx.fillStyle = col["--live-red"]; mctx.fillRect(i * bw + 1, h - peak[i] * h - 3, bw - 2, 1.5); }   // red peak caps while it's live
   }
 }
-(function meterLoop(now) { drawMeter(now); requestAnimationFrame(meterLoop); })(performance.now());
+(function beatLoop(now) { beat(now); requestAnimationFrame(beatLoop); })(performance.now());
 
 document.getElementById("navvols").textContent = D.text.directoryContents.replace("{count}", D.nodes.length);
 document.getElementById("intro").innerHTML = `<p class="lede">${esc(D.profile.oneliner)}</p>

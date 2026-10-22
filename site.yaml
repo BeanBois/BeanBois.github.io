@@ -20,7 +20,6 @@ you:
 # The cover (index.html)
 cover:
   intro: "Every project I've built sits on this record, placed by the skills it took: ML, Backend, Infra and Product at the corners, mixed projects nearer the middle. Drag to spin it. Click a name."
-  hint: "Every project I've built, placed by the skills it took. Click a name."   # under the record until the first click (phones)
   label_rim: "TEOH KAI SHUN · SIDE A · 33⅓ RPM · "      # printed round the record's centre label
   sleeve_heading: LINER NOTES                           # the small heading on a project's sleeve
   directory:                                            # the line under each page's name (rail layouts; {count} = number of projects)

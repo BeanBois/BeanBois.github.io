@@ -659,7 +659,7 @@ def cover_page(data, vols, chapters):
     t = (SRC / "cover.html").read_text()
     data = dict(data, chapters={i: {"href": f"vol-{i}.html", "vol": vols[i]} for i in chapters}, vols=vols, musicApi=MUSIC_API or None,
                 profile=dict(data["profile"], oneliner=cfg("you.one_liner")), playlistIds=music_settings({n["id"] for n in data["nodes"]}),
-                text={"intro": cfg("cover.intro"), "hint": cfg("cover.hint"), "labelRim": cfg("cover.label_rim"),
+                text={"intro": cfg("cover.intro"), "labelRim": cfg("cover.label_rim"),
                       "directoryContents": cfg("cover.directory.contents"), "cvPdfNote": cfg("pages.cv_pdf_note") if PDFS else ""},
                 music=SAMPLE_MUSIC if not MUSIC_API else {"is_playing": False, "title": None},
                 playlists={})   # per-project playlists: not yet (see README)
