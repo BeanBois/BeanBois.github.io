@@ -21,7 +21,6 @@ HERE = Path(__file__).parent
 CONTENT, SRC, DIST = HERE / "content", HERE / "src", HERE / "dist"
 CFG = {}   # site.yaml, loaded by main()
 HOME = "./"
-LAYOUT = "shapes"   # the cover's layout: deck | record | strip | liner | sleeve | shapes (see src/cover.html)
 PREVIEW = os.environ.get("PREVIEW")   # set by the deploy for design/* branches: shown as a stamp
 
 esc = lambda s: html.escape(str(s or ""), quote=True)
@@ -581,7 +580,7 @@ def colophon_page(n_entries, n_public, n_vols):
 
 def cover_page(data, vols, chapters):
     t = (SRC / "cover.html").read_text()
-    data = dict(data, chapters={i: {"href": f"vol-{i}.html", "vol": vols[i]} for i in chapters}, vols=vols, musicApi=MUSIC_API or None, layout=LAYOUT,
+    data = dict(data, chapters={i: {"href": f"vol-{i}.html", "vol": vols[i]} for i in chapters}, vols=vols, musicApi=MUSIC_API or None,
                 profile=dict(data["profile"], oneliner=cfg("you.one_liner")), playlistIds=music_settings({n["id"] for n in data["nodes"]}),
                 text={"intro": cfg("cover.intro"), "hint": cfg("cover.hint"), "labelRim": cfg("cover.label_rim"),
                       "directoryContents": cfg("cover.directory.contents"), "cvPdfNote": cfg("pages.cv_pdf_note")},
@@ -645,7 +644,6 @@ document.addEventListener("visibilitychange", poll);
     if t.count("/*__DATA__*/null") != 1:
         raise SystemExit("src/cover.html: the data placeholder is missing")
     t = fill(t.replace("/*__COLOURS__*/", colours_css())).replace("/*__DATA__*/null", json.dumps(data, ensure_ascii=False))
-    t = t.replace('<html lang="en">', f'<html lang="en" data-layout="{LAYOUT}">', 1)
     (DIST / "index.html").write_text(t.replace("</body>", music_js + "\n</body>"))
 
 

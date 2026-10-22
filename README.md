@@ -20,7 +20,7 @@ portfolio/bank/*.md  (private)
                   └─ GitHub Actions → GitHub Pages
 ```
 
-Design drafts: push a `design/<name>` branch and it deploys as a preview at `/preview/<name>/`; `LAYOUT` in `build.py` picks the cover's layout.
+Design drafts: push a `design/<name>` branch and it deploys as a preview at `/preview/<name>/`.
 
 ```sh
 pip install pyyaml

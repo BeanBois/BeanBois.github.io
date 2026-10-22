@@ -116,133 +116,56 @@ dl.meta dd { margin: 0; min-width: 0; }
 .np a { font: inherit; letter-spacing: normal; color: inherit; text-decoration: none; }
 .deck { position: fixed; z-index: 2; left: max(20px, calc(env(safe-area-inset-left, 0px) + 12px)); top: calc(env(safe-area-inset-top, 0px) + 66px); pointer-events: auto; }
 .mastnav small { display: none; }
-/* 7-3: the record takes the left 70%, a rail the right 30%, so clicking never moves the record.
-   The rail is cut 7-3 the other way: the top 70% is one scrolling area (who I am on the home view, or the open
-   project), the bottom 30% the deck (what's playing, always in view, like a player bar). The way into the rest
-   of the volume sits at the end of the scroll, starting just below the fold, so it shows only when you scroll to it. */
+/* Wide screens: the record (circle) half pulled out of its sleeve (square), with triangles in the corners pointing
+   the way out. The sleeve is what you read: the intro on home, a project's liner notes when one is open. JS sizes it
+   and cuts a hole where the record sits in front of it. Phones get the column below the record instead. */
 .intro, .more { display: none; }
+.shade { display: none; }
 @media (min-width: 900px) {
-  :root:not([data-layout="sleeve"]) .rail {
-    position: fixed; z-index: 2; top: 0; right: 0; bottom: 0; width: 30%;
-    display: grid; grid-template-rows: minmax(0, 7fr) minmax(0, 3fr); grid-template-columns: minmax(0, 1fr);
-    background: var(--paper); border-left: 2px solid var(--ink);
+  .rail {
+    position: fixed; z-index: 2; display: grid; grid-template-rows: minmax(0, 1fr); grid-template-columns: minmax(0, 1fr); overflow: hidden;
+    background: var(--sleeve-paper); color: var(--sleeve-text); border: 2.5px solid var(--sleeve-border);
   }
-  :root:not([data-layout="sleeve"]) .rail .deck, :root:not([data-layout="sleeve"]) .rail .mast, :root:not([data-layout="sleeve"]) .rail .mastnav { position: static; pointer-events: auto; }
-  :root:not([data-layout="sleeve"]) .rail .deck {
-    display: flex; flex-direction: column; min-width: 0; min-height: 0; border-top: 2px solid var(--ink);
-    padding: 22px calc(env(safe-area-inset-right, 0px) + 32px) calc(env(safe-area-inset-bottom, 0px) + 24px) 36px;
-  }
-  :root:not([data-layout="sleeve"]) .rail .np { margin: 0; min-width: 0; overflow: hidden; max-width: none; font-size: 12px; }
-  :root:not([data-layout="sleeve"]) .rail .np .lbl, :root:not([data-layout="sleeve"]) .rail .np .by, :root:not([data-layout="sleeve"]) .rail .np .bpm { display: block; }
-  :root:not([data-layout="sleeve"]) .rail .np b { display: block; margin: 4px 0 2px; font-size: 19px; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  :root:not([data-layout="sleeve"]) .rail .np .by { color: var(--ink); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  :root:not([data-layout="sleeve"]) .rail .np .bpm { margin-top: 2px; }
-  :root:not([data-layout="sleeve"]) .rail .meter { width: 100%; flex: 1 1 0; min-height: 28px; height: 0; margin-top: 14px; }   /* the bars take what's left */
-  :root:not([data-layout="sleeve"]) .rail .scroll {
-    min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
-    padding: calc(env(safe-area-inset-top, 0px) + 10px) calc(env(safe-area-inset-right, 0px) + 32px) 28px 36px;
-  }
-  :root:not([data-layout="sleeve"]) .rail .body { min-height: 100%; display: flex; flex-direction: column; gap: 22px; padding-top: 26px; }
-  :root:not([data-layout="sleeve"]) .rail .body > *, :root:not([data-layout="sleeve"]) .rail .say * { min-width: 0; }
-  :root:not([data-layout="sleeve"]) .rail .mast { gap: 4px; min-width: 0; }
-  :root:not([data-layout="sleeve"]) .rail .mast > a { font-size: 26px; line-height: 1.05; }
-  :root:not([data-layout="sleeve"]) .rail:has(.say:not([hidden])) .mast, :root:not([data-layout="sleeve"]) .rail:has(.say:not([hidden])) .intro { display: none; }   /* who I am: home only */
-  :root:not([data-layout="sleeve"]) .rail .intro { display: block; }
-  :root:not([data-layout="sleeve"]) .rail .intro p { margin: 0 0 14px; max-width: 40ch; }
-  :root:not([data-layout="sleeve"]) .rail .intro .lede { font-size: 17px; }
-  :root:not([data-layout="sleeve"]) .rail .intro .hint { font: 12px/1.7 var(--font-mono); color: var(--muted); }
-  :root:not([data-layout="sleeve"]) .rail .say { position: static; overflow: visible; border: 0; border-radius: 0; padding: 0; animation: fade 0.25s ease-out; }
-  :root:not([data-layout="sleeve"]) .rail .close { margin: 0 0 6px 10px; }
-  :root:not([data-layout="sleeve"]) .rail .more { display: block; margin: auto 0 0; font: 11px var(--font-mono); color: var(--tone); }
-  :root:not([data-layout="sleeve"]) .rail .mastnav { display: grid; gap: 16px; border-top: 2px solid var(--ink); padding-top: 22px; margin-top: 8px; }
-  :root:not([data-layout="sleeve"]) .rail .mastnav a { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0 10px; align-items: baseline; text-decoration: none; }
-  :root:not([data-layout="sleeve"]) .rail .mastnav a b { font: 700 18px var(--font-body); margin: 0; grid-row: span 2; }
-  :root:not([data-layout="sleeve"]) .rail .mastnav a span { font: 400 16px var(--font-display); }
-  :root:not([data-layout="sleeve"]) .rail .mastnav small { display: block; font: 12px/1.5 var(--font-mono); color: var(--muted); }
-  :root:not([data-layout="sleeve"]) .rail .mastnav a:hover span { text-decoration: underline; text-decoration-color: var(--live-red); text-decoration-thickness: 2px; }
-}
-/* Layouts, one per design branch (D.layout, also set on <html data-layout>):
-   deck    the rail ends in a music deck (30%)
-   record  the record is the player: the track is printed round its rim, level bars ring its edge; no music box
-   strip   a slim player strip across the foot of the page
-   liner   the rail opens with a one-line credit for what's playing
-   sleeve  no rail: an open project slides out beside the record as a square sleeve; the nav sits in the corners */
-@media (min-width: 900px) {
-  :root[data-layout="record"] .rail { grid-template-rows: minmax(0, 1fr); }
-  :root[data-layout="record"] .rail .deck { display: none; }
-
-  :root[data-layout="liner"] .rail { grid-template-rows: auto minmax(0, 1fr); }
-  :root[data-layout="liner"] .rail .deck { order: -1; border-top: 0; border-bottom: 1.5px solid var(--soft); padding: calc(env(safe-area-inset-top, 0px) + 30px) 32px 16px 36px; }
-  :root[data-layout="liner"] .rail .meter { display: none; }
-  :root[data-layout="liner"] .rail .np { font-size: 12px; line-height: 1.6; }
-  :root[data-layout="liner"] .rail .np b { font-size: 15px; margin: 2px 0 0; }
-  :root[data-layout="liner"] .rail .np .by, :root[data-layout="liner"] .rail .np .bpm { display: inline; font-size: 12px; color: var(--muted); }
-  :root[data-layout="liner"] .rail .np .bpm::before { content: " · "; }
-
-  :root[data-layout="strip"] .rail { bottom: 46px; grid-template-rows: minmax(0, 1fr); }
-  :root[data-layout="strip"] .rail .deck {
-    position: fixed; z-index: 3; top: auto; left: 0; right: 0; bottom: 0; height: calc(46px + env(safe-area-inset-bottom, 0px));
-    flex-direction: row; align-items: center; gap: 18px; background: var(--paper); border-top: 2px solid var(--ink);
-    padding: 0 calc(env(safe-area-inset-right, 0px) + 32px) env(safe-area-inset-bottom, 0px) calc(env(safe-area-inset-left, 0px) + 32px);
-  }
-  :root[data-layout="strip"] .rail .np { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  :root[data-layout="strip"] .rail .np .lbl, :root[data-layout="strip"] .rail .np b, :root[data-layout="strip"] .rail .np .by, :root[data-layout="strip"] .rail .np .bpm { display: inline; }
-  :root[data-layout="strip"] .rail .np b { font-size: 14px; margin: 0 4px; }
-  :root[data-layout="strip"] .rail .np .by::before, :root[data-layout="strip"] .rail .np .bpm::before { content: "· "; }
-  :root[data-layout="strip"] .rail .meter { flex: none; width: 180px; height: 22px; margin: 0; }
-
-  :root[data-layout="sleeve"] .rail, :root[data-layout="sleeve"] .scroll, :root[data-layout="sleeve"] .body { display: contents; }
-  :root[data-layout="sleeve"] .deck, :root[data-layout="sleeve"] .intro, :root[data-layout="sleeve"] .more { display: none; }
-  :root[data-layout="sleeve"] .mast { top: calc(env(safe-area-inset-top, 0px) + 28px); left: calc(env(safe-area-inset-left, 0px) + 32px); }
-  :root[data-layout="sleeve"] .mastnav { inset: 0; pointer-events: none; }
-  :root[data-layout="sleeve"] .mastnav a { position: fixed; pointer-events: auto; font-size: 13px; }
-  :root[data-layout="sleeve"] .mastnav a span { margin-left: 4px; }
-  :root[data-layout="sleeve"] .mastnav a:nth-child(1) { top: calc(env(safe-area-inset-top, 0px) + 30px); right: calc(env(safe-area-inset-right, 0px) + 32px); }
-  :root[data-layout="sleeve"] .mastnav a:nth-child(2) { bottom: calc(env(safe-area-inset-bottom, 0px) + 26px); left: calc(env(safe-area-inset-left, 0px) + 32px); }
-  :root[data-layout="sleeve"] .mastnav a:nth-child(3) { bottom: calc(env(safe-area-inset-bottom, 0px) + 26px); right: calc(env(safe-area-inset-right, 0px) + 32px); }
-  /* the sleeve: square, flat, printed like liner notes; it slides out from the record's side */
-  :root[data-layout="sleeve"] .say { border-radius: 0; border-width: 2.5px; padding: 30px 32px 32px; animation: slide 0.35s cubic-bezier(.2, .8, .2, 1); }
-  :root[data-layout="sleeve"] .say::before { content: "{{cover.sleeve_heading}}"; display: block; font: 500 10px var(--font-mono); letter-spacing: 0.2em; color: var(--muted); margin-bottom: 6px; }
-}
-/* shapes: the record (circle) half pulled out of its sleeve (square), with triangles pointing the way out.
-   The sleeve is the rail made an object: JS sizes it and cuts a hole where the record sits in front of it. */
-@media (min-width: 900px) {
-  :root[data-layout="shapes"] .rail { right: auto; bottom: auto; background: var(--sleeve-paper); color: var(--sleeve-text); border: 2.5px solid var(--sleeve-border); grid-template-rows: minmax(0, 1fr); overflow: hidden; }
-  :root[data-layout="shapes"] .rail .deck, :root[data-layout="shapes"] .rail .more { display: none; }
-  :root[data-layout="shapes"] .rail .scroll { position: relative; z-index: 1; padding: 34px var(--sleeve-pad, 40%) 30px 34px; }
-  :root[data-layout="shapes"] .rail .say::before { content: "{{cover.sleeve_heading}}"; display: block; font: 500 10px var(--font-mono); letter-spacing: 0.2em; color: var(--muted); margin-bottom: 6px; }
-  :root[data-layout="shapes"] .rail .say:not([hidden]) { animation: sleeve-in 0.4s cubic-bezier(.2, .8, .2, 1); }
-  .shade { display: none; }
-  :root[data-layout="shapes"] .shade {
+  .rail .deck { display: none; }
+  .rail .mast { position: static; pointer-events: auto; gap: 4px; min-width: 0; }
+  .rail .mast > a { font-size: 26px; line-height: 1.05; }
+  .rail .scroll { position: relative; z-index: 1; min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; padding: 34px var(--sleeve-pad, 40%) 30px 34px; }
+  .rail .body { min-height: 100%; display: flex; flex-direction: column; gap: 22px; padding-top: 26px; }
+  .rail .body > *, .rail .say * { min-width: 0; }
+  .rail:has(.say:not([hidden])) .mast, .rail:has(.say:not([hidden])) .intro { display: none; }   /* who I am: home only */
+  .rail .intro { display: block; }
+  .rail .intro p { margin: 0 0 14px; max-width: 40ch; }
+  .rail .intro .lede { font-size: 17px; }
+  .rail .intro .hint { font: 12px/1.7 var(--font-mono); color: var(--muted); }
+  .rail .say { position: static; overflow: visible; border: 0; border-radius: 0; padding: 0; }
+  .rail .say::before { content: "{{cover.sleeve_heading}}"; display: block; font: 500 10px var(--font-mono); letter-spacing: 0.2em; color: var(--muted); margin-bottom: 6px; }
+  .rail .say:not([hidden]) { animation: sleeve-in 0.4s cubic-bezier(.2, .8, .2, 1); }
+  .rail .close { margin: 0 0 6px 10px; }
+  .shade {
     display: block; position: fixed; z-index: 1; pointer-events: none;
     background-image: radial-gradient(var(--shadows-shadow) 1px, transparent 1.4px); background-size: 5px 5px; opacity: 0.55;
   }
-  :root[data-layout="shapes"] .rail .crescent {
+  .rail .crescent {
     position: absolute; z-index: 0; border-radius: 50%; pointer-events: none;
     background-image: radial-gradient(var(--shadows-shadow) 1px, transparent 1.4px); background-size: 4px 4px; opacity: 0.6;
   }
-  :root[data-layout="shapes"] body > .mastnav { position: fixed; inset: 0; z-index: 2; pointer-events: none; display: block; }
-  :root[data-layout="shapes"] body > .mastnav a { position: fixed; pointer-events: auto; display: flex; gap: 8px; align-items: center; color: var(--corners-labels); text-decoration: none; font: 13px var(--font-mono); }
-  :root[data-layout="shapes"] body > .mastnav a b { font: 700 14px var(--font-body); }
-  :root[data-layout="shapes"] body > .mastnav a::before { content: ""; width: 11px; height: 11px; background: var(--corners-triangles); flex: none; }
-  :root[data-layout="shapes"] body > .mastnav a:hover::before { background: var(--corners-current); box-shadow: 0 0 0 2px var(--live-edge); }
-  :root[data-layout="shapes"] body > .mastnav a:nth-child(1) { top: calc(env(safe-area-inset-top, 0px) + 30px); right: calc(env(safe-area-inset-right, 0px) + 34px); flex-direction: row-reverse; }
-  :root[data-layout="shapes"] body > .mastnav a:nth-child(1)::before { clip-path: polygon(0 0, 100% 0, 100% 100%); }
-  :root[data-layout="shapes"] body > .mastnav a:nth-child(2) { bottom: calc(env(safe-area-inset-bottom, 0px) + 28px); left: calc(env(safe-area-inset-left, 0px) + 34px); }
-  :root[data-layout="shapes"] body > .mastnav a:nth-child(2)::before { clip-path: polygon(0 0, 0 100%, 100% 100%); }
-  :root[data-layout="shapes"] body > .mastnav a:nth-child(3) { bottom: calc(env(safe-area-inset-bottom, 0px) + 28px); right: calc(env(safe-area-inset-right, 0px) + 34px); flex-direction: row-reverse; }
-  :root[data-layout="shapes"] body > .mastnav a:nth-child(3)::before { clip-path: polygon(100% 0, 100% 100%, 0 100%); }
-  :root[data-layout="shapes"] body > .mastnav small { display: none; }
+  .mastnav { inset: 0; pointer-events: none; display: block; }
+  .mastnav a { position: fixed; pointer-events: auto; display: flex; gap: 8px; align-items: center; color: var(--corners-labels); text-decoration: none; font: 13px var(--font-mono); }
+  .mastnav a b { font: 700 14px var(--font-body); margin: 0; }
+  .mastnav a::before { content: ""; width: 11px; height: 11px; background: var(--corners-triangles); flex: none; }
+  .mastnav a:hover { text-decoration: none; }
+  .mastnav a:hover::before { background: var(--corners-current); box-shadow: 0 0 0 2px var(--live-edge); }
+  .mastnav a:nth-child(1) { top: calc(env(safe-area-inset-top, 0px) + 30px); right: calc(env(safe-area-inset-right, 0px) + 34px); flex-direction: row-reverse; }
+  .mastnav a:nth-child(1)::before { clip-path: polygon(0 0, 100% 0, 100% 100%); }
+  .mastnav a:nth-child(2) { bottom: calc(env(safe-area-inset-bottom, 0px) + 28px); left: calc(env(safe-area-inset-left, 0px) + 34px); }
+  .mastnav a:nth-child(2)::before { clip-path: polygon(0 0, 0 100%, 100% 100%); }
+  .mastnav a:nth-child(3) { bottom: calc(env(safe-area-inset-bottom, 0px) + 28px); right: calc(env(safe-area-inset-right, 0px) + 34px); flex-direction: row-reverse; }
+  .mastnav a:nth-child(3)::before { clip-path: polygon(100% 0, 100% 100%, 0 100%); }
 }
 @keyframes sleeve-in { from { transform: translateY(14px); opacity: 0; } to { transform: none; opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { :root[data-layout="shapes"] .rail .say:not([hidden]) { animation: none; } }
-@keyframes slide { from { transform: translateX(-90px); opacity: 0; } to { transform: none; opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { :root[data-layout="sleeve"] .say { animation: none; } }
-@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { .rail .say { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .rail .say:not([hidden]) { animation: none; } }
 .np .by::before { content: "· "; }
 .np .bpm::before { content: "· "; }
-@media (min-width: 900px) { .rail .np .by::before, .rail .np .bpm::before { content: none; } }
 .meter { display: block; width: 160px; height: 18px; margin-top: 6px; }
 .np .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--live-red); box-shadow: 0 0 0 2px var(--live-edge); margin-right: 6px; vertical-align: 1px; }
 .np button { font: inherit; color: var(--muted); background: none; border: 0; border-bottom: 1px dashed var(--tone); padding: 0; margin-left: 8px; cursor: pointer; }
@@ -266,14 +189,14 @@ dl.meta dd { margin: 0; min-width: 0; }
 </aside>
 <p class="more" aria-hidden="true">目次 · 作者 · 奥付 further down ↓</p>
 </div>
+</div>
+<section class="deck" aria-label="Now playing"><p class="np" id="np" aria-live="polite"></p><canvas class="meter" id="meter" aria-hidden="true"></canvas></section>
+</div>
 <nav class="mastnav" aria-label="Volume">
   <a href="contents.html"><b>目次</b><span>contents</span><small id="navvols">{{cover.directory.contents}}</small></a>
   <a href="author.html"><b>作者</b><span>author &amp; CV</span><small>{{cover.directory.author}}</small></a>
   <a href="colophon.html"><b>奥付</b><span>colophon</span><small>{{cover.directory.colophon}}</small></a>
 </nav>
-</div>
-<section class="deck" aria-label="Now playing"><p class="np" id="np" aria-live="polite"></p><canvas class="meter" id="meter" aria-hidden="true"></canvas></section>
-</div>
 <nav class="sr" aria-label="All projects" id="srlist"></nav>
 <div class="pick" id="pick" role="dialog" aria-label="Projects here" hidden></div>
 
@@ -416,25 +339,14 @@ let W = 0, H = 0, dpr = 1;
 let cx = 0, cy = 0, R = 0;          // drawn
 let tx = 0, ty = 0, tR = 0;         // target
 const CAM = 3.2, K = Math.sqrt(CAM * CAM - 1);   // camera distance; K makes the ball's silhouette exactly R
-const LAYOUT = D.layout || "deck";
-const wide = () => W >= 900;          // the same break as the rail's CSS
-const AREA = 0.7;                    // the record's share of a wide screen
+const wide = () => W >= 900;          // the same break as the sleeve's CSS
 const GAP = 56;                     // blank paper between the ball and the bubble
 function layout() {
   const open = !sayEl.hidden;
-  if (wide() && LAYOUT === "shapes") {
+  if (wide()) {
     // the sleeve, a square, sits left of centre; the record is pulled two-thirds out of it, to the right
     const S = Math.min(H - 110, W * 0.44), R0 = S * 0.485;
     tR = R0; tx = W * 0.07 + S + R0 * 0.3; ty = H / 2;
-  } else if (wide() && LAYOUT === "sleeve") {
-    // no rail: the record alone in the middle; an open project's sleeve slides out to its right
-    if (!open) { tR = Math.min(W, H) / 2 - 90; tx = W / 2; ty = H / 2; }
-    else { tR = Math.max(80, Math.min(H / 2 - 90, W * 0.24)); tx = W * 0.06 + tR + 30; ty = H / 2; }
-  } else if (wide()) {
-    // 7-3: centred in the left 70%, with room for the tonearm; the rail on the right holds everything else
-    const foot = LAYOUT === "strip" ? 46 : 0;
-    tR = Math.max(80, Math.min(W * AREA / 2 - 70, (H - foot) / 2 - 48));
-    tx = W * AREA / 2 - 10; ty = (H - foot) / 2;
   } else if (!open) { tx = W / 2; ty = H / 2; tR = Math.min(W, H) / 2 - 28; }
   else {
     tR = Math.max(70, Math.min(W / 2 - 20, H * 0.19));
@@ -445,14 +357,8 @@ function layout() {
 function placeSay() {
   if (sayEl.hidden) return;
   const s = sayEl.style;
-  if (wide() && LAYOUT === "shapes") {
+  if (wide()) {
     s.cssText = "";                  // it's printed on the sleeve
-  } else if (wide() && LAYOUT === "sleeve") {
-    // a square the height of the record, beside it
-    const side = Math.min(2 * tR, W - (tx + tR + 40) - 40), top = Math.max(24, ty - side / 2);
-    Object.assign(s, { left: (tx + tR + 40) + "px", width: side + "px", right: "auto", top: top + "px", height: side + "px", bottom: "auto" });
-  } else if (wide()) {
-    s.cssText = "";                  // it sits in the rail
   } else {
     Object.assign(s, { left: "12px", right: "12px", width: "auto", top: (ty + tR + GAP * 0.6) + "px", bottom: "12px", height: "auto" });
   }
@@ -522,7 +428,7 @@ let seed = 11;
 const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
 const flowSeed = new Map(nodes.map(n => [n.id, rnd()]));
 let hits = [];
-let clusters = null, clusteredAt = 0, clusterOf = new Map(), meBox = null, touched = false;
+let clusters = null, clusteredAt = 0, clusterOf = new Map(), meBox = null;
 const short = t => (t.length > 26 ? t.slice(0, 25) + "…" : t);
 // the tag's width at the current font: icon, name, and room for a count badge
 const tagWidth = (n, k) => ctx.measureText(short(n.title)).width + 32 + (k > 1 ? 26 : 0);
@@ -568,9 +474,8 @@ function draw(now = performance.now()) {
   const time = (now - t0) / 1000;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.fillStyle = col["--paper"]; ctx.fillRect(0, 0, W, H);
-  if (LAYOUT === "shapes" && wide()) { drawBlot(); placeSleeve(); }
-  if (music) drawGrooves(now);
-  if (music && (LAYOUT === "record" || LAYOUT === "sleeve" || LAYOUT === "shapes")) drawRimPlayer(now);
+  if (wide()) { drawBlot(); placeSleeve(); }
+  if (music) { drawGrooves(now); drawRimPlayer(now); }
 
   // the steel ball: three grooves on its surface, turning with it (a record has its own grooves instead)
   if (!music) for (const plane of [[1, 0, 0], [0, 1, 0], [0, 0, 1]]) {
@@ -687,11 +592,9 @@ function draw(now = performance.now()) {
   if (music) drawArm(now);
 
   // the line from the selected point to its bubble
-  if (sel && !sayEl.hidden && !(LAYOUT === "shapes" && wide())) {
+  if (sel && !sayEl.hidden && !wide()) {
     const v = view(sel.z), s = proj(v), b = sayEl.getBoundingClientRect();
-    let ex, ey;
-    if (wide()) { ex = b.left; ey = Math.max(b.top + 36, Math.min(b.bottom - 36, s.y)); }
-    else { ey = b.top; ex = Math.max(b.left + 36, Math.min(b.right - 36, s.x)); }
+    const ey = b.top, ex = Math.max(b.left + 36, Math.min(b.right - 36, s.x));
     const ang = Math.atan2(ey - s.y, ex - s.x);
     let reach;
     if (sel === ME) reach = (music && rec.on === ME ? labelR(v, s) : Math.max(6, 24 * conf(v) * s.s)) + 12;
@@ -704,18 +607,6 @@ function draw(now = performance.now()) {
     ctx.beginPath(); ctx.arc(sx, sy, 3.5, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.arc(ex, ey, 5, 0, Math.PI * 2); ctx.fill();
   }
-
-  // until the first click or drag, one quiet line under the ball says what to do
-  if (!touched && sayEl.hidden && (!wide() || LAYOUT === "sleeve") && LAYOUT !== "shapes") {
-    ctx.font = `13px ${mono}`; ctx.fillStyle = col["--muted"]; ctx.textAlign = "center"; ctx.textBaseline = "top";
-    const hint = D.text.hint;
-    if (ctx.measureText(hint).width < W - 32) ctx.fillText(hint, cx, cy + R + 14);
-    else {   // two lines on a narrow screen, broken near the middle
-      const words = hint.split(" "), half = Math.ceil(words.length / 2);
-      ctx.fillText(words.slice(0, half).join(" "), cx, cy + R + 14); ctx.fillText(words.slice(half).join(" "), cx, cy + R + 32);
-    }
-  }
-
 }
 
 function loop(now) {
@@ -809,7 +700,7 @@ cv.addEventListener("pointermove", ev => {
     return;
   }
   if (drag) {
-    if (Math.hypot(ev.clientX - drag.x, ev.clientY - drag.y) > 4) { drag.moved = true; touched = true; cv.classList.add("dragging"); }
+    if (Math.hypot(ev.clientX - drag.x, ev.clientY - drag.y) > 4) { drag.moved = true; cv.classList.add("dragging"); }
     if (drag.moved) {
       const k = 2.4 / R, t = performance.now(), dtm = Math.max(8, t - (drag.t || t - 16)) / 1000;
       const ax = (ev.clientY - drag.ly) * k, ay = (ev.clientX - drag.lx) * k;
@@ -836,7 +727,6 @@ cv.addEventListener("pointerup", ev => {
   drag = null; cv.classList.remove("dragging");
   if (wasDrag) return;
   const h = hitAt(ev);
-  touched = true;
   if (h && h.members && !h.title) openPick(h, ev.clientX, ev.clientY);      // a cluster: list what's in it
   else if (h) select(h);
   else if (!sayEl.hidden) closeSay();      // a click on blank paper closes the bubble
@@ -997,7 +887,7 @@ function placeSleeve() {
   Object.assign(crescentEl.style, { left: hx - hole + 9 + "px", top: hy - hole + 11 + "px", width: 2 * hole + "px", height: 2 * hole + "px" });
 }
 
-// The record as the player (layouts "record" and "sleeve"): what's playing is printed round the top of the rim,
+// The record as the player: what's playing is printed round the top of the rim,
 // the way a label prints its text, and level bars ring the rest of the edge, pumping with the beat.
 function drawRimPlayer(now) {
   if (!music.title) return;
@@ -1010,7 +900,7 @@ function drawRimPlayer(now) {
   while ([...text].reduce((a, c) => a + w(c), 0) / rr > Math.PI * 0.95 && text.length > 12) text = text.slice(0, -2).trimEnd() + "…";
   const chars = [...text], span = chars.reduce((a, c) => a + w(c), 0) / rr;
   ctx.fillStyle = col["--rim-player-track-text"]; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-  const mid = LAYOUT === "shapes" ? -Math.PI / 3 : -Math.PI / 2;      // shapes: round to the upper right, clear of the sleeve
+  const mid = -Math.PI / 3;      // round to the upper right, clear of the sleeve
   let a = mid - span / 2;
   for (const c of chars) {
     const th = a + w(c) / 2 / rr;
@@ -1178,7 +1068,7 @@ function closePick() { pickEl.hidden = true; }
 pickEl.addEventListener("click", ev => { const b = ev.target.closest("[data-go]"); if (b) { closePick(); select(byId.get(b.dataset.go)); } });
 
 function select(n) {
-  closePick(); touched = true; clusters = null;
+  closePick(); clusters = null;
   sel = n; render();
   if (n === ME) rec.target = ME;
   else if (!n.members) rec.target = n;
@@ -1233,7 +1123,6 @@ function drawMeter(now) {
 }
 (function meterLoop(now) { drawMeter(now); requestAnimationFrame(meterLoop); })(performance.now());
 
-if (LAYOUT === "shapes") document.body.append(document.querySelector(".mastnav"));
 document.getElementById("navvols").textContent = D.text.directoryContents.replace("{count}", D.nodes.length);
 document.getElementById("intro").innerHTML = `<p class="lede">${esc(D.profile.oneliner)}</p>
   <p class="hint">${esc(D.text.intro)}</p>`;
