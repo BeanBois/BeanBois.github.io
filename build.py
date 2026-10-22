@@ -9,9 +9,11 @@ Writes:
   contents.html     目次: every public project as a volume spine on a shelf
   vol-<id>.html     one per file in content/chapters/: that project's cover, spine and story
   author.html       作者紹介: about, the years, contact, the CV per lens
+  <name>-cv-<lens>.pdf   each CV as an A4 PDF, printed by headless Chrome (the deploy has it; locally it's skipped
+                         with a note if Chrome isn't found)
   colophon.html     奥付: how this printing was made
 """
-import hashlib, html, json, math, os, re, shutil, subprocess
+import hashlib, html, json, math, os, re, shutil, subprocess, sys, tempfile
 from datetime import date
 from pathlib import Path
 
@@ -50,7 +52,7 @@ def md_to_html(text):
     """Enough Markdown for the CVs: headings, bullets, paragraphs, bold, italics, links."""
     text = re.sub(r"<!--.*?-->", "", text, flags=re.S)
     out, para, items = [], [], []
-    flush = lambda: (out.append(f"<p>{inline_md(' '.join(para))}</p>") if para else None, para.clear())
+    flush = lambda: (out.append(f"<p>{'<br>'.join(inline_md(l) for l in para)}</p>") if para else None, para.clear())   # a line break in the source stays one
     close = lambda: (out.append("<ul>" + "".join(f"<li>{inline_md(i)}</li>" for i in items) + "</ul>") if items else None, items.clear())
     for line in text.splitlines():
         if not line.strip():
@@ -378,6 +380,7 @@ def music_settings(node_ids):
 # ---------- pages ----------
 TEMPLATE = (SRC / "page.html").read_text()
 PAGES = []  # (file, short name, kana), in reading order; filled in main
+PDFS = set()  # the lenses whose CV was printed to PDF this build
 
 
 def nav(current, part):
@@ -510,16 +513,18 @@ def volume_page(n, vol, ch, log):
     page(f'vol-{n["id"]}.html', f'{n["title"]} · Vol. {vol}', f'Vol. {vol} · {esc(n["title"])}', main)
 
 
-def author_page(data, groups):
+def author_page(data, groups, pdfs):
     p = data["profile"]
     yrs = "".join(f"<li><time>{esc(re.sub(r' – present', '–', y['period']))}</time><span>{esc(y['what'])}</span></li>" for y in data["years"])
     tabs, sheets = [], []
-    for i, (lens, label) in enumerate([("ml", "ML"), ("cloud", "Cloud"), ("backend", "Backend")]):
+    for i, (lens, label) in enumerate(LENSES):
         f = CONTENT / "cv" / f"{lens}.md"
         if not f.exists():
             continue
         body = md_to_html(f.read_text())
         body = re.sub(r"(</h1>\n)<p>", r'\1<p class="head">', body, count=1)
+        if lens in pdfs:
+            body = f'<a class="btn pdf" href="{pdf_name(lens)}" download>{esc(cfg("pages.cv_pdf_link"))}</a>' + body
         tabs.append(f'<button type="button" role="tab" id="tab-{lens}" aria-controls="cv-{lens}" aria-selected="{str(i == 0).lower()}">{label}</button>')
         sheets.append(f'<article class="cv obj" role="tabpanel" id="cv-{lens}" aria-labelledby="tab-{lens}"{"" if i == 0 else " hidden"}>{body}</article>')
     rail = f'''<div class="pt"><h1>作者紹介</h1><p>{esc(cfg("pages.author_intro"))}</p></div>
@@ -533,7 +538,7 @@ def author_page(data, groups):
     <a href="{esc(p["github"])}" target="_blank" rel="noopener">github.com/BeanBois</a>
     <a href="{esc(p["linkedin"])}" target="_blank" rel="noopener">linkedin.com/in/kai-shun-teoh</a></div></div>
 </div>'''
-    main = split(f'<section aria-label="CV"><div class="tabs" role="tablist" aria-label="CV lens">{"".join(tabs)}<span class="note">{esc(cfg("pages.cv_pdf_note"))}</span></div>{"".join(sheets)}</section>', rail)
+    main = split(f'<section aria-label="CV"><div class="tabs" role="tablist" aria-label="CV lens">{"".join(tabs)}</div>{"".join(sheets)}</section>', rail)
     script = """<script>
 const tabs = [...document.querySelectorAll('[role="tab"]')];
 function pick(id) {
@@ -549,6 +554,78 @@ copy.onclick = () => {
 };
 </script>"""
     page("author.html", "作者紹介 · Teoh Kai Shun", "作者紹介 about the author", main, script)
+
+
+# ---------- the CVs as PDFs ----------
+LENSES = [("ml", "ML"), ("cloud", "Cloud"), ("backend", "Backend")]
+PRINT_CSS = """@page { size: A4; margin: 12mm 14mm 11mm; }
+body { margin: 0; color: #1d1d1f; font: var(--pt)/1.38 "Inter", "Zen Kaku Gothic New", "Hiragino Sans", sans-serif; }   /* Inter: only + and ×, which Zen draws full-width */
+h1 { font: 400 22pt/1.1 "Dela Gothic One", sans-serif; letter-spacing: 0.02em; margin: 0 0 3pt; }
+h1 + p { font: 8.4pt "IBM Plex Mono", monospace; margin: 0 0 8pt; }
+h2 { font: 500 8.4pt "IBM Plex Mono", monospace; text-transform: uppercase; letter-spacing: 0.12em; margin: 9pt 0 4pt; padding-bottom: 2pt; border-bottom: 1.2pt solid #1d1d1f; break-after: avoid; }
+p { margin: 0 0 4pt; } ul { margin: 0 0 6pt; padding-left: 12pt; } li { margin-bottom: 1pt; break-inside: avoid; }
+p:has(+ ul) { break-after: avoid; }
+a { color: inherit; text-decoration: none; }"""
+
+
+def find_chrome():
+    for c in (os.environ.get("CHROME"), shutil.which("google-chrome"), shutil.which("google-chrome-stable"), shutil.which("chromium"),
+              shutil.which("chromium-browser"), "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"):
+        if c and Path(c).exists():
+            return c
+
+
+def pdf_name(lens):
+    return re.sub(r"[^a-z]+", "-", cfg("you.name").lower()).strip("-") + f"-cv-{lens}.pdf"
+
+
+def pdf_pages(path):
+    return len(re.findall(rb"/Type\s*/Page[^s]", path.read_bytes()))
+
+
+def cv_pdfs():
+    """Print each CV to dist/ as a PDF, on one A4 page if a slightly smaller type size gets it there. Returns the
+    lenses that got one. On the deploy (CI) a failure stops the build, so the site never links a PDF that isn't there."""
+    chrome, ci = find_chrome(), os.environ.get("CI") == "true"
+    if not chrome:
+        if ci:
+            raise SystemExit("CV PDFs: no Chrome found on the deploy")
+        print("CV PDFs: skipped, no Chrome found (set CHROME to its path); the author page shows no PDF links")
+        return set()
+    made = set()
+    with tempfile.TemporaryDirectory() as tmp:
+        for lens, label in LENSES:
+            f = CONTENT / "cv" / f"{lens}.md"
+            if not f.exists():
+                continue
+            out = DIST / pdf_name(lens)
+            for pt in ("9.4pt", "9.1pt", "8.8pt"):    # the body size: smaller until the CV fits one page
+                page_ = Path(tmp) / f"{lens}.html"
+                page_.write_text(f'<!doctype html><html lang="en"><head><meta charset="utf-8"><title>{esc(cfg("you.name"))}, CV ({label})</title>'
+                                 '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=IBM+Plex+Mono:wght@400;500&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=block">'
+                                 '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&text=%2B%C3%97&display=block">'
+                                 f'<style>:root {{ --pt: {pt}; }}\n{PRINT_CSS}</style></head><body>{md_to_html(f.read_text())}</body></html>')
+                for attempt in (1, 2):   # headless Chrome now and then hangs; a second go nearly always works
+                    try:
+                        r = subprocess.run([chrome, "--headless=new", "--disable-gpu", "--no-first-run", "--no-pdf-header-footer", "--virtual-time-budget=8000",
+                                            f"--user-data-dir={tmp}/profile-{lens}-{pt}-{attempt}", *(["--no-sandbox"] if ci else []),
+                                            f"--print-to-pdf={out}", page_.as_uri()], capture_output=True, text=True, timeout=45)
+                        err = r.stderr.strip()[-300:] if r.returncode or not out.exists() else None
+                    except subprocess.TimeoutExpired:
+                        err = "timed out"
+                    if not err:
+                        break
+                if err or pdf_pages(out) == 1:
+                    break
+            if err:
+                if ci:
+                    raise SystemExit(f"CV PDFs: Chrome failed on {lens}: {err}")
+                print(f"CV PDFs: Chrome failed on {lens} ({err}), skipped")
+                continue
+            if pdf_pages(out) > 1:
+                print(f"CV PDFs: the {label} CV runs to {pdf_pages(out)} pages even at {pt}")
+            made.add(lens)
+    return made
 
 
 def ordinal(n):
@@ -583,7 +660,7 @@ def cover_page(data, vols, chapters):
     data = dict(data, chapters={i: {"href": f"vol-{i}.html", "vol": vols[i]} for i in chapters}, vols=vols, musicApi=MUSIC_API or None,
                 profile=dict(data["profile"], oneliner=cfg("you.one_liner")), playlistIds=music_settings({n["id"] for n in data["nodes"]}),
                 text={"intro": cfg("cover.intro"), "hint": cfg("cover.hint"), "labelRim": cfg("cover.label_rim"),
-                      "directoryContents": cfg("cover.directory.contents"), "cvPdfNote": cfg("pages.cv_pdf_note")},
+                      "directoryContents": cfg("cover.directory.contents"), "cvPdfNote": cfg("pages.cv_pdf_note") if PDFS else ""},
                 music=SAMPLE_MUSIC if not MUSIC_API else {"is_playing": False, "title": None},
                 playlists={})   # per-project playlists: not yet (see README)
     music_js = """<script>
@@ -665,12 +742,13 @@ def main():
     shutil.rmtree(DIST, ignore_errors=True)
     DIST.mkdir()
     (DIST / ".nojekyll").write_text("")
+    PDFS.clear(); PDFS.update(cv_pdfs())
     cover_page(data, vols, chapters)
     contents_page(nodes, vols, chapters)
     for i, ch in chapters.items():
         volume_page(byid[i], vols[i], ch, data["log"])
     groups = {k: dict(v, id=k) for k, v in data["groups"].items()}
-    author_page(data, groups)
+    author_page(data, groups, PDFS)
     colophon_page(data["counts"]["entries"], data["counts"]["public"], len(nodes))
     print(f"{len(PAGES)} pages, {len(nodes)} volumes, {len(chapters)} written -> dist/")
 

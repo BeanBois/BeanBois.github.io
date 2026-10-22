@@ -1013,7 +1013,7 @@ function render() {
       </div></div>
       <div class="sec"><h4>get cv</h4><div class="row">
         <a class="btn" href="author.html#cv-ml">ML</a><a class="btn" href="author.html#cv-cloud">Cloud</a><a class="btn" href="author.html#cv-backend">Backend</a>
-      </div><p class="note">Opens the CV on the author page. ${esc(D.text.cvPdfNote)}.</p></div>
+      </div><p class="note">Opens the CV on the author page.${D.text.cvPdfNote ? " " + esc(D.text.cvPdfNote) + "." : ""}</p></div>
       <div class="sec"><h4>latest</h4><ol class="events">${chapters.map(([d, id, msg, ep]) => `<li><button type="button" data-go="${id}"><span class="ep">第${ep}話</span><time>${d}</time><span class="svc">${esc(byId.get(id).title)}</span>${esc(msg)}</button></li>`).join("")}</ol></div>`;
     const copy = document.getElementById("copy");
     copy.onclick = () => {

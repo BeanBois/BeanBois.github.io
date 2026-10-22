@@ -34,7 +34,8 @@ pages:
   contents_intro: "Contents. Every project I've built is a volume, numbered in the order I started it. Thick spines are the big ones. A red band means it's still running. Pull one out."
   author_intro: About the author, and the CV. Pick the lens that fits the role.
   author_comment_label: 作者コメント · a word from the author
-  cv_pdf_note: PDFs come at deploy
+  cv_pdf_note: Each one is also a PDF there   # on the cover, under "get cv" (left out when no PDFs were built)
+  cv_pdf_link: download as PDF                # the button on each CV
   draft_note: Details are drafts until Kai Shun reviews this entry.   # under a volume's links while its entry is a draft
 
 colophon:

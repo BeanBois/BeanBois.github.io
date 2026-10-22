@@ -9,7 +9,7 @@ The site is https://beanbois.github.io. This guide is everything you need to cha
 | Words on the site, colours, music settings | **`site.yaml`** (this repo) | look locally, then publish |
 | A project's facts (what it is, dates, bullets, stack, status) | `~/Desktop/works/portfolio/bank/…/<project>.md` | export (below), then look and publish |
 | A volume's story panels (Wallet) | `~/Desktop/works/portfolio/docs/2-research-design/prototypes/site/chapters/<project>.yaml` | export, look, publish |
-| Your CVs | `~/Desktop/works/portfolio/cv/general-*.md` | export, look, publish |
+| Your CVs | `~/Desktop/works/portfolio/cv/general-*.md` | export, look, publish. Each CV is also printed to a one-page A4 PDF by Chrome during the build (`teoh-kai-shun-cv-<lens>.pdf`, linked on the author page). If a CV grows past one page at the smallest type size, the build says so. |
 | Hidden artists, your own tempos | `site.yaml` → `music:` | publish the worker too (see Music) |
 | Layout and design | `src/cover.html`, `src/page.html`, `build.py` | ask Claude, or carefully |
 
