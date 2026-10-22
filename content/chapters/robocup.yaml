@@ -1,0 +1,17 @@
+# Volume for bank/experience/robocup.md. Panel text from that entry; captions editorial.
+entry: robocup
+kana: ロボカップ
+obi: A robot that listens.
+cover: robot
+episodes:
+  - n: 1
+    title: At home
+    panels:
+      - span: 3
+        art: robot
+        caption: Listening
+        text: The speech-recognition module (Dialogflow) for natural-language commands on a service robot.
+      - span: 3
+        art: rooms
+        caption: Seeing
+        text: Robot perception with ROS and rospy, identifying people and detecting rooms.

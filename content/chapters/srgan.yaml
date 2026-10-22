@@ -1,0 +1,21 @@
+# Volume for bank/projects/srgan.md. Panel text from that entry; captions editorial.
+entry: srgan
+kana: 超解像
+obi: Four times the pixels.
+cover: pixels
+episodes:
+  - n: 1
+    title: Super-resolution
+    panels:
+      - span: 6
+        art: pixels
+        caption: The paper
+        text: SRGAN from scratch in PyTorch, with a ResNet generator, VGG perceptual loss and adversarial training, trained on DIV2K at 4× upscaling. 29.3 dB PSNR and 0.82 SSIM on validation.
+      - span: 3
+        art: loss
+        caption: The trade-off
+        text: Ablations of pixel-wise MSE against perceptual loss, putting a number on the perceptual-quality/PSNR trade-off.
+      - span: 3
+        art: gpu
+        caption: The GPU
+        text: Training on a Windows GPU through DirectML, with custom replacements for the operations it doesn't support.

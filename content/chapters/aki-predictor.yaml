@@ -1,0 +1,21 @@
+# Volume for bank/research/aki-predictor.md. Panel text from that entry; captions editorial.
+entry: aki-predictor
+kana: 腎臓
+obi: Then it failed live, and I wrote it up.
+cover: blood
+episodes:
+  - n: 1
+    title: From blood test to pager
+    panels:
+      - span: 4
+        art: blood
+        caption: The model
+        text: A gradient-boosted classifier trained on NHS creatinine blood-test data, reaching 87% AUC for early detection of acute kidney injury.
+      - span: 2
+        art: k8s
+        caption: The service
+        text: Deployed on Kubernetes with Prometheus monitoring, alerting and automated rollback on model degradation.
+      - span: 6
+        art: postmortem
+        caption: The failure
+        text: The model failed during live deployment. The postmortem covers the impact, the root cause and the resolution.

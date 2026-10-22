@@ -51,7 +51,7 @@
    "period": "2022",
    "status": "shipped",
    "kind": "job",
-   "track": "side",
+   "track": "academic",
    "group": null,
    "size": "small",
    "mix": {
@@ -506,7 +506,7 @@
    "period": "2023",
    "status": "shipped",
    "kind": "model-from-scratch",
-   "track": "side",
+   "track": "academic",
    "group": null,
    "size": "small",
    "mix": {
@@ -840,7 +840,7 @@
    "period": "2026-02",
    "status": "shipped",
    "kind": "model-from-scratch",
-   "track": "side",
+   "track": "academic",
    "group": null,
    "size": "small",
    "mix": {

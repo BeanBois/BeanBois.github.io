@@ -7,17 +7,20 @@ portfolio/tools/export_site.py; never edit it by hand) and src/.
 Writes:
   index.html        the cover: the record (the projects' ball), the masthead and now playing
   contents.html     目次: every public project as a volume spine on a shelf
-  vol-<id>.html     one per file in content/chapters/: that project's cover, spine and story
+  vol-<id>.html     one per file in content/chapters/: a volume's cover, spine and story. A volume is one entry, or
+                    several folded together (a chapter script's `members:`), led by an entry or by a job
   author.html       作者紹介: about, the years, contact, the CV per lens
   <name>-cv-<lens>.pdf   each CV as an A4 PDF, printed by headless Chrome (the deploy has it; locally it's skipped
                          with a note if Chrome isn't found)
   colophon.html     奥付: how this printing was made
 """
-import hashlib, html, json, math, os, re, shutil, subprocess, sys, tempfile
+import html, json, math, os, re, shutil, subprocess, sys, tempfile
 from datetime import date
 from pathlib import Path
 
 import yaml
+
+from art import cover, cover_wallet, panel, seed
 
 HERE = Path(__file__).parent
 CONTENT, SRC, DIST = HERE / "content", HERE / "src", HERE / "dist"
@@ -28,11 +31,6 @@ PREVIEW = os.environ.get("PREVIEW")   # set by the deploy for design/* branches:
 esc = lambda s: html.escape(str(s or ""), quote=True)
 STATUS = {"active": "running", "paused": "paused", "shipped": "completed", "archived": "archived", "idea": "pending", "learning": "pending"}
 SHELVES = [("work", "仕事", "Work"), ("academic", "研究", "Academic"), ("side", "個人", "Side projects")]
-
-
-def seed(s, k=0):
-    """A stable number in [0, 1) from an id, so each spine's art is the same on every build."""
-    return int(hashlib.sha1(f"{s}:{k}".encode()).hexdigest()[:8], 16) / 0xFFFFFFFF
 
 
 def start(period):
@@ -146,129 +144,6 @@ def spine(n, vol, href=None, extra=""):
     if href:
         return f'<a class="{cls}" href="{href}" style="--h:{h:.0f}px" aria-label="{esc(label)}, read it" title="{esc(n["title"])}" {extra}>{inner}</a>'
     return f'<button type="button" class="{cls}" style="--h:{h:.0f}px" aria-label="{esc(label)}" aria-expanded="false" title="{esc(n["title"])}" {extra}>{inner}</button>'
-
-
-# ---------- Wallet's art (hand-drawn, one volume) ----------
-INK, PAPER, SPOT, ONSPOT = "fill:var(--ink)", "fill:var(--paper)", "fill:var(--live-red)", "fill:var(--live-on-red)"
-
-
-def tone(x0, y0, x1, y1, step, rmax, fade_from_top=True):
-    """Screentone: a dot grid whose dots grow across the area."""
-    out = []
-    y, row = y0, 0
-    while y <= y1:
-        x = x0 + (row % 2) * step / 2
-        f = (y - y0) / max(1, y1 - y0) if fade_from_top else 1 - (y - y0) / max(1, y1 - y0)
-        r = rmax * max(0, min(1, f)) ** 1.2
-        while x <= x1 and r > 0.25:
-            out.append(f'<circle cx="{x:.0f}" cy="{y:.0f}" r="{r:.2f}"/>')
-            x += step
-        y += step * 0.87
-        row += 1
-    return f'<g style="{INK}">{"".join(out)}</g>'
-
-
-def sheet(x, y, w, h, rot, rows=7):
-    lines = "".join(f'<rect x="{x + 14}" y="{y + 30 + i * (h - 44) / rows:.0f}" width="{(w - 28) * (0.45 + 0.5 * seed("sheet", i + int(x))):.0f}" height="4" style="{INK}"/>' for i in range(rows))
-    return (f'<g transform="rotate({rot} {x + w/2} {y + h/2})"><rect x="{x}" y="{y}" width="{w}" height="{h}" style="{PAPER};stroke:var(--ink);stroke-width:4"/>'
-            f'<rect x="{x + 14}" y="{y + 12}" width="{w * 0.4:.0f}" height="8" style="{INK}"/>{lines}</g>')
-
-
-def phone(x, y, w, h, rot=0, screen=""):
-    return (f'<g transform="rotate({rot} {x + w/2} {y + h/2})"><rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{w*0.16:.0f}" style="{PAPER};stroke:var(--ink);stroke-width:7"/>'
-            f'<rect x="{x + w*0.08:.0f}" y="{y + h*0.08:.0f}" width="{w*0.84:.0f}" height="{h*0.84:.0f}" rx="8" style="fill:none;stroke:var(--ink);stroke-width:3"/>'
-            f'<rect x="{x + w*0.38:.0f}" y="{y + h*0.035:.0f}" width="{w*0.24:.0f}" height="7" rx="3.5" style="{INK}"/>{screen}</g>')
-
-
-def ledger_rows(x, y, w, n, gap):
-    out = []
-    for i in range(n):
-        yy = y + i * gap
-        out.append(f'<rect x="{x}" y="{yy}" width="{w*0.32:.0f}" height="5" style="{INK}"/>')
-        out.append(f'<rect x="{x + w - w*(0.16 + 0.2*seed("led", i)):.0f}" y="{yy}" width="{w*(0.16 + 0.2*seed("led", i)):.0f}" height="5" style="{INK}"/>')
-    out.append(f'<rect x="{x}" y="{y + n*gap - 4}" width="{w}" height="3" style="{INK}"/><rect x="{x}" y="{y + n*gap + 2}" width="{w}" height="3" style="{INK}"/>')
-    return "".join(out)
-
-
-def cover_wallet(n, vol, kana, obi):
-    W, H = 512, 728
-    live = n.get("status") == "active"
-    obi_fill, obi_text = (SPOT, ONSPOT) if live else (INK, PAPER)
-    tag = n["tagline"]
-    cut = tag.rfind(" ", 0, 48)
-    tag1, tag2 = (tag[:cut], tag[cut + 1:]) if len(tag) > 48 else (tag, "")
-    screen = ledger_rows(196, 330, 128, 9, 24)
-    return f'''<svg class="cover" viewBox="0 0 {W} {H}" role="img" aria-label="Cover of volume {vol}, {esc(n['title'])}: statements slide into a phone that keeps its ledger to itself.">
-<rect width="{W}" height="{H}" style="{PAPER}"/>
-{tone(0, 200, W, 590, 13, 4.6)}
-<rect width="{W}" height="44" style="{INK}"/>
-<text x="20" y="30" style="{PAPER};font:400 17px var(--font-display);letter-spacing:.04em">{esc(cfg("you.name"))}</text>
-<text x="{W - 20}" y="30" text-anchor="end" style="{PAPER};font:500 13px var(--font-mono);letter-spacing:.12em">VOL. {vol}</text>
-<text x="22" y="150" textLength="{W - 96}" lengthAdjust="spacingAndGlyphs" style="{INK};font:400 100px var(--font-display)">{esc(n['title']).upper()}</text>
-<text x="{W - 34}" y="196" style="{INK};font:700 30px var(--font-body);writing-mode:vertical-rl">{esc(kana)}</text>
-{sheet(118, 178, 150, 196, -16)}{sheet(214, 162, 150, 196, 7)}{sheet(166, 196, 150, 196, -3)}
-{phone(150, 262, 212, 400, -6, screen)}
-<g transform="rotate(-6 256 462)"><path d="M372 420 h58 m-16 -16 l16 16 l-16 16" style="fill:none;stroke:var(--ink);stroke-width:7;stroke-linecap:square"/>
-<path d="M388 398 l44 44 m0 -44 l-44 44" style="fill:none;stroke:var(--paper);stroke-width:13"/><path d="M388 398 l44 44 m0 -44 l-44 44" style="fill:none;stroke:var(--ink);stroke-width:6"/></g>
-<rect y="{H - 150}" width="{W}" height="150" style="{obi_fill}"/>
-<text x="24" y="{H - 98}" style="{obi_text};font:400 31px var(--font-display)">{esc(obi)}</text>
-<text x="24" y="{H - 64}" style="{obi_text};font:400 14px var(--font-body)">{esc(tag1)}</text>
-<text x="24" y="{H - 44}" style="{obi_text};font:400 14px var(--font-body)">{esc(tag2)}</text>
-<text x="{W - 22}" y="{H - 18}" text-anchor="end" style="{obi_text};font:700 14px var(--font-body)">第1話 収録</text>
-</svg>'''
-
-
-def panel_art(kind):
-    if kind == "phone":
-        cloud = ('<g style="fill:var(--paper);stroke:var(--ink);stroke-width:5">'
-                 '<path d="M430 150 a34 34 0 0 1 64 -14 a40 40 0 0 1 72 26 a28 28 0 0 1 -6 56 h-124 a34 34 0 0 1 -6 -68z"/></g>'
-                 '<path d="M455 118 l100 112 m0 -112 l-100 112" style="fill:none;stroke:var(--paper);stroke-width:16"/>'
-                 '<path d="M455 118 l100 112 m0 -112 l-100 112" style="fill:none;stroke:var(--ink);stroke-width:7"/>')
-        return (f'<svg viewBox="0 0 600 340" aria-hidden="true"><rect width="600" height="340" style="{PAPER}"/>{tone(0, 0, 600, 340, 12, 3.2, False)}'
-                f'{sheet(60, 40, 120, 150, -12, 5)}{sheet(110, 30, 120, 150, 9, 5)}'
-                f'{phone(150, 90, 150, 260, 0, ledger_rows(178, 150, 94, 6, 22))}'
-                f'<path d="M318 190 q50 -10 96 -24" style="fill:none;stroke:var(--ink);stroke-width:4;stroke-dasharray:9 7"/>{cloud}</svg>')
-    if kind == "sen":
-        return (f'<svg viewBox="0 0 300 340" aria-hidden="true"><rect width="300" height="340" style="{PAPER}"/>'
-                f'<text x="150" y="122" text-anchor="middle" style="{INK};font:400 52px var(--font-display)">RM 1.00</text>'
-                f'<text x="150" y="182" text-anchor="middle" style="{INK};font:400 40px var(--font-display)">=</text>'
-                f'<text x="150" y="250" text-anchor="middle" style="{INK};font:400 52px var(--font-display)">100 sen</text>'
-                f'<text x="150" y="296" text-anchor="middle" style="fill:var(--muted);font:500 13px var(--font-mono)">Long, never Double</text></svg>')
-    if kind == "ledger":
-        rows = "".join(
-            f'<g><rect x="{60 + i*86}" y="{150 - 50*seed("mv", i)}" width="54" height="{40 + 50*seed("mv", i):.0f}" style="{INK if i % 3 else PAPER};stroke:var(--ink);stroke-width:4"/>'
-            f'<path d="M{87 + i*86} 214 v18" style="stroke:var(--ink);stroke-width:3"/></g>' for i in range(7))
-        return (f'<svg viewBox="0 0 900 300" aria-hidden="true"><rect width="900" height="300" style="{PAPER}"/>'
-                f'<text x="60" y="44" style="fill:var(--muted);font:500 14px var(--font-mono)">every movement, replayed</text>{rows}'
-                f'<path d="M50 236 H660" style="stroke:var(--ink);stroke-width:5"/><path d="M640 220 l24 16 l-24 16" style="fill:none;stroke:var(--ink);stroke-width:5"/>'
-                f'<rect x="690" y="186" width="160" height="96" style="{PAPER};stroke:var(--ink);stroke-width:5"/>'
-                f'<text x="770" y="214" text-anchor="middle" style="fill:var(--muted);font:500 12px var(--font-mono)">statement says</text>'
-                f'<rect x="716" y="236" width="108" height="8" style="{INK}"/><rect x="716" y="252" width="108" height="8" style="{INK}"/>'
-                f'<g transform="rotate(-8 760 110)"><rect x="672" y="78" width="196" height="62" style="{PAPER};stroke:var(--ink);stroke-width:5"/>'
-                f'<text x="770" y="118" text-anchor="middle" style="{INK};font:700 24px var(--font-body)">合わない</text></g>'
-                f'<text x="770" y="166" text-anchor="middle" style="{INK};font:500 13px var(--font-mono)">doesn\'t reconcile</text></svg>')
-    if kind == "wall":
-        bricks = "".join(f'<rect x="{214 + (r % 2) * 11 - 11}" y="{40 + r*22}" width="22" height="20" style="{PAPER};stroke:var(--ink);stroke-width:3"/>'
-                         f'<rect x="{214 + (r % 2) * 11 + 11}" y="{40 + r*22}" width="22" height="20" style="{PAPER};stroke:var(--ink);stroke-width:3"/>' for r in range(11))
-        return (f'<svg viewBox="0 0 450 300" aria-hidden="true"><rect width="450" height="300" style="{PAPER}"/>'
-                f'<rect x="40" y="110" width="130" height="80" style="{PAPER};stroke:var(--ink);stroke-width:5"/><text x="105" y="157" text-anchor="middle" style="{INK};font:400 18px var(--font-display)">phone</text>'
-                f'<rect x="300" y="110" width="120" height="80" style="fill:var(--paper);stroke:var(--ink);stroke-width:5;stroke-dasharray:10 6"/><text x="360" y="148" text-anchor="middle" style="{INK};font:500 13px var(--font-mono)">forbidden</text><text x="360" y="166" text-anchor="middle" style="{INK};font:500 13px var(--font-mono)">module</text>'
-                f'<path d="M170 150 H206" style="stroke:var(--ink);stroke-width:5"/><path d="M262 150 H300" style="stroke:var(--ink);stroke-width:5;stroke-dasharray:6 6"/>{bricks}'
-                f'<g transform="rotate(-6 225 268)"><rect x="128" y="246" width="194" height="40" style="{PAPER};stroke:var(--ink);stroke-width:4"/><text x="225" y="273" text-anchor="middle" style="{INK};font:400 17px var(--font-display)">BUILD FAILED</text></g></svg>')
-    if kind == "month":
-        cells = "".join(f'<rect x="{60 + (i % 7) * 46}" y="{70 + (i // 7) * 36}" width="40" height="30" style="{INK if i == 30 else PAPER};stroke:var(--ink);stroke-width:3"/>' for i in range(31))
-        return (f'<svg viewBox="0 0 450 300" aria-hidden="true"><rect width="450" height="300" style="{PAPER}"/>{cells}'
-                f'<path d="M318 64 C 300 38, 110 38, 76 58" style="fill:none;stroke:var(--ink);stroke-width:4;stroke-dasharray:9 7"/><path d="M68 44 l8 16 l16 -6" style="fill:none;stroke:var(--ink);stroke-width:4"/>'
-                f'<text x="200" y="22" text-anchor="middle" style="fill:var(--muted);font:500 13px var(--font-mono)">one statement, looking back</text>'
-                f'<text x="60" y="280" style="{INK};font:500 13px var(--font-mono)">statement day</text><path d="M170 276 H 330 V 262" style="fill:none;stroke:var(--ink);stroke-width:2.5"/></svg>')
-    if kind == "live":
-        banner = (f'<rect x="368" y="98" width="230" height="64" rx="14" style="{PAPER};stroke:var(--ink);stroke-width:5"/>'
-                  f'<circle cx="398" cy="130" r="11" style="{SPOT}"/><rect x="420" y="116" width="120" height="7" style="{INK}"/><rect x="420" y="134" width="150" height="6" style="fill:var(--tone)"/>')
-        lines = "".join(f'<path d="M{600 + i*14} {108 + i*12} h{60 - i*8}" style="stroke:var(--ink);stroke-width:2.5;opacity:{0.5 - i*0.08:.2f}"/>' for i in range(4))
-        return (f'<svg viewBox="0 0 900 300" aria-hidden="true"><rect width="900" height="300" style="{PAPER}"/>{tone(0, 0, 900, 300, 12, 2.6)}'
-                f'{phone(340, 40, 160, 300, 0)}{banner}{lines}'
-                f'<text x="60" y="80" style="{INK};font:400 26px var(--font-display)">live</text><text x="60" y="104" style="fill:var(--muted);font:500 13px var(--font-mono)">bank notification → ledger</text></svg>')
-    return ""
 
 
 # What the music proxy will return (stage 3: a small worker holding Kai Shun's Spotify token). Until then the
@@ -412,7 +287,46 @@ def split(main, rail, rail_first=True):
 
 
 def chapter_files():
-    return {yaml.safe_load(p.read_text())["entry"]: yaml.safe_load(p.read_text()) for p in sorted((CONTENT / "chapters").glob("*.yaml"))}
+    """Each chapter script, by its volume's id: `id:` if it sets one, else its entry's."""
+    out = {}
+    for p in sorted((CONTENT / "chapters").glob("*.yaml")):
+        ch = yaml.safe_load(p.read_text())
+        out[ch.get("id", ch["entry"])] = ch
+    return out
+
+
+LIVENESS = ["active", "paused", "shipped", "archived", "idea", "learning"]   # a volume takes its liveliest entry's status
+
+
+def volumes(nodes, groups, chapters):
+    """The shelf: one spine per volume, and one per entry no volume holds yet. Also returns, for each entry in a
+    volume, that volume's id. A volume of several entries takes its title and tagline from the chapter script, its
+    period across all of them, and its words from the entry or job it's led by."""
+    byid = {n["id"]: n for n in nodes}
+    shelf, home = [], {}
+    for vid, ch in chapters.items():
+        lead = ch["entry"]
+        if lead not in byid and lead not in groups:
+            raise SystemExit(f"content/chapters: {vid} is led by '{lead}', which is neither a public entry nor a job")
+        ids = ([lead] if lead in byid else []) + list(ch.get("members") or [])
+        for i in ids:
+            if i not in byid:
+                raise SystemExit(f"content/chapters: {vid} holds '{i}', which is not a public entry")
+            if i in home:
+                raise SystemExit(f"content/chapters: '{i}' is in both {home[i]} and {vid}")
+            home[i] = vid
+        ms = [byid[i] for i in ids]
+        head = byid.get(lead) or dict(groups[lead], kind="job", track=ms[0]["track"], tagline="", bullets=[], stack=[])
+        dates = [d for m in ms for d in re.findall(r"\d{4}(?:-\d{2})?", m["period"])]
+        end = "present" if any("present" in m["period"] for m in ms) else max(dates)
+        period = head["period"] if len(ms) == 1 else min(dates) + ("" if end == min(dates) else f" – {end}")
+        keys = {k for m in ms for k in m["mix"]}
+        shelf.append(dict(head, id=vid, members=ids, title=ch.get("title", head["title"]), tagline=ch.get("tagline", head.get("tagline", "")),
+                          period=period, status=min((m.get("status") for m in ms), key=LIVENESS.index),
+                          stack=list(dict.fromkeys(x for m in [head] + ms for x in m.get("stack", []))),
+                          mix={k: sum(m["mix"].get(k, 0) for m in ms) / len(ms) for k in keys},
+                          size="big" if len(ms) > 1 else head.get("size"), verified=all(m.get("verified") for m in ms)))
+    return shelf + [n for n in nodes if n["id"] not in home], home
 
 
 def blot(cls="blot"):
@@ -491,25 +405,28 @@ document.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () =
     page("contents.html", "目次 · Teoh Kai Shun", "目次 contents", main, script)
 
 
-def volume_page(n, vol, ch, log):
+def volume_page(n, vol, ch, log, byid):
     eps = []
-    for ep in ch["episodes"]:
-        panels = "".join(f'<figure class="panel s{p["span"]}" style="margin:0">{panel_art(p["art"])}<figcaption class="txt"><span class="cap">{esc(p["caption"])}</span><p>{esc(p["text"])}</p></figcaption></figure>' for p in ep["panels"])
-        live = n.get("status") == "active"
+    for k, ep in enumerate(ch["episodes"]):
+        last = k == len(ch["episodes"]) - 1
+        e = byid.get(ep.get("entry"), n)   # an episode about one of the volume's entries carries that entry's stamps
+        panels = "".join(f'<figure class="panel s{p["span"]}" style="margin:0">{panel(p["art"], p["span"])}<figcaption class="txt"><span class="cap">{esc(p["caption"])}</span><p>{esc(p["text"])}</p></figcaption></figure>' for p in ep["panels"])
+        live = e.get("status") == "active"
         eps.append(f'''<section class="tobira" aria-labelledby="ep{ep["n"]}"><div class="ep jp">第{ep["n"]}話</div><h2 id="ep{ep["n"]}">{esc(ep["title"])}</h2>
-<div class="stamps"><span class="stamp{" live" if live else ""}">{STATUS.get(n.get("status"))}</span>{"" if n.get("verified") else '<span class="stamp draft">draft</span>'}</div></section>
+<div class="stamps"><span class="stamp{" live" if live else ""}">{STATUS.get(e.get("status"))}</span>{"" if e.get("verified") else '<span class="stamp draft">draft</span>'}</div></section>
 <div class="page">{panels}</div>
-<div class="tsuzuku"><span class="muted mono" style="font-size:12px">{"still being written" if live else "the end"}</span><span class="big">{"つづく" if live else "完"}</span></div>
+<div class="tsuzuku"><span class="muted mono" style="font-size:12px">{"the end" if last and not live else "to be continued" if last else "continued"}</span><span class="big">{"完" if last and not live else "つづく"}</span></div>
 {f'<div class="next"><span class="lbl jp">次回予告</span><span>Next time: {esc(ep["next"])}</span></div>' if ep.get("next") else ""}''')
-    events = "".join(f"<li><time>{d}</time>{esc(msg)}</li>" for d, i, msg in sorted(log, reverse=True) if i == n["id"])
-    blurb = (f'<div class="blurb"><h2>あらすじ · the story so far</h2><p>{inline_md(n["what"])}</p>'
-             f'<dl><dt>period</dt><dd>{esc(n["period"])}</dd><dt>status</dt><dd>{STATUS.get(n.get("status"))}</dd><dt>repo</dt><dd>{"private" if not n.get("repo") else esc(n["repo"])}</dd></dl></div>')
+    events = "".join(f"<li><time>{d}</time>{esc(msg)}</li>" for d, i, msg in sorted(log, reverse=True) if i in n["members"])
+    repo = f'<a href="{esc(n["repo"])}" target="_blank" rel="noopener">{esc(n["repo"].split("github.com/")[-1])}</a>' if n.get("repo") else "private"
+    blurb = (f'<div class="blurb"><h2>あらすじ · the story so far</h2><p>{inline_md(n["what"] or n["tagline"])}</p>'
+             f'<dl><dt>period</dt><dd>{esc(n["period"])}</dd><dt>status</dt><dd>{STATUS.get(n.get("status"))}</dd><dt>repo</dt><dd>{repo}</dd></dl></div>')
     rail = (blurb
             + f'<div class="back"><div><h3>stack</h3><div class="chips">{"".join(f"<span>{esc(s)}</span>" for s in n["stack"])}</div></div>'
             + (f'<div><h3>log</h3><ol>{events}</ol></div>' if events else "")
             + f'<div><h3>elsewhere</h3><ul><li><a href="./#{n["id"]}">find it on the record →</a></li><li><a href="contents.html">back to the shelf →</a></li></ul>'
             + ("" if n.get("verified") else f'<p class="muted" style="font-size:13px;margin-top:10px">{esc(cfg("pages.draft_note"))}</p>') + '</div></div>')
-    main = split(f'<div class="book"><div class="obj">{spine(n, vol)}</div><div class="obj">{cover_wallet(n, vol, ch["kana"], ch["obi"])}</div></div>' + "".join(eps), rail, rail_first=False)
+    main = split(f'<div class="book"><div class="obj">{spine(n, vol)}</div><div class="obj">{cover_wallet(n, vol, ch["kana"], ch["obi"], cfg("you.name")) if ch.get("cover") == "wallet" else cover(n, vol, ch, cfg("you.name"))}</div></div>' + "".join(eps), rail, rail_first=False)
     page(f'vol-{n["id"]}.html', f'{n["title"]} · Vol. {vol}', f'Vol. {vol} · {esc(n["title"])}', main)
 
 
@@ -655,9 +572,11 @@ def colophon_page(n_entries, n_public, n_vols):
     page("colophon.html", "奥付 · Teoh Kai Shun", "奥付 colophon", main)
 
 
-def cover_page(data, vols, chapters):
+def cover_page(data, vols, chapters, home):
     t = (SRC / "cover.html").read_text()
-    data = dict(data, chapters={i: {"href": f"vol-{i}.html", "vol": vols[i]} for i in chapters}, vols=vols, musicApi=MUSIC_API or None,
+    ep = lambda i, ch: next((e["n"] for e in ch["episodes"] if e.get("entry") == i), ch["episodes"][0]["n"])
+    data = dict(data, chapters={i: {"href": f"vol-{v}.html", "vol": vols[v], "ep": ep(i, chapters[v])} for i, v in home.items()},
+                vols={n["id"]: vols[home.get(n["id"], n["id"])] for n in data["nodes"]}, musicApi=MUSIC_API or None,
                 profile=dict(data["profile"], oneliner=cfg("you.one_liner")), playlistIds=music_settings({n["id"] for n in data["nodes"]}),
                 text={"intro": cfg("cover.intro"), "hint": cfg("cover.hint"), "labelRim": cfg("cover.label_rim"),
                       "directoryContents": cfg("cover.directory.contents"), "cvPdfNote": cfg("pages.cv_pdf_note") if PDFS else ""},
@@ -750,37 +669,36 @@ def main():
     CFG.clear(); CFG.update(load_config())
     data = json.loads((CONTENT / "site.json").read_text())
     nodes = data["nodes"]
-    ordered = sorted(nodes, key=lambda n: (start(n["period"]), n["id"]))
-    vols = {n["id"]: i + 1 for i, n in enumerate(ordered)}
     chapters = chapter_files()
+    shelf, home = volumes(nodes, data["groups"], chapters)
+    ordered = sorted(shelf, key=lambda n: (start(n["period"]), n["id"]))
+    vols = {n["id"]: i + 1 for i, n in enumerate(ordered)}
     byid = {n["id"]: n for n in nodes}
-    for i in chapters:
-        if i not in byid:
-            raise SystemExit(f"content/chapters/{i}.yaml: no public entry with that id")
+    books = {n["id"]: n for n in shelf}
     PAGES.clear()
     PAGES.extend([("index.html", "表紙", "cover"), ("contents.html", "目次", "contents")]
-                 + [(f"vol-{i}.html", f"Vol. {vols[i]}", byid[i]["title"]) for i in chapters]
+                 + [(f"vol-{i}.html", f"Vol. {vols[i]}", books[i]["title"]) for i in sorted(chapters, key=vols.get)]
                  + [("author.html", "作者紹介", "about the author"), ("colophon.html", "奥付", "colophon")])
     shutil.rmtree(DIST, ignore_errors=True)
     DIST.mkdir()
     (DIST / ".nojekyll").write_text("")
     PDFS.clear(); PDFS.update(cv_pdfs())
-    cover_page(data, vols, chapters)
-    contents_page(nodes, vols, chapters)
+    cover_page(data, vols, chapters, home)
+    contents_page(shelf, vols, chapters)
     for i, ch in chapters.items():
-        volume_page(byid[i], vols[i], ch, data["log"])
+        volume_page(books[i], vols[i], ch, data["log"], byid)
     groups = {k: dict(v, id=k) for k, v in data["groups"].items()}
     author_page(data, groups, PDFS)
-    colophon_page(data["counts"]["entries"], data["counts"]["public"], len(nodes))
+    colophon_page(data["counts"]["entries"], data["counts"]["public"], len(shelf))
     subset_fonts()
-    print(f"{len(PAGES)} pages, {len(nodes)} volumes, {len(chapters)} written -> dist/")
+    print(f"{len(PAGES)} pages, {len(shelf)} volumes, {len(chapters)} written -> dist/")
 
 
 def watch(port=8765):
     """Serve dist/ and rebuild whenever site.yaml, src/ or content/ changes. 127.0.0.1:8765 is a page the
     now-playing worker answers, so the record plays live locally too."""
     import functools, http.server, sys, threading, time
-    watched = lambda: [HERE / "site.yaml", HERE / "build.py"] + [p for d in (SRC, CONTENT) for p in d.rglob("*") if p.is_file()]
+    watched = lambda: [HERE / "site.yaml", HERE / "build.py", HERE / "art.py"] + [p for d in (SRC, CONTENT) for p in d.rglob("*") if p.is_file()]
     stamp = lambda: max(p.stat().st_mtime for p in watched())
     def build():
         try:

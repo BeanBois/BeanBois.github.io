@@ -1,0 +1,17 @@
+# Volume for bank/projects/blockhub.md. Panel text from that entry; captions editorial.
+entry: blockhub
+kana: ブロック
+obi: First of 50+ teams.
+cover: trophy
+episodes:
+  - n: 1
+    title: The hackathon
+    panels:
+      - span: 4
+        art: vote
+        caption: The idea
+        text: A decentralised open-source collaboration platform where contributors vote and build reputation on-chain. Co-designed it, and built the backend and frontend.
+      - span: 2
+        art: trophy
+        caption: The result
+        text: 1st place of 50+ teams at the Polygon × EasyA hackathon.

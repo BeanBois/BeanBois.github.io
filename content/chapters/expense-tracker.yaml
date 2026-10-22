@@ -1,0 +1,13 @@
+# Volume for bank/projects/expense-tracker.md. Panel text from that entry; captions editorial.
+entry: expense-tracker
+kana: 家計簿
+obi: Budgets, from the keyboard.
+cover: tui
+episodes:
+  - n: 1
+    title: In the terminal
+    panels:
+      - span: 6
+        art: tui
+        caption: The tool
+        text: A personal-finance TUI in Go (Bubble Tea) on pure-Go SQLite, with monthly trackings that carry budgets forward.

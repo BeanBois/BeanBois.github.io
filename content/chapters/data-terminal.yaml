@@ -1,0 +1,13 @@
+# Volume for bank/projects/data-terminal.md. Panel text from that entry; captions editorial.
+entry: data-terminal
+kana: ターミナル
+obi: Ticks in, lines out.
+cover: ticks
+episodes:
+  - n: 1
+    title: The feed
+    panels:
+      - span: 6
+        art: ticks
+        caption: The pipe
+        text: A C++ market-data terminal that streams live ticks from Finnhub (with a Yahoo Finance source), re-serves them over a TCP socket server, and feeds a Python live plotter.

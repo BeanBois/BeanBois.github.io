@@ -1,0 +1,17 @@
+# Volume for bank/projects/mybudixc.md. Panel text from that entry; captions editorial.
+entry: mybudixc
+kana: 取引所
+obi: Orders that can't fill now, filled later.
+cover: book
+episodes:
+  - n: 1
+    title: Two matchers
+    panels:
+      - span: 3
+        art: book
+        caption: Now
+        text: A Go exchange engine with a price-time-priority order book for instant matches.
+      - span: 3
+        art: batch
+        caption: Later
+        text: A deadline-aware batch matcher pairs the unmatched orders globally every N minutes to maximise volume. Market data goes out over WebSockets.

@@ -1,0 +1,25 @@
+# Volume for bank/projects/re-news.md. Panel text from that entry; captions editorial.
+entry: re-news
+kana: リニュース
+obi: Grey is correct.
+cover: grey
+episodes:
+  - n: 1
+    title: Ranked and cited
+    panels:
+      - span: 6
+        art: sources
+        caption: The signals
+        text: Per-source encoders for news, government, CPI, OPR and fiscal data, public opinion and search trends compress raw data into one citable signal schema.
+      - span: 4
+        art: fusion
+        caption: The rule
+        text: The LLM only fuses signals, never raw documents, into ranked causal chains ("policy X led to Y, so Z feels W"). Every claim in a report resolves to its evidence.
+      - span: 2
+        art: switch
+        caption: Whose model
+        text: The model backend can be switched per stage. A local qwen3:32b on the home-lab GPU by default, Claude as an opt-in.
+      - span: 6
+        art: grey
+        caption: Grey
+        text: The system shows nothing rather than an extrapolation.

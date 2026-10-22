@@ -1,0 +1,17 @@
+# Volume for bank/projects/plate-recognition.md. Panel text from that entry; captions editorial.
+entry: plate-recognition
+kana: ナンバー
+obi: Find the plate, then read it.
+cover: plate
+episodes:
+  - n: 1
+    title: Two networks
+    panels:
+      - span: 3
+        art: plate
+        caption: Find
+        text: YOLOv8 finds the plate.
+      - span: 3
+        art: chars
+        caption: Read
+        text: A custom CNN reads each character. 94% character-level accuracy on 2,000+ images I collected, in varied lighting.

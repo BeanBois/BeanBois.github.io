@@ -1,0 +1,17 @@
+# Volume for bank/projects/car-designer.md. Panel text from that entry; captions editorial.
+entry: car-designer
+kana: 塗装
+obi: Your car, repainted, in your driveway.
+cover: scan
+episodes:
+  - n: 1
+    title: Scan, paint, park
+    panels:
+      - span: 4
+        art: scan
+        caption: Scan
+        text: A fully offline iOS app that scans a car with LiDAR, with photogrammetry as the fallback.
+      - span: 2
+        art: driveway
+        caption: Park
+        text: Design paint and livery in 3D, then see it at real scale in AR.

@@ -1,0 +1,21 @@
+# Volume for bank/experience/9loop.md. Panel text from that entry; captions editorial.
+entry: 9loop
+kana: 9ループ
+obi: TypeScript, learnt in a week.
+cover: week
+episodes:
+  - n: 1
+    title: The internship
+    panels:
+      - span: 6
+        art: week
+        caption: One week
+        text: Learnt TypeScript in a week to refactor and extend a Svelte page generator, improving component reuse.
+      - span: 3
+        art: latency
+        caption: Faster
+        text: Render latency down by 30%.
+      - span: 3
+        art: coverage
+        caption: Tested
+        text: Integrated a third-party game API and built an automated integration-test suite, raising test coverage from 40% to 85%.

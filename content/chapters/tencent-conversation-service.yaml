@@ -1,0 +1,21 @@
+# Volume for bank/work/tencent-conversation-service.md. Panel text from that entry; captions editorial.
+entry: tencent-conversation-service
+kana: 会話
+obi: Second-in-command, from day one.
+cover: newservice
+episodes:
+  - n: 1
+    title: A new service
+    panels:
+      - span: 6
+        art: newservice
+        caption: The job
+        text: Since October 2026, second-in-command on a new Go, tRPC and Protobuf query service for gameplay-session conversation data.
+      - span: 3
+        art: tz
+        caption: First fix
+        text: MySQL DATETIME writes that were timezone-wrong, fixed with a tested migration runbook.
+      - span: 3
+        art: timeout
+        caption: Second fix
+        text: LLM worker timeouts.
