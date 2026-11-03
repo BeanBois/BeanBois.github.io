@@ -18,7 +18,7 @@ html.vt-head::view-transition-new(vt-wave) { animation: none !important; }
 <script>
 (() => {
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let MODE = "ball";
+  let MODE = "wave";
   try { const q = new URLSearchParams(location.search).get("nav"); if (q) sessionStorage.vtnav = q; MODE = sessionStorage.vtnav || MODE; } catch (_) {}
   const root = document.documentElement;
 
@@ -73,7 +73,7 @@ html.vt-head::view-transition-new(vt-wave) { animation: none !important; }
      screen it starts quick and slows towards the rim; a few faint rings trail it at even hyperbolic spacing, bunching
      at the edge, and lean towards the centre of the disk, as circles there do. */
   function wave(A, B, cv) {
-    const W = innerWidth, H = innerHeight, RD = Math.hypot(W, H) / 2 * 1.04, ms = 1100;
+    const W = innerWidth, H = innerHeight, RD = Math.hypot(W, H) / 2 * 1.6, ms = 1100;   // the disk is bigger than the screen, so a corner isn't at its very rim
     let z0 = null;
     try { const c = JSON.parse(sessionStorage.vtwave || "null"); sessionStorage.removeItem("vtwave"); if (c) z0 = [(c[0] - W / 2) / RD, (c[1] - H / 2) / RD]; } catch (_) {}
     if (!z0) z0 = sc(dirTo(B, A), 0.45);                   // Back: from the side the old page lies
@@ -85,18 +85,31 @@ html.vt-head::view-transition-new(vt-wave) { animation: none !important; }
     const N = 28, fn = [];
     for (let i = 0; i <= N; i++) { const k = i / N, { c, r } = circle(rmax * k);
       fn.push({ offset: k, clipPath: `circle(${r.toFixed(1)}px at ${c[0].toFixed(1)}px ${c[1].toFixed(1)}px)` }); }
+    // the page is lifted a touch by the wave and settles flat: tilted away from where it began, a hair large
+    const u = unitv(z0), tilt = 2.2;
+    fn.forEach((f, i) => { const k = i / N, g = Math.pow(1 - k, 2);
+      f.transform = `perspective(1400px) rotate3d(${(-u[1]).toFixed(3)}, ${u[0].toFixed(3)}, 0, ${(tilt * g).toFixed(3)}deg) scale(${(1 + 0.018 * g).toFixed(4)})`; });
     anim(fn, "new", ms);
-    anim([{ opacity: 1 }, { offset: 0.6, opacity: 1 }, { opacity: 0.85 }], "old", ms);
+    anim([{ opacity: 1, transform: "scale(1)" }, { offset: 0.6, opacity: 1 }, { opacity: 0.85, transform: "scale(.992)" }], "old", ms);
     if (!cv) return;
-    const dpr = Math.min(devicePixelRatio || 1, 2), ctx = cv.getContext("2d"), tone = getComputedStyle(root).getPropertyValue("--tone").trim(), t0 = performance.now();
+    // the crests: each ring is a soft raised band, lit on the side towards the disk's centre and shaded outside.
+    // The light and the shade are this theme's paper and ink, whichever is lighter and darker.
+    const css = getComputedStyle(root), rgb = h => { h = h.replace("#", ""); if (h.length === 3) h = [...h].map(x => x + x).join(""); const n = parseInt(h, 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
+    const lum = c => 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+    const pa = rgb(css.getPropertyValue("--paper").trim()), ik = rgb(css.getPropertyValue("--ink").trim());
+    const darkMode = lum(pa) < lum(ik), lite = darkMode ? ik : pa, dark = darkMode ? pa.map(v => v * 0.25) : ik;   // in dark mode the shade is the paper, deeper
+    const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a.toFixed(3)})`;
+    const dpr = Math.min(devicePixelRatio || 1, 2), ctx = cv.getContext("2d"), t0 = performance.now(), HW = 0.22;
     const frame = now => {
-      const k = Math.min(1, (now - t0) / ms), rho = rmax * k;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H); ctx.strokeStyle = tone;
-      for (let j = 0; j < 4; j++) {                       // the edge, then three rings trailing it
-        const rr = rho - j * 0.45; if (rr <= 0.02) break;
-        const { c, r } = circle(rr);
-        ctx.globalAlpha = (j ? 0.5 / j : 0.9) * (1 - k * k); ctx.lineWidth = j ? 1 : 1.6;
-        ctx.beginPath(); ctx.arc(c[0], c[1], r, 0, Math.PI * 2); ctx.stroke();
+      const k = Math.min(1, (now - t0) / ms), rho = rmax * k, fade = 1 - k * k;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+      for (let j = 0; j < 4; j++) {                       // the front, then three smaller crests behind it
+        const rr = rho - j * 0.55; if (rr <= HW) break;
+        const amp = (j ? 0.55 / j : 1) * fade, a = circle(rr - HW), b = circle(rr + HW);
+        const g = ctx.createRadialGradient(a.c[0], a.c[1], a.r, b.c[0], b.c[1], b.r);
+        g.addColorStop(0, rgba(lite, 0)); g.addColorStop(0.3, rgba(lite, (darkMode ? 0.16 : 0.55) * amp));
+        g.addColorStop(0.5, rgba(lite, 0)); g.addColorStop(0.72, rgba(dark, (darkMode ? 0.5 : 0.16) * amp)); g.addColorStop(1, rgba(dark, 0));
+        ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
       }
       if (k < 1) requestAnimationFrame(frame); else ctx.clearRect(0, 0, W, H);
     };
