@@ -2,6 +2,7 @@
 //   GET /now        {is_playing, title, artist, url, art, duration_ms, progress_ms, bpm, played_at, fetched_at}
 //   GET /art?u=…    a Spotify cover image, re-served with CORS so the page can print it as screentone
 //   GET /playlist?id=…   a playlist's name, cover and tracks, for a project that has one (site.yaml music.playlists)
+//   GET /covers     the album covers of what Kai Shun played lately (up to 40, no repeats), for the page turn that tiles them
 //   GET /tempo?id=…&title=…&artist=…&ms=…&isrc=…   one track's tempo from the tempo bank
 // Secrets (wrangler secret put): SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REFRESH_TOKEN.
 // KV (binding MUSIC): the current access token, a rotated refresh token if Spotify sends one, and tempo per track.
@@ -19,6 +20,7 @@ export default {
     try {
       if (url.pathname === "/now") return json(await now(env, url), cors);
       if (url.pathname === "/art") return art(url);
+      if (url.pathname === "/covers") return json(await covers(env, url), cors, 200, "public, max-age=1800");
       if (url.pathname === "/playlist") return json(await playlist(env, url), cors);
       if (url.pathname === "/tempo") return json(await tempo({ id: url.searchParams.get("id"), name: url.searchParams.get("title") || "",
         artists: [{ name: url.searchParams.get("artist") || "" }], duration_ms: Number(url.searchParams.get("ms")) || 0,
@@ -31,9 +33,29 @@ export default {
   },
 };
 
-const json = (body, cors, status = 200) => new Response(JSON.stringify(body), {
-  status, headers: { ...cors, "Content-Type": "application/json", "Cache-Control": "no-store" },
+const json = (body, cors, status = 200, cache = "no-store") => new Response(JSON.stringify(body), {
+  status, headers: { ...cors, "Content-Type": "application/json", "Cache-Control": cache },
 });
+
+async function covers(env, url) {
+  const hit = await env.MUSIC.get("covers", "json");
+  if (hit) return hit;
+  const h = { Authorization: "Bearer " + (await accessToken(env)) };
+  const r = await fetch("https://api.spotify.com/v1/me/player/recently-played?limit=50", { headers: h });
+  if (!r.ok) return { covers: [], error: `spotify ${r.status}` };
+  const hidden = CONFIG.hide_artists.map(a => a.toLowerCase()), seen = new Set(), out = [];
+  for (const x of (await r.json()).items || []) {
+    const t = x.track, al = t?.album;
+    if (!al || seen.has(al.id) || t.artists.some(a => hidden.includes(a.name.toLowerCase()))) continue;
+    const img = (al.images || []).find(i => i.width && i.width <= 320) || al.images?.[0];
+    if (!img) continue;
+    seen.add(al.id); out.push(`${url.origin}/art?u=${encodeURIComponent(img.url)}`);
+    if (out.length >= 40) break;
+  }
+  const body = { covers: out };
+  if (out.length) await env.MUSIC.put("covers", JSON.stringify(body), { expirationTtl: 1800 });
+  return body;
+}
 
 async function now(env, url) {
   if (last.body && Date.now() - last.at < FRESH_MS) return last.body;

@@ -207,6 +207,11 @@ def nav(current, part):
             + corner("br", "colophon.html", "奥付", esc(cfg("nav.colophon"))))
 
 
+def turn_html():
+    """The page turn shared by the cover and every page (src/turn.html), told where the music worker is."""
+    return (SRC / "turn.html").read_text().replace("__MUSIC_API__", MUSIC_API or "")
+
+
 def page(file, title, part, main, script=""):
     order = [p[0] for p in PAGES]
     i = order.index(file)
@@ -218,7 +223,7 @@ def page(file, title, part, main, script=""):
     updated = f'<a class="upd" href="colophon.html">{esc(cfg("pages.updated").replace("{date}", UPDATED[0]))}</a>'
     for k, v in {"title": title, "part": part, "nav": nav(file, part), "main": main, "folio": str(i + 1), "next": nxt_html, "script": script, "home": HOME, "updated": updated}.items():
         out = out.replace("{{" + k + "}}", v)
-    out = out.replace("<!--TURN-->", (SRC / "turn.html").read_text())
+    out = out.replace("<!--TURN-->", turn_html())
     (DIST / file).write_text(fill(out.replace("/*__COLOURS__*/", colours_css())))
 
 
@@ -629,7 +634,7 @@ def barcode(text):
 
 
 def cover_page(data, vols, chapters, home):
-    t = (SRC / "cover.html").read_text().replace("<!--TURN-->", (SRC / "turn.html").read_text())
+    t = (SRC / "cover.html").read_text().replace("<!--TURN-->", turn_html())
     ep = lambda i, ch: next((e["n"] for e in ch["episodes"] if e.get("entry") == i), ch["episodes"][0]["n"])
     data = dict(data, chapters={i: {"href": f"vol-{v}.html", "vol": vols[v], "ep": ep(i, chapters[v])} for i, v in home.items()},
                 vols={n["id"]: vols[home.get(n["id"], n["id"])] for n in data["nodes"]}, musicApi=MUSIC_API or None,
