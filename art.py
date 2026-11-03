@@ -550,3 +550,77 @@ def cover(n, vol, ch, name):
 {"".join(f'<text x="24" y="{H - 64 + i * 20}" style="{obi_text};font:400 14px var(--font-body)">{esc(l)}</text>' for i, l in enumerate(tag))}
 <text x="{W - 22}" y="{H - 18}" text-anchor="end" style="{obi_text};font:700 14px var(--font-body)">{shown}</text>
 </svg>'''
+
+
+# ---------- the record and its sleeve (目次 and every volume page) ----------
+def sleeve(n, vol, ch, name):
+    """A volume as a record sleeve: square, the series band, the title and kana, the volume's picture on screentone,
+    and the obi strip (red while the project runs)."""
+    W, strip = 512, 62
+    live = n.get("status") == "active"
+    room = W - 24 - 58
+    size, lines = fit_title(n["title"], room)
+    size = min(size, 58 if len(lines) == 1 else 50)
+    title = "".join(f'<text x="24" y="{46 + size * 0.95 * (i + 1):.0f}" textLength="{min(room, 0.86 * size * len(l)):.0f}" lengthAdjust="spacingAndGlyphs" '
+                    f'style="{INK};font:400 {size:.0f}px var(--font-display)">{esc(l)}</text>' for i, l in enumerate(lines))
+    top = 46 + size * 0.95 * len(lines) + 22
+    pic_h = min(270, W - strip - 18 - top)
+    pic_w = pic_h * 1.5
+    pic = wallet_panel("phone") if ch.get("cover") == "wallet" else panel(ch["cover"], 3)
+    pic = pic.replace("<svg ", f'<svg x="{(W - pic_w) / 2:.0f}" y="{top:.0f}" width="{pic_w:.0f}" height="{pic_h:.0f}" preserveAspectRatio="xMidYMid slice" ', 1)
+    fill, text = (SPOT, ONSPOT) if live else (INK, PAPER)
+    obi = ch.get("obi", "")
+    return f"""<svg class="sleeve-art" viewBox="0 0 {W} {W}" role="img" aria-label="Sleeve of volume {vol}, {esc(n['title'])}.">
+<rect width="{W}" height="{W}" style="{PAPER}"/>{tone_bands(n["id"], 0, top - 10, W, W - strip, 12, 3.6)}
+<rect width="{W}" height="40" style="{INK}"/>
+<text x="18" y="27" style="{PAPER};font:400 15px var(--font-display);letter-spacing:.04em">{esc(name)}</text>
+<text x="{W - 18}" y="27" text-anchor="end" style="{PAPER};font:500 12px var(--font-mono);letter-spacing:.12em">VOL. {vol} · 33⅓</text>
+{title}<text x="{W - 30}" y="64" style="{INK};font:700 24px var(--font-body);writing-mode:vertical-rl">{esc(ch.get("kana", ""))}</text>
+<rect x="{(W - pic_w) / 2 - 5:.0f}" y="{top - 5:.0f}" width="{pic_w + 10:.0f}" height="{pic_h + 10:.0f}" style="{PAPER};stroke:var(--ink);stroke-width:5"/>{pic}
+<rect y="{W - strip}" width="{W}" height="{strip}" style="{fill}"/>
+<text x="20" y="{W - 24}" textLength="{min(W - 40, len(obi) * 15):.0f}" lengthAdjust="spacingAndGlyphs" style="{text};font:400 26px var(--font-display)">{esc(obi)}</text>
+</svg>"""
+
+
+def tone_bands(key, x0, y0, x1, y1, step, rmax, bands=8):
+    """Screentone as tone() draws it, but as a few bands of repeating dot patterns instead of one circle per dot, so
+    a page of twenty sleeves stays light. key keeps the pattern ids unique on the page."""
+    defs, rects, h = [], [], (y1 - y0) / bands
+    for i in range(bands):
+        r = rmax * ((i + 0.5) / bands) ** 1.2
+        pid = f"tb-{key}-{i}"
+        defs.append(f'<pattern id="{pid}" width="{step}" height="{step * 0.87 * 2:.2f}" patternUnits="userSpaceOnUse">'
+                    f'<circle cx="0" cy="0" r="{r:.2f}"/><circle cx="{step}" cy="0" r="{r:.2f}"/><circle cx="{step / 2}" cy="{step * 0.87:.2f}" r="{r:.2f}"/>'
+                    f'<circle cx="0" cy="{step * 1.74:.2f}" r="{r:.2f}"/><circle cx="{step}" cy="{step * 1.74:.2f}" r="{r:.2f}"/></pattern>')
+        rects.append(f'<rect x="{x0}" y="{y0 + i * h:.1f}" width="{x1 - x0}" height="{h + 0.5:.1f}" fill="url(#{pid})"/>')
+    return f'<defs style="{INK}">{"".join(defs)}</defs><g>{"".join(rects)}</g>'
+
+
+RECORD_GROOVES = (100, 242)   # the grooved band's inner and outer radius; the tonearm reads these (data-in, data-out)
+
+
+def record(n, vol, ch):
+    """The volume's record, centred on 0,0 with radius 250: one band of grooves per episode (the tracks), and a label
+    that says which volume it is, red while the project runs. The label turns with the record, so a spin shows."""
+    live = n.get("status") == "active"
+    inner, outer = RECORD_GROOVES
+    eps, gap = len(ch["episodes"]), 8
+    span = (outer - inner - gap * (eps - 1)) / eps
+    rings, r = [], outer
+    for k in range(eps):
+        end = r - span
+        while r > end:
+            rings.append(f'<circle r="{r:.1f}"/>')
+            r -= 3.4
+        r = end - gap
+    label, on = ("var(--live-red)", "var(--live-on-red)") if live else ("var(--shelf-finished-band)", "var(--paper)")
+    kana = esc(ch.get("kana", ""))
+    return f"""<svg class="record" viewBox="-250 -250 500 500" aria-hidden="true" data-in="{inner}" data-out="{outer}">
+<g class="spin"><circle r="248" style="fill:var(--paper);stroke:var(--record-edge);stroke-width:4"/>
+<g style="fill:none;stroke:var(--record-grooves);stroke-width:1">{"".join(rings)}</g>
+<circle r="90" style="fill:{label};stroke:var(--record-label-rim);stroke-width:3"/>
+<text y="-46" text-anchor="middle" style="fill:{on};font:500 13px var(--font-mono);letter-spacing:.14em">VOL. {vol}</text>
+<text y="10" text-anchor="middle" textLength="{min(140, 26 * len(ch.get("kana", "")))}" lengthAdjust="spacingAndGlyphs" style="fill:{on};font:700 26px var(--font-body)">{kana}</text>
+<text y="56" text-anchor="middle" style="fill:{on};font:500 11px var(--font-mono);letter-spacing:.14em">33⅓ RPM</text>
+<circle r="6" style="fill:var(--paper);stroke:var(--record-edge);stroke-width:2"/></g>
+</svg>"""

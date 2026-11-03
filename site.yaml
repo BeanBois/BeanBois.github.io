@@ -17,30 +17,62 @@ you:
                                                         # your author's comment; it also opens the cover's intro
 
 # ---------------------------------------------------------------------------------------------------------------
-# The cover (index.html)
+# The site has four parts, each for a different reader:
+#   the cover   (index.html)    the hook: the record, and a back-of-the-book blurb that sends you on
+#   the brief   (author.html)   thirty seconds: who, the highlights, the years, contact, the CV
+#   the projects (contents.html + a volume each)   in depth: every project as a record in its sleeve
+#   the colophon (colophon.html) the footnote: when the site was last updated and how it's made
+nav:                                                    # the names of the parts, in the corners of every page
+  brief: the brief
+  projects: the projects
+  colophon: colophon
+
+# ---------------------------------------------------------------------------------------------------------------
+# The cover (index.html): written like the back of a book
 cover:
-  intro: "Every project I've built sits on this record, placed by the skills it took: ML, Backend, Infra and Product at the corners, mixed projects nearer the middle. Drag to spin it. Click a name."
-  hint: "Every project I've built, placed by the skills it took. Click a name."   # under the record until the first click (phones)
+  blurb_head: "Too many side projects. All of them on one record."   # the big line, like a back cover's teaser
+  blurb: "By day, the platform that keeps Tencent's GPUs busy. By night, whatever won't leave me alone: a wallet that reads Malaysian bank statements, a trading system my own red team took apart, a robot that learns from a few demonstrations."
+                                                        # the back-cover paragraph under it (DRAFT by Claude: rewrite in your voice)
+  intro: "Each project sits on the record by the skills it took. Drag to spin it; click a name for its blurb."
+                                                        # the small print: how to use the record
+  door_brief: "The brief"                               # the two ways on, under the blurb
+  door_brief_note: "thirty seconds, and the CV"
+  door_projects: "The projects"
+  door_projects_note: "{count} volumes, in depth"
+  updated: "printed {date}"                             # the small print by the barcode at the foot of the blurb ({date} = last update)
   label_rim: "TEOH KAI SHUN · SIDE A · 33⅓ RPM · "      # printed round the record's centre label
-  sleeve_heading: LINER NOTES                           # the small heading on a project's sleeve
-  directory:                                            # the line under each page's name (rail layouts; {count} = number of projects)
-    contents: "{count} projects, as volumes on a shelf"
-    author: about me, the years, and the CV for ML, cloud or backend roles
-    colophon: how this site is made, from one folder of Markdown
+  sleeve_heading: ON THE BACK                           # the small heading on a project's blurb
+  read_more: "Read Vol. {vol}"                          # the button on a project's blurb
+  directory:                                            # the line under each corner link on the cover ({count} = number of projects)
+    projects: "{count} projects in depth, a record each"
+    brief: who I am, the highlights and the CV
+    colophon: last updated, and how this site is made
 
 # ---------------------------------------------------------------------------------------------------------------
 # The other pages
 pages:
-  contents_intro: "Contents. Every project I've built is a volume, numbered in the order I started it. Thick spines are the big ones. A red band means it's still running. Pull one out."
-  author_intro: About the author, and the CV. Pick the lens that fits the role.
+  contents_intro: "Every project is a record in its sleeve, numbered in the order I started it; a red label means it's still running. Pick one and it plays."
+  author_intro: "The short version: who I am, what I'm proudest of, and the CV for the role you're hiring for."
   author_comment_label: 作者コメント · a word from the author
-  cv_pdf_note: Each one is also a PDF there   # on the cover, under "get cv" (left out when no PDFs were built)
+  brief_summary: in thirty seconds            # the heading over your summary
+  highlights_heading: the highlights          # the heading over the projects you pick below
+  highlights:                                 # the volumes to show on the brief, in order (ids from the table in GUIDE.md;
+    - ai-platform                             #  a volume of several projects uses its volume id: ai-platform, neuromorphic)
+    - kkp-wallet
+    - tradingjoe
+    - icl-hyperbolic
+    - re-news
+  years_heading: 年譜 · the years
+  cv_heading: the CV                          # the second tab on the brief (the first is highlights_heading)
+  cv_get: get the CV                          # over the PDF buttons beside the brief
   cv_pdf_link: download as PDF                # the button on each CV
   draft_note: Details are drafts until Kai Shun reviews this entry.   # under a volume's links while its entry is a draft
+  updated: last updated {date}                # at the foot of every page, linking to the colophon
 
 colophon:
   title: "Teoh Kai Shun: every project, big or small"
   sound: "The cover is a record playing whatever Kai Shun is listening to on Spotify, live, with each track's tempo from a bank of sources ranked by trust."
+  updated: last updated                       # the first line of the colophon, before the date
   state: Live since 2026-10-20 and still being drawn. Details on most volumes are drafts until reviewed.
 
 # ---------------------------------------------------------------------------------------------------------------

@@ -85,6 +85,44 @@ body { position: relative; min-height: 100vh; }
 .blot { position: absolute; z-index: -1; width: 420px; max-width: 70%; left: -60px; bottom: -40px; color: var(--shadows-blot); opacity: 0.45; pointer-events: none; }
 .split > .main { position: relative; }
 
+/* The page turn between the shelf and a volume. The shelf names the clicked card's record "rec" and its sleeve
+   "sleeve"; a volume page names its own the same, so the browser carries both across and fades everything else.
+   Browsers without cross-page transitions just open the page. */
+@view-transition { navigation: auto; }
+.deck .rec-wrap { view-transition-name: rec; }
+.vsleeve { view-transition-name: sleeve; }
+/* one curve for everything: starts gently (the record is at rest, half out of its sleeve) and settles long */
+::view-transition-group(rec), ::view-transition-group(sleeve), ::view-transition-old(root), ::view-transition-new(root) {
+  animation-duration: .8s; animation-timing-function: cubic-bezier(.5, 0, .15, 1); }
+html.vt-back::view-transition-group(sleeve) { z-index: 2; }   /* going back, the record slides in behind its sleeve */
+html.vt-back::view-transition-group(rec) { z-index: 1; }
+/* The background, three ways (preview switch: ?bg=ripple, ?bg=tone or ?bg=dim, kept for the session).
+   --vx/--vy: where the record left its sleeve (forward) or the card it goes home to (back). */
+@property --dot { syntax: "<length>"; inherits: false; initial-value: 0px; }
+@property --hole { syntax: "<length>"; inherits: false; initial-value: 0px; }
+@keyframes vt-open { from { clip-path: circle(0 at var(--vx, 50%) var(--vy, 50%)); } to { clip-path: circle(150vmax at var(--vx, 50%) var(--vy, 50%)); } }
+@keyframes vt-close { from { clip-path: circle(150vmax at var(--vx, 50%) var(--vy, 50%)); } to { clip-path: circle(0 at var(--vx, 50%) var(--vy, 50%)); } }
+@keyframes vt-tone { 0% { --hole: 0px; --dot: 7px; } 45% { --dot: 7px; } 100% { --hole: 160vmax; --dot: 0px; } }
+@keyframes vt-out { to { opacity: 0; filter: brightness(.6); } }
+@keyframes vt-in { from { opacity: 0; } }
+/* ripple: the new page opens out of the record like a ring on water; going back it closes into the card */
+html.bg-ripple::view-transition-old(root) { animation: none; }
+html.bg-ripple::view-transition-new(root) { animation-name: vt-open; }
+html.bg-ripple.vt-back::view-transition-new(root) { animation: none; }
+html.bg-ripple.vt-back::view-transition-old(root) { animation-name: vt-close; animation-duration: .8s; z-index: 1; }
+/* tone: the old page breaks into screentone dots from the record outwards, and the dots shrink away */
+html.bg-tone::view-transition-new(root) { animation: none; }
+html.bg-tone::view-transition-old(root) { z-index: 1; animation-name: vt-tone;
+  mask-image: radial-gradient(circle, #000 calc(var(--dot) - .5px), transparent var(--dot)),
+              radial-gradient(circle at var(--vx, 50%) var(--vy, 50%), transparent var(--hole), #000 calc(var(--hole) + 25vmax));
+  mask-size: 9px 9px, 100% 100%; mask-repeat: repeat, no-repeat; }
+/* dim: the room goes dark while the record crosses, and the new page comes up out of it */
+html.bg-dim::view-transition { background: var(--ink); }
+html.bg-dim::view-transition-old(root) { animation: vt-out .4s ease-in both; }
+html.bg-dim::view-transition-new(root) { animation: vt-in .45s .35s ease-out both; }
+@media (prefers-color-scheme: dark) { html.bg-dim::view-transition { background: #000; } }
+@media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }
+
 /* folio: page number and the next page, like the foot of a printed page */
 .folio { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 3fr); gap: 12px 56px; align-items: baseline; margin-top: 72px; padding-block: 14px 28px; border-top: 2px solid var(--ink); font: 12px var(--font-mono); }
 .folio .no { font-variant-numeric: tabular-nums; }
@@ -105,69 +143,48 @@ body { position: relative; min-height: 100vh; }
 .filters .lbl { color: var(--muted); margin-right: 4px; }
 .chip { font: 12px var(--font-mono); color: var(--ink); background: var(--paper); border: 1.5px solid var(--ink); padding: 1px 8px; cursor: pointer; }
 .chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
-.shelfname { display: flex; align-items: baseline; gap: 10px; margin: 0 0 10px; }
-section + section .shelfname { margin-top: 40px; }
-.shelfname h2 { margin: 0; font-size: 22px; }
-.shelfname span { font: 12px var(--font-mono); color: var(--muted); }
-.shelf {
-  display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0 3px; row-gap: 22px;
-  /* a board under every row of books */
-  background: repeating-linear-gradient(to bottom, transparent 0 var(--spine-h), var(--shelf-running-band) var(--spine-h) calc(var(--spine-h) + 6px), transparent calc(var(--spine-h) + 6px) calc(var(--spine-h) + 22px));
-  padding-bottom: 0;
+.filters { margin: 0 0 8px; }
+.gh { font-size: 22px; margin: 44px 0 18px; }
+/* every volume as a record in its sleeve. Hover: the record slides half out. Click: all the way, then the page turns */
+.lp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 40px 64px; padding-right: 48px; }
+.lp-card { color: var(--ink); text-decoration: none; display: grid; gap: 12px; align-content: start; position: relative; transition: opacity .2s; }
+.lp-card:hover, .lp-card:focus-visible, .lp-card.pulling { z-index: 2; }
+.lp-card.dim { opacity: 0.2; }
+.lp { position: relative; }
+.lp .sl { line-height: 0; position: relative; z-index: 1; border: 2.5px solid var(--ink); }
+.sleeve-art, .record { display: block; width: 100%; height: auto; }
+.disc { position: absolute; z-index: 0; top: 3%; left: 3%; width: 94%; transition: transform .45s cubic-bezier(.2, .8, .2, 1); }
+.lp-card:hover .disc, .lp-card:focus-visible .disc { transform: translateX(38%) rotate(40deg); }
+html:has(.lp-grid) { overflow-x: clip; }   /* a record pulled out of the last column runs off the page, not into a scrollbar */
+.lp-card.pulling .disc { transform: translateX(116%) rotate(90deg); transition-duration: .34s; transition-timing-function: cubic-bezier(.2, .7, .3, 1); }
+.lp-card .cap { display: grid; gap: 2px; }
+.lp-card .cap span { font-size: 11px; }
+.lp-card .livetxt { color: var(--live-text); }
+.lp-card b { font: 400 16px/1.2 var(--font-display); }
+.lp-card small { color: var(--muted); font-size: 13px; line-height: 1.4; }
+.lp-card:hover b { text-decoration: underline; text-decoration-color: var(--live-red); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+@media (max-width: 520px) {
+  .lp-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 16px; padding-right: 0; }
+  .lp-card:hover .disc { transform: translateX(14%) rotate(20deg); }
 }
-.slot { height: var(--spine-h); display: flex; align-items: flex-end; position: relative; }
-.slot::after {
-  content: ""; position: absolute; z-index: -1; left: 9px; bottom: 0; width: 34px; height: var(--sh); pointer-events: none; opacity: 0; transition: opacity 0.18s;
-  background-image: radial-gradient(var(--shadows-shadow) 1px, transparent 1.4px); background-size: 5px 5px;
-}
-.slot.big::after { width: 52px; }
-.slot:has(.spine[aria-expanded="true"])::after, .slot:has(.spine:hover)::after, .slot:has(.spine:focus-visible)::after { opacity: 0.5; }
-.spine {
-  --w: 34px;
-  display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto auto; justify-items: center;
-  width: var(--w); height: var(--h, 250px); padding: 0; margin: 0;
-  color: var(--shelf-spine-ink); background: var(--shelf-spine-paper); border: 2.5px solid var(--shelf-spine-ink); border-bottom: 0;
-  font: inherit; text-decoration: none; cursor: pointer; overflow: hidden;
-  transition: transform 0.18s ease-out, opacity 0.2s;
-}
-.spine.big { --w: 52px; }
-.spine:hover, .spine:focus-visible, .spine[aria-expanded="true"] { transform: translateY(-12px); }
-.spine.dim { opacity: 0.18; }
-@media (prefers-reduced-motion: reduce) { .spine { transition: none; } }
-.spine .ser { font: 500 8px var(--font-mono); letter-spacing: 0.1em; padding-top: 5px; }
-.spine .vol { font: 400 13px var(--font-display); font-variant-numeric: tabular-nums; padding: 1px 0 4px; }
-.spine.big .vol { font-size: 17px; }
-.spine .ttl { writing-mode: vertical-rl; font: 400 13px/1 var(--font-display); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 6px 0; min-height: 0; max-height: 100%; }
-.spine.big .ttl { font-size: 17px; }
-.spine .art { width: 100%; height: 54px; display: block; border-top: 2px solid var(--shelf-spine-ink); }
-.spine .obi { width: 100%; height: 30px; display: grid; place-items: center; background: var(--shelf-finished-band); color: var(--shelf-spine-paper); }
-.spine .obi.live { background: var(--live-red); color: var(--live-on-red); box-shadow: 0 0 0 2px var(--live-edge); }
-.spine .obi svg { width: 12px; height: 12px; }
-.sleeve { aspect-ratio: 1; border: 2.5px solid var(--ink); }
-.pull { height: 100%; overflow: auto; padding: 16px 18px 18px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; align-content: start; }
-.pull .side { grid-row: 1; font: 12px var(--font-mono); display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-items: start; }
-.pull .side .x { margin-left: auto; order: 9; }
-.pull h3 { margin: 6px 0 2px; font-size: 26px; }
-.pull .tag { margin: 0 0 8px; }
-.pull ul { margin: 6px 0 0; padding-left: 18px; }
-.pull li { margin-bottom: 4px; max-width: 70ch; }
-.pull .meta { font: 12px var(--font-mono); color: var(--muted); }
-.pull .x { width: 32px; height: 32px; border-radius: 50%; border: 0; background: var(--ink); color: var(--paper); font: 400 14px var(--font-display); cursor: pointer; }
+@media (prefers-reduced-motion: reduce) { .disc, .lp-card { transition: none; } }
 
 /* ---------- a volume ---------- */
-.book { display: grid; grid-template-columns: auto minmax(0, 460px); gap: 0 28px; align-items: start; justify-content: center; margin-top: 36px; }
-.book .spine { cursor: default; height: auto; }
-.book > .obj { align-self: stretch; display: flex; }
-.book > .obj > .spine { height: auto; }
-.book .spine:hover { transform: none; }
-.cover { width: 100%; aspect-ratio: 128 / 182; max-width: 100%; border: 3px solid var(--ink); display: block; background: var(--paper); }
+.vsleeve { max-width: 440px; margin-top: 28px; line-height: 0; border: 3px solid var(--ink); }
+/* the turntable at the top of the rail: the record on the left, the tonearm pivoting from the top right */
+.deck { position: relative; aspect-ratio: 6 / 5; margin: 0 0 4px; }
+.deck .rec-wrap { position: absolute; left: 0; top: 0; width: 83.333%; }
+.deck .arm { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+@media (max-width: 860px) {
+  .vtop { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 10px; align-items: center; margin-top: 20px; }
+  .vtop .vsleeve { margin: 0; border-width: 2px; }
+}
 .blurb { align-self: end; padding-bottom: 8px; }
 .blurb h2 { font-size: 15px; font-family: var(--font-mono); font-weight: 500; margin: 0 0 8px; }
 .blurb p { margin: 0 0 12px; max-width: 42ch; }
 .blurb dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 14px; font: 12px var(--font-mono); margin: 16px 0 0; }
 .blurb dt { color: var(--muted); }
 .blurb dd { margin: 0; }
-@media (max-width: 760px) { .book { grid-template-columns: minmax(0, 1fr); gap: 20px; } .book > .obj:first-child { display: none; } }
 .rail .blurb h2 { margin-top: 0; }
 .rail .back { margin: 0; grid-template-columns: minmax(0, 1fr); gap: 22px; }
 
@@ -189,6 +206,15 @@ section + section .shelfname { margin-top: 40px; }
 .tsuzuku .big { font: 400 30px var(--font-display); }
 .next { margin: 40px 0 0; border: 3px solid var(--ink); padding: 16px 20px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 18px; align-items: baseline; }
 .next .lbl { font: 400 18px var(--font-display); }
+.volnav { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 12px; align-items: stretch; margin: 72px 0 0; }
+.volnav a { display: grid; gap: 2px; padding: 12px 16px; border: 3px solid var(--ink); color: var(--ink); text-decoration: none; background: var(--paper); }
+.volnav a span { font: 12px var(--font-mono); color: var(--muted); }
+.volnav a b { font: 400 18px/1.2 var(--font-display); }
+.volnav .vn-next { text-align: right; }
+.volnav .vn-all { place-content: center; font-size: 18px; }
+.volnav a:hover, .volnav a:focus-visible { background: var(--ink); color: var(--paper); }
+.volnav a:hover span { color: var(--paper); }
+@media (max-width: 640px) { .volnav { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .volnav .vn-all { display: none; } }
 .back { max-width: 880px; margin: 56px auto 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 28px; }
 .back h3 { font: 500 12px var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 8px; }
 .back ol, .back ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 14px; }
@@ -196,6 +222,25 @@ section + section .shelfname { margin-top: 40px; }
 .chips { display: flex; flex-wrap: wrap; gap: 4px; }
 .chips span { font: 11px var(--font-mono); padding: 0 6px; border: 1.5px solid var(--ink); }
 
+/* ---------- 作者紹介: the brief ---------- */
+.brief + .brief { margin-top: 48px; }
+.btabs { display: flex; gap: 28px; border-bottom: 2px solid var(--ink); margin-bottom: 18px; }
+.btabs button { font: 500 12px var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); background: none; border: 0; padding: 0 0 8px; margin-bottom: -2px; border-bottom: 4px solid transparent; cursor: pointer; }
+.btabs button:hover { color: var(--ink); }
+.btabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--live-red); }
+.kicker { font: 500 12px var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 12px; padding-bottom: 6px; border-bottom: 2px solid var(--ink); }
+.brief .sum { font-size: clamp(18px, 1.8vw, 21px); line-height: 1.6; margin: 0; max-width: 60ch; }
+.hl { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.hl a { display: grid; grid-template-columns: 7ch minmax(0, 1fr) auto; gap: 2px 14px; align-items: baseline; padding: 12px 14px; border: 2.5px solid var(--ink); color: var(--ink); text-decoration: none; background: var(--paper); }
+.hl .no { font: 12px var(--font-mono); color: var(--muted); grid-row: span 2; }
+.hl b { font: 400 20px/1.2 var(--font-display); }
+.hl .meta { font: 12px var(--font-mono); color: var(--muted); white-space: nowrap; }
+.hl .meta .live { color: var(--live-text); }
+.hl .tag { grid-column: 2 / -1; font-size: 15px; line-height: 1.45; }
+.hl a:hover, .hl a:focus-visible { background: var(--soft); }
+.hl a:hover b { text-decoration: underline; text-decoration-color: var(--live-red); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+@media (max-width: 640px) { .hl a { grid-template-columns: minmax(0, 1fr); } .hl .no { grid-row: auto; } .hl .tag { grid-column: auto; } .hl .meta { white-space: normal; } }
+.brief .years { font-size: 15px; max-width: 64ch; }
 /* ---------- 作者紹介 ---------- */
 .flap { display: grid; gap: 24px; }
 .seal { width: 92px; height: 92px; border: 3px solid var(--ink); border-radius: 50%; display: grid; place-items: center; font: 400 32px var(--font-display); transform: rotate(-8deg); }
@@ -241,8 +286,43 @@ section + section .shelfname { margin-top: 40px; }
 .pipe { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font: 12px var(--font-mono); margin-top: 4px; }
 .pipe span { border: 2px solid var(--ink); padding: 1px 8px; }
 .pipe i { font-style: normal; color: var(--muted); }
+.upd-big { display: grid; gap: 2px; margin: 0 0 20px; }
+.upd-big span { font-size: 12px; }
+.upd-big b { font: 400 clamp(30px, 4vw, 40px)/1 var(--font-display); font-variant-numeric: tabular-nums; }
+.folio .upd { color: var(--muted); margin-left: 14px; white-space: nowrap; }
+@media (max-width: 640px) { .folio { grid-template-columns: minmax(0, 1fr); } .folio .upd { margin-left: 8px; } }
+@media (max-width: 860px) { .flap .seal { display: none; } }   /* phones: the brief reaches the summary sooner */
 .pages { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; font-size: 14px; }
 </style>
+<!--TURN-->
+<link rel="expect" href="#end" blocking="render">
+<script>
+/* preview switch for the background of the page turn: ?bg=ripple|tone|dim, remembered for the session */
+(() => {
+  let bg = "ripple";
+  try { const q = new URLSearchParams(location.search).get("bg"); if (q) sessionStorage.vtbg = q; bg = sessionStorage.vtbg || bg; } catch (_) {}
+  document.documentElement.classList.add("bg-" + bg);
+})();
+const vtAt = (x, y) => { const s = document.documentElement.style; s.setProperty("--vx", x + "px"); s.setProperty("--vy", y + "px"); };
+/* arriving at a volume from the shelf: the background opens from where the record left its sleeve */
+addEventListener("pagereveal", e => {
+  if (!e.viewTransition) return;
+  try { const p = JSON.parse(sessionStorage.vtfrom || "null"); if (p) vtAt(p[0], p[1]); sessionStorage.removeItem("vtfrom"); } catch (_) {}
+});
+/* back on the shelf from a volume: that volume's record and sleeve go home to their card */
+addEventListener("pagereveal", e => {
+  document.querySelectorAll("[data-vt] .disc, [data-vt] .sl").forEach(el => el.style.viewTransitionName = "");
+  const m = e.viewTransition && (window.navigation?.activation?.from?.url || "").match(/vol-([\w-]+)\.html/);
+  const card = m && document.querySelector(`[data-vt="${m[1]}"]`);
+  if (!card) return;
+  const r = card.querySelector(".lp").getBoundingClientRect();
+  vtAt(r.left + r.width / 2, r.top + r.height / 2);
+  card.querySelector(".disc").style.viewTransitionName = "rec";
+  card.querySelector(".sl").style.viewTransitionName = "sleeve";
+  document.documentElement.classList.add("vt-back");
+  e.viewTransition.finished.finally(() => { document.documentElement.classList.remove("vt-back"); card.querySelectorAll(".disc, .sl").forEach(el => el.style.viewTransitionName = ""); });
+});
+</script>
 </head>
 <body>
 <nav class="corners" aria-label="Volume">{{nav}}</nav>
@@ -250,8 +330,9 @@ section + section .shelfname { margin-top: 40px; }
 <main>
 {{main}}
 </main>
-<footer class="folio"><span class="no">— {{folio}} —</span>{{next}}</footer>
+<footer class="folio"><span><span class="no">— {{folio}} —</span>{{updated}}</span>{{next}}</footer>
 </div>
 {{script}}
+<i id="end" hidden></i>
 </body>
 </html>

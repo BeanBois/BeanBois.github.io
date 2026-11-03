@@ -4,11 +4,11 @@ Teoh Kai Shun's personal site: every project, big or small, laid out as a manga 
 
 | Page | What it is |
 |---|---|
-| `index.html` (表紙, cover) | The record, half out of its sleeve. Projects sit on the record (a Poincaré ball, placed by their mix of four skills), and what's playing is printed round its rim. The sleeve carries the intro, or a project's liner notes once you click one. |
-| `contents.html` (目次) | Every project as a volume spine on a shelf |
-| `vol-<id>.html` | A project's volume: cover, spine, and its story as panels |
-| `author.html` (作者紹介) | About, the years, contact, the CV per lens |
-| `colophon.html` (奥付) | How this printing was made |
+| `index.html` (表紙, cover): the hook | The record, half out of its sleeve. Projects sit on the record (a Poincaré ball, placed by their mix of four skills), and what's playing is printed round its rim. The sleeve reads like the back of a book: a blurb and two doors, to the brief and to the projects; a clicked project shows its own blurb. |
+| `author.html` (作者紹介): the brief | Thirty seconds: summary, highlights, the years, contact, the CV per lens (and as PDFs) |
+| `contents.html` (目次): the projects | Every volume as a record in its square sleeve; hover pulls the record half out, a click pulls it out and the volume opens with record and sleeve carried across |
+| `vol-<id>.html` | A project's volume: its sleeve, its record on a turntable (spins on arrival, then turns as you scroll; the tonearm follows how far you've read), its story as panels; links to the volumes either side |
+| `colophon.html` (奥付): the footnote | When the site was last updated, what changed lately, how this printing was made |
 
 ## How it's built
 

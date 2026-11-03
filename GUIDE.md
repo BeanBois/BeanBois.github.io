@@ -2,6 +2,17 @@
 
 The site is https://beanbois.github.io. This guide is everything you need to change it, see the change on your Mac, and publish it.
 
+## The four parts
+
+Each part is for a different reader, and the corners of every page lead between them.
+
+| Part | Page | For | What's on it |
+|---|---|---|---|
+| The hook | the cover (`index.html`) | anyone arriving | the record, and a blurb written like the back of a book (`cover.blurb_head`, `cover.blurb`), with two doors: the brief and the projects. Clicking a project shows only its blurb and a link to its volume. |
+| The brief | 作者紹介 (`author.html`) | someone with thirty seconds, e.g. a recruiter | your summary, the highlights (`pages.highlights` picks which volumes, in order), the years, contact, the CV PDFs, and the CV in full below |
+| The projects | 目次 (`contents.html`) and a volume each | someone who wants depth | every volume as a record in its sleeve. Click one: the record comes out and the volume opens with it (Chrome, Edge and Safari animate this; other browsers just open the page). On the volume the record spins, then turns as you scroll, and the tonearm shows how far you've read. Every volume links to the ones either side. |
+| The footnote | 奥付 (`colophon.html`) | the curious | when the site last changed (the date of the last commit), what changed lately, and how it's made. Every page's foot also says "last updated" and links here. |
+
 ## What lives where
 
 | To change | Edit | Then |
@@ -37,6 +48,10 @@ Open **http://127.0.0.1:8765**. Leave the command running: every time you save `
 - **A mistake in `site.yaml`** (a missing quote, a wrong project id) prints `not rebuilt: …` with what's wrong, and the last good version keeps serving. Fix it and save again.
 - **Stop:** Ctrl+C.
 - **"Address already in use":** an old `--watch` is still running somewhere. Close that terminal, or run `pkill -f "build.py --watch"`.
+
+**Trying the page turns (for now, until one of each is chosen).** Add a switch to any page's address; it sticks until you close the tab. Chrome, Edge or Safari only.
+- `?nav=` picks how the four parts turn into each other: `geo` (the page slides along a curve of the ball's space, shrinking into a disc), `ball` (the default: leaving the cover, the ball flies and the page opens out of it; everywhere else as `geo`), `tile` (heptagon tiles fill the screen and empty again). Try `index.html?nav=geo`.
+- `?bg=` picks what happens behind the record when a volume opens: `ripple` (the default), `tone` (screentone dots) or `dim` (the lights go down). Try `contents.html?bg=tone`.
 
 ## Editing `site.yaml`
 
@@ -130,7 +145,7 @@ When you like it: `git checkout main && git merge design/new-colours && git push
 
 ## Project ids
 
-For `music.playlists`.
+For `music.playlists`. For `pages.highlights`, use the volume's id: most are the same as the project's, except the volumes that hold several projects: `ai-platform` (the Tencent platform work) and `neuromorphic` (with iRecognise).
 
 | id | project |
 |---|---|
