@@ -286,7 +286,7 @@ def contents_page(nodes, vols, chapters):
     """The projects, in depth: every volume as a record in its sleeve, a grid per shelf. Hovering pulls the record half
     out; clicking pulls it all the way and the volume page opens with the record carried over (see the transition
     in src/page.html)."""
-    secs = []
+    secs, sleeves = [], {}
     for track, kana, name in SHELVES:
         items = sorted([n for n in nodes if n.get("track", "side") == track], key=lambda n: vols[n["id"]])
         if not items:
@@ -299,7 +299,7 @@ def contents_page(nodes, vols, chapters):
             mix = " ".join(k for k, w in n["mix"].items() if w >= 0.3)
             live = n.get("status") == "active"
             cards.append(f'<a class="lp-card{" live" if live else ""}" href="vol-{vid}.html" data-vt="{vid}" data-status="{n.get("status")}" data-mix="{mix}">'
-                         f'<div class="lp"><div class="disc">{record(n, vols[vid], ch)}</div><div class="obj sl">{sleeve(n, vols[vid], ch, cfg("you.name"))}</div></div>'
+                         f'<div class="lp"><div class="disc">{record(n, vols[vid], ch)}</div><div class="obj sl">{sleeves.setdefault(vid, sleeve(n, vols[vid], ch, cfg("you.name")))}</div></div>'
                          f'<div class="cap"><span class="mono muted">Vol. {vols[vid]} · {esc(n["period"])}{" · " if live else ""}<span class="livetxt">{"running" if live else ""}</span></span>'
                          f'<b>{esc(n["title"])}</b><small>{esc(n.get("tagline") or "")}</small></div></a>')
         secs.append(f'<section aria-labelledby="sh-{track}" id="sh-{track}"><h2 class="gh" id="sh-{track}-h"><span class="jp">{kana}</span> {name} '
@@ -309,6 +309,8 @@ def contents_page(nodes, vols, chapters):
     chips = lambda f, opts: "".join(f'<button type="button" class="chip" data-f="{f}" data-v="{k}" aria-pressed="{str(k == "all").lower()}">{v}</button>' for k, v in opts)
     filt = (f'<div class="filters" role="group" aria-label="Filter the projects"><div class="grp"><span class="lbl">status</span>{chips("status", statuses)}</div>'
             f'<div class="grp"><span class="lbl">skill</span>{chips("mix", skills)}</div></div>')
+    # every sleeve on its own, for the page turn that tiles the screen with them (src/turn.html, ?nav=sleeves)
+    (DIST / "sleeves.json").write_text(json.dumps([sleeves[k] for k in sorted(sleeves, key=lambda k: vols[k])], ensure_ascii=False))
     main = (f'<div class="pt"><h1>目次</h1><p>{esc(cfg("pages.contents_intro"))}</p></div>{filt}' + "".join(secs))
     script = r"""<script>
 /* click: pull the record all the way out, then open its volume; the browser carries record and sleeve across */
