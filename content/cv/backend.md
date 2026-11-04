@@ -6,10 +6,11 @@ ML Engineer at Tencent writing the Go services behind its model-serving platform
 
 ## Experience
 **Tencent**, ML Engineer, AI infrastructure · Mar 2026 – present
-- Main contributor (about 450 of 550 commits) to a Go/tRPC/Protobuf platform backed by MySQL through which 1,000+ GPUs of model-serving services are deployed and scaled across multiple Kubernetes clusters and business units.
+- Main contributor (about 450 of 550 commits) to a Go/tRPC/Protobuf platform backed by MySQL through which 50+ model-serving services on 1,000+ GPUs are deployed and scaled across multiple Kubernetes clusters and business units.
 - Made it multi-tenant: every query scoped by business unit with ownership checks, configuration resolved per tenant from a shared base layer.
 - Built a time-of-day autoscaling scheduler with conflict-validated schedules, staged scale-up and a database-enforced lock (UNIQUE constraint) against double fires.
-- Hardened cross-environment service cloning; replaced N per-service calls with one batch call; made DAO writes transactional; removed hard-coded credentials; led a four-phase refactor of monolith handlers into packages.
+- Audited the server and fixed about 30 latent defects in a month: an SQL injection, swapped status constants, an offline call that silently left workloads running, rollbacks that leaked GPU-holding pods; moved secrets out of the code and rotated leaked keys; shipped with three data migrations, 19 robustness tests and transactional DAO writes.
+- Led a four-phase refactor of monolith handlers into packages, removed dead code, made logs readable, and set the team's protocol for moving config between dev and prod.
 - Since Oct 2026, second-in-command on a new gameplay-conversation query service: fixed timezone-wrong DATETIME writes with a tested migration runbook, and LLM worker timeouts.
 
 **9Loop**, Software Engineer Intern · 2024
@@ -18,7 +19,7 @@ ML Engineer at Tencent writing the Go services behind its model-serving platform
 ## Projects
 **Wallet**, on-device personal finance (Kotlin Multiplatform + SwiftUI) · 2026 – present
 - Parses bank statements on the phone into a local ledger; the balance sheet reconciles by replaying every movement against each closing balance.
-- Integer money end to end; build-enforced module boundaries; 600+ unit tests across JVM and iOS.
+- Integer money end to end; 13 build-enforced modules; about 1,200 tests across JVM and iOS with CI; home refresh cut from 5.8 s to 221 ms.
 
 **myBudiXc**, exchange matching engine (Go) · 2025
 - Price-time-priority order book for instant matches plus a deadline-aware batch matcher that pairs unmatched orders to maximise volume; WebSocket market feed.

@@ -1,9 +1,34 @@
 # Volume for bank/projects/re-news.md. Panel text from that entry; captions editorial.
 entry: re-news
+members: [atlas]   # RE-News's prologue (Kai Shun, 2026-11-04)
 kana: リニュース
 obi: Grey is correct.
 cover: grey
 episodes:
+  - n: 0
+    entry: atlas
+    title: Before the rename
+    panels:
+      - span: 4
+        art: sources
+        caption: Atlas
+        text: Seven weeks, about 155 versions. A pipeline in a day, real data within a week, then six domains of Malaysian news, government, economic and public-opinion signals, each compressed into one citable shape.
+      - span: 2
+        art: chars
+        caption: Evidence, not examples
+        text: Retrieval-augmented reasoning, not in-context learning. Signals are immutable; how much each matters is recomputed every run.
+      - span: 3
+        art: redteam
+        caption: Auditing myself
+        text: An audit of the ingestion, then a critique of the architecture against recent papers. Its biggest risk was silent error upstream of the verifier, so each citation is now graded by removing it.
+      - span: 3
+        art: walkforward
+        caption: Measure first
+        text: The next phase needed links between kinds of source. Measured, there were none, so it was deferred on evidence instead of built.
+      - span: 6
+        art: retract
+        caption: Knowing when to stop
+        text: A campaign decision-support side was built, then set aside over the legal and data-protection questions around political profiling, and because the party-attribution chain measured too weak to stand on. What survived became RE-News.
   - n: 1
     title: Ranked and cited
     panels:

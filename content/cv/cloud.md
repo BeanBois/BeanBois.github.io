@@ -6,10 +6,10 @@ ML Engineer at Tencent and main author of its model-serving platform: deployment
 
 ## Experience
 **Tencent**, ML Engineer, AI infrastructure · Mar 2026 – present
-- Main contributor (about 450 of 550 commits) to a Go/tRPC platform through which 1,000+ GPUs of model-serving services are deployed and scaled across multiple Kubernetes clusters and business units.
+- Main contributor (about 450 of 550 commits) to a Go/tRPC platform through which 50+ model-serving services on 1,000+ GPUs are deployed and scaled across multiple Kubernetes clusters and business units.
 - Designed and built time-of-day ("tidal") GPU autoscaling from scratch: conflict-validated schedules, a scheduler/executor firing multiple configs per tick, staged two-phase scale-up, a MySQL-enforced lock against concurrent fires, and reconciliation that auto-disables orphaned schedules.
 - Built GPU usage history (30-minute snapshots) and fixed the GPU accounting behind resource reports.
-- Reliability: request-ID tracing across every RPC, automatic Kubernetes client rebuild on token expiry, namespace guards before deploy, bounded cluster-probe budgets, migration of 29 stuck orphaned records.
+- Audited the platform and fixed about 30 latent defects in a month, among them rollbacks that leaked GPU-holding pods and a config feed that could wipe every template and cluster credential; moved secrets out of the code into managed config and rotated leaked keys; added Kubernetes client rebuild on token expiry, namespace guards and bounded cluster-probe budgets.
 - Made the platform multi-tenant, with environment tags bound to the clusters each tenant may deploy into; wrote the bilingual (EN/CN) handover with eleven recorded design decisions.
 
 **9Loop**, Software Engineer Intern · 2024

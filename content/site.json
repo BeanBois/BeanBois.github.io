@@ -61,6 +61,7 @@
    "stack": [
     "ROS",
     "rospy",
+    "Gazebo",
     "Dialogflow",
     "Python"
    ],
@@ -95,42 +96,15 @@
     "Kubernetes"
    ],
    "repo": null,
-   "what": "Built from scratch on Tencent's model-serving platform: model-serving services scale their GPUs up and down on a daily schedule, on a platform 1,000+ GPUs' worth of serving runs through.",
+   "what": "Built from scratch on Tencent's model-serving platform: inference services scale their GPUs up and down on a daily (\"tidal\") schedule. Started 30 March 2026; tidal scheduling and its scaling config shipped mid-April, the rest through May, released to staging in June.",
    "bullets": [
-    "Designed and built time-of-day GPU autoscaling: schedules with conflict validation, a scheduler/executor that fires multiple configs per tick, staged two-phase scale-up, a database-enforced lock against concurrent fires, and reconciliation that auto-disables schedules whose services have gone.",
-    "Built GPU usage history (30-minute snapshots) and fixed the GPU accounting behind resource reports."
+    "Designed and built time-of-day (\"tidal\") GPU autoscaling for inference services from scratch: schedules with conflict validation, weekday and overnight schedule tags, a scheduler/executor that fires multiple configs per tick, staged two-phase scale-up, a database-enforced lock against concurrent fires, and reconciliation that auto-disables schedules whose services have gone.",
+    "Added a change log that snapshots every schedule before and after each edit or delete, the API behind the tidal-services page, and tidal service deletion; fixed services that could not scale back up after scaling to zero.",
+    "Built GPU usage history (30-minute snapshots) and fixed the GPU accounting behind resource reports (replica multipliers, staged-scaling ratios)."
    ],
-   "story": "**Exactly-once without new infrastructure.** The scheduler runs on every replica. Redis or ZooKeeper would have been a new dependency for one feature, so a UNIQUE constraint on the execution log is the lock: one INSERT wins, the rest skip. **Scale up in two steps.** Asking a shared cluster for every GPU at once can starve other workloads or fail on the last few replicas, so scale-up takes 80% first, then the rest.",
+   "story": "**Exactly-once without new infrastructure.** The scheduler runs on every replica. Redis or ZooKeeper would have been a new dependency for one feature, so a UNIQUE constraint on the execution log is the lock: one INSERT wins, the rest skip. **Scale up in two steps** (a design choice, asked for by the team in May): asking a shared cluster for every GPU at once can starve other workloads or fail on the last few replicas, so scale-up takes 80% first, waits for it to be ready, then asks for the rest.",
    "playlist": null,
-   "verified": null
-  },
-  {
-   "id": "tencent-cloning",
-   "title": "Cross-environment service cloning",
-   "role": null,
-   "tagline": "A copy replays the service; it doesn't copy the row",
-   "period": "2026-08 – 2026-09",
-   "status": "shipped",
-   "kind": "job",
-   "track": "work",
-   "group": "tencent",
-   "size": "small",
-   "mix": {
-    "backend": 0.6,
-    "infra": 0.4
-   },
-   "stack": [
-    "Go",
-    "Kubernetes"
-   ],
-   "repo": null,
-   "what": "",
-   "bullets": [
-    "Hardened cross-environment service cloning so a copy never carries the source's models, resets values on unsupported GPU types, and refuses copies made stale by a template change."
-   ],
-   "story": "**The copy that broke everything.** One version refused any copy whose saved config held values the template no longer declared. Correct in principle, it broke every real copy within 24 hours. Reverted to *report* those values instead, and kept the principle.",
-   "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "tencent-conversation-service",
@@ -164,11 +138,112 @@
    "verified": null
   },
   {
+   "id": "tencent-hardening",
+   "title": "The hardening audit",
+   "role": null,
+   "tagline": "Thirty quiet bugs found in a month, each with the proof of why it mattered",
+   "period": "2026-07 – 2026-11",
+   "status": "shipped",
+   "kind": "job",
+   "track": "work",
+   "group": "tencent",
+   "size": "big",
+   "mix": {
+    "backend": 0.65,
+    "infra": 0.35
+   },
+   "stack": [
+    "Go",
+    "tRPC",
+    "MySQL",
+    "Kubernetes"
+   ],
+   "repo": null,
+   "what": "In July 2026 the frontend's schedule slipped by three weeks. I used the gap to audit the platform's server end to end: about 30 defects found and fixed between 9 July and 11 August, each written up with its cause and fix, then tested and merged to production on 17–19 August. The same habit carried on afterwards: cloning fixes (28 August – 7 September), secrets moved out of the code (October), and the last of the orphaned-workload leaks closed (November, in testing).",
+   "bullets": [
+    "Audited the model-serving platform's server and fixed about 30 latent defects in a month, among them an SQL injection, swapped status constants that let the scheduler re-scale offline services, an offline path that silently left workloads running, and deploy rollbacks whose clean-up never worked and left orphaned pods holding GPUs.",
+    "Guarded the platform against its own config feed: an empty or truncated push could have deleted every deployment template and the cluster credentials, so pushes are now sanity-checked before anything is removed.",
+    "Moved the platform's secrets out of the code for security: the object-storage keys (Jul) and the cluster manager's API token (Oct) are now delivered by the company's config centre and the cluster credentials instead of sitting in source, the server refuses to start without them rather than falling back, and the keys that had been committed were rotated.",
+    "Shipped three data migrations with their fixes, added 19 robustness tests, and made multi-statement DAO writes transactional.",
+    "Automatic rebuild of the Kubernetes client when its token expires, namespace guards before deploys, a shared 5-second budget for cluster probes so one slow cluster no longer hangs every list call, and a migration for 29 stuck orphaned records.",
+    "In testing (Nov 2026): a deploy now always finishes its database write after the Kubernetes create, even past the request's deadline, and a sweep removes labelled Deployments that no service row references, closing the orphaned-GPU leak from both ends.",
+    "Aug–Sep 2026, hardened cross-environment service cloning so a copy never carries the source's models, resets values on unsupported GPU types, and refuses copies made stale by a template change."
+   ],
+   "story": "**Silent bugs.** The worst defects made no noise. Two status constants had been copied the wrong way round, so the tidal scheduler excluded *deleted* services instead of *offline* ones and could scale an offline service back up. On one call path, taking a service offline did nothing at all: no delete, no status change, no error, and the workload kept running. The rollback after a failed deploy was refused on every real deploy (it would only delete zero-replica deployments), so the GPU leak it existed to prevent happened every time.\n\n**Small cause, big symptom.** \"The TTS model is missing from the wizard\" was a hard-coded `LIMIT 10`: the wizard only ever showed the ten newest models. A duplicate job ID made a whole service group vanish from the UI while its workloads ran on, because MySQL treats every NULL `deleted_at` as distinct and the unique key never applied to live rows.\n\n**The copy that broke everything.** In early September, one version of cloning refused any copy whose saved config held values the template no longer declared. Correct in principle, it broke every real copy within 24 hours. Reverted to *report* those values instead, and kept the principle.",
+   "playlist": null,
+   "verified": "2026-11-04"
+  },
+  {
+   "id": "tencent-maintainability",
+   "title": "Keeping it maintainable",
+   "role": null,
+   "tagline": "Shorter functions, less dead code, readable logs, and one way to move config",
+   "period": "2026-05 – 2026-09",
+   "status": "shipped",
+   "kind": "job",
+   "track": "work",
+   "group": "tencent",
+   "size": "small",
+   "mix": {
+    "backend": 0.8,
+    "infra": 0.2
+   },
+   "stack": [
+    "Go",
+    "tRPC"
+   ],
+   "repo": null,
+   "what": "The work that makes the platform easier for the next person: refactoring, clean-up, logging, a config-change protocol and the handover.",
+   "bullets": [
+    "Refactored the platform for maintainability and scale: split monolith handlers into packages in four phases, modularised and shortened long functions, removed dead code, and threaded resolved values explicitly instead of through shared request fields.",
+    "Set the team's protocol for moving config changes between dev and prod in both directions, adopted by the team.",
+    "Made logs easier to read: request-ID tracing across every RPC and corrected log formatting; cleaned up stale git branches so staging and test track verified work.",
+    "Wrote the platform's bilingual (English/Chinese) handover: runtime view, release and rollback, eleven recorded design decisions, runbook, known debt."
+   ],
+   "story": "",
+   "playlist": null,
+   "verified": "2026-11-04"
+  },
+  {
+   "id": "tencent-models",
+   "title": "Deploying models",
+   "role": null,
+   "tagline": "Which model, on which GPU, in which cluster, and what it all costs",
+   "period": "2026-05 – 2026-07",
+   "status": "shipped",
+   "kind": "job",
+   "track": "work",
+   "group": "tencent",
+   "size": "small",
+   "mix": {
+    "backend": 0.55,
+    "infra": 0.3,
+    "ml": 0.15
+   },
+   "stack": [
+    "Go",
+    "tRPC",
+    "MySQL",
+    "Kubernetes"
+   ],
+   "repo": null,
+   "what": "The everyday deployment features of the model-serving platform, built between the autoscaler and the audit.",
+   "bullets": [
+    "Added GPU usage totals per project and per service group, then refactored them from two API calls into one.",
+    "Bound each service to the model versions it can be updated to, so updating a service shows only valid models; fixed model updates listing the wrong versions.",
+    "Fixed the platform taking services offline whenever its own access to the cluster manager was refused, which cut off users who did have access.",
+    "Added deploys from GPU-type templates, listing the GPU cards each template supports, cluster and namespace selection, and model-version search; migrated the legacy values that stopped services updating."
+   ],
+   "story": "",
+   "playlist": null,
+   "verified": "2026-11-04"
+  },
+  {
    "id": "tencent-multitenancy",
    "title": "Multi-tenant model deployment",
    "role": null,
    "tagline": "One platform, several business units, nobody rendering anyone else's config",
-   "period": "2026-07 – 2026-09",
+   "period": "2026-08 – 2026-09",
    "status": "shipped",
    "kind": "job",
    "track": "work",
@@ -184,51 +259,20 @@
     "MySQL"
    ],
    "repo": null,
-   "what": "Turned a single-tenant deployment platform into a multi-tenant one.",
+   "what": "Turned a single-tenant deployment platform into a multi-tenant one, so several business units and their app groups share it, from 19 August to 30 September 2026. The requirements changed along the way, so it took longer than planned.",
    "bullets": [
     "Made the platform multi-tenant: every query scoped by business unit with ownership checks, configuration resolved per tenant from a shared base layer, and environment tags bound to the clusters each tenant may deploy into."
    ],
    "story": "**Don't guess who the tenant is.** Joining two request labels into a config directory resolved to a directory that doesn't exist on live traffic, and nothing reported it. Tenancy now comes from an explicit table keyed on IDs every request carries; an undeclared tenant is refused. **Don't rebuild what the platform has:** a server-side config-merge layer was rejected because the company's config system already does it, with per-tenant version pinning as a bonus.",
    "playlist": null,
-   "verified": null
-  },
-  {
-   "id": "tencent-reliability",
-   "title": "Platform reliability",
-   "role": null,
-   "tagline": "Tracing, self-healing cluster clients, and the guards that stop bad deploys",
-   "period": "2026-04 – 2026-09",
-   "status": "shipped",
-   "kind": "job",
-   "track": "work",
-   "group": "tencent",
-   "size": "small",
-   "mix": {
-    "infra": 0.65,
-    "backend": 0.35
-   },
-   "stack": [
-    "Go",
-    "tRPC",
-    "Kubernetes"
-   ],
-   "repo": null,
-   "what": "",
-   "bullets": [
-    "Request-ID tracing across every RPC, automatic rebuild of the Kubernetes client when its token expires, namespace guards before deploys, bounded cluster-probe budgets, and a migration for 29 stuck orphaned records.",
-    "Replaced N per-service detail calls with one batch call, made DAO writes transactional, removed hard-coded object-storage credentials, and led a four-phase refactor splitting monolith handlers into packages.",
-    "Wrote the platform's bilingual (English/Chinese) handover: runtime view, release and rollback, eleven recorded design decisions, runbook, known debt."
-   ],
-   "story": "",
-   "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "aki-predictor",
    "title": "Acute kidney injury predictor",
    "role": null,
    "tagline": "Flagging kidney injury from NHS blood tests, deployed and monitored on Kubernetes",
-   "period": "2024",
+   "period": "2025-01 – 2025-03",
    "status": "shipped",
    "kind": "research",
    "track": "academic",
@@ -241,7 +285,9 @@
    },
    "stack": [
     "Python",
-    "gradient boosting",
+    "PyTorch",
+    "scikit-learn",
+    "Docker",
     "Kubernetes",
     "Prometheus"
    ],
@@ -258,10 +304,10 @@
   },
   {
    "id": "icl-hyperbolic",
-   "title": "In-context imitation learning with non-Euclidean methods",
+   "title": "Instant Policy++: in-context imitation learning with hyperbolic embeddings",
    "role": null,
    "tagline": "Teaching a robot a task from a few demonstrations, embedding them in hyperbolic space",
-   "period": "2024 – 2025",
+   "period": "2025-05 – 2025-09",
    "status": "shipped",
    "kind": "research",
    "track": "academic",
@@ -273,19 +319,21 @@
    "stack": [
     "Python",
     "PyTorch",
+    "PyTorch Geometric",
     "graph neural networks",
+    "diffusion (DDIM)",
     "hyperbolic geometry"
    ],
    "repo": "https://github.com/BeanBois/instant_policy_pp",
-   "what": "MSc research project at Imperial. It builds on Instant Policy (in-context imitation learning with graphs) and asks whether hyperbolic geometry, which suits hierarchical data, represents demonstrations better.",
+   "what": "MSc thesis at Imperial (MSc Computing, AI and ML), supervised by Dr Edward Johns, submitted September 2025: \"In-Context Imitation Learning: Instant Policy++\". Instant Policy teaches a robot a new task from a couple of demonstrations, framing it as graph generation with diffusion. The thesis adds a second, hyperbolic channel that is meant to carry the *hierarchy* of a demonstration (which moves belong to which sub-goal), next to the usual Euclidean channel for local geometry.",
    "bullets": [
-    "Designed a dual-channel architecture that embeds actions and observations separately, improving representational efficiency for few-shot imitation learning.",
-    "Developed a Hyperbolic Graph Attention Network on the Poincaré ball to capture hierarchical temporal dependencies across demonstration actions.",
-    "Proposed a Product Manifold Attention module that combines Euclidean and hyperbolic channels while keeping each geometry's relational bias.",
-    "Used Sarkar's construction for training-free hyperbolic embeddings, conditioning predictions on both demonstrations and the current observation without embedding fine-tuning.",
-    "Benchmarked against Instant Policy on robotic manipulation tasks: the baseline scored higher, and the work showed non-Euclidean methods are feasible here."
+    "Designed a dual-channel extension of Instant Policy: a Euclidean channel for local spatial geometry and a hyperbolic (Poincaré ball) channel for the hierarchical semantics of demonstrations.",
+    "Built the hyperbolic channel without training: demonstrations are clustered into action trees by angle (keeping time order) and embedded with Sarkar's constructor, a low-distortion tree embedding that also keeps hyperbolic norms from blowing up.",
+    "Fused the two channels with a product-manifold attention module, so current observations attend to demonstrations in both geometries; actions are predicted as flows and denoised with DDIM over 1,000 steps.",
+    "Re-implemented Instant Policy as the baseline and built a 2D game environment for it: four tasks (reach goal, eat all edibles, push and place, parking), continuously generated pseudo-demonstrations, a human demo collector, and a 2D geometry encoder in place of PointNet++.",
+    "Reported a negative result honestly: 2/10 vs the baseline's 5/10 on reach-goal, 1/10 vs 3/10 on eat-all-edibles, both 0/10 on the two hard tasks. A linear probe on the hyperbolic embeddings predicts the next action worse than a bigram baseline (18.5% vs 36.6% test accuracy), which showed the core assumption was wrong."
    ],
-   "story": "An honest negative result. The hyperbolic model lost to the baseline, and the write-up says so. Good material for the website: what the geometry bought, what it cost, and what I'd try next.",
+   "story": "The idea was that a demonstration has a tree shape (a task splits into sub-goals, sub-goals into moves) and hyperbolic space holds trees with little distortion. The model lost to the baseline, so the last chapter asks why and tests it: are the next-action semantics actually in the frozen hyperbolic embeddings? A linear probe says no, and a small MLP only gets to 34%, still under a bigram. Instant Policy learns local dynamics end to end; the tree embedding didn't. He also names his own mistake in the baseline (downsampling demonstrations evenly instead of keeping the important frames, which made policies oscillate) and lays out what next: tree-structured demonstration signatures with low-to-high resolution graph generation.\n\nThe road there: the project started on RLBench in 3D (May 2025), moved to a 2D game made for the purpose within ten days, and went through four repositories: icl-fyp (217 commits, first attempt), my_icl_agent then my_icl_agent_duchess (the main model), my_instant_policy (the baseline, refactored), and instant_policy_pp (the submission).",
    "playlist": null,
    "verified": null
   },
@@ -324,8 +372,8 @@
    "id": "neuromorphic",
    "title": "Neuromorphic computing (independent study)",
    "role": null,
-   "tagline": "Spiking neural networks on Intel's Loihi stack, for edge devices",
-   "period": "2024",
+   "tagline": "Can spiking neural networks learn on cheap edge devices? A review and an experiment on Raspberry Pis",
+   "period": "2025-02 – 2025-03",
    "status": "shipped",
    "kind": "research",
    "track": "academic",
@@ -338,16 +386,60 @@
    "stack": [
     "Python",
     "Lava",
-    "Loihi 2",
-    "SNN"
+    "spiking neural networks",
+    "R-STDP",
+    "Raspberry Pi",
+    "HTTP"
    ],
    "repo": null,
-   "what": "",
+   "what": "An independent study at Imperial with Dr Eiman Kanjo: \"Neuromorphic Computing for Decentralised Federated and Constrained Edge AI devices\". A 21-page review of neuromorphic hardware (Intel Loihi 1 and 2, IBM TrueNorth, SpiNNaker 2), software (Lava) and learning rules (STDP, surrogate gradients, three-factor learning), then an experiment: can spiking networks learn on-device on cheap hardware, and share what they learn by federated learning? The experiment's code is [iRecognise](../projects/irecognise.md).",
    "bullets": [
-    "Reviewed hardware and software advances in neuromorphic computing (Intel Loihi 2, Lava) for edge inference.",
-    "Implemented a winner-take-all spiking neural network in Lava for face-mask classification."
+    "Reviewed neuromorphic computing for constrained edge devices: the properties that matter (event-driven, sparse, in-memory, on-device learning), the hardware (Loihi 2, TrueNorth, SpiNNaker 2), Intel's Lava framework, and how federated learning could run without a central server.",
+    "Built a winner-take-all spiking network in Lava for face-mask classification: images turned to Poisson spike trains over 100 Hilbert-ordered bins, 10 excitatory modules of 200 neurons in two competing mega-modules, 2 inhibitory modules of 400, and reward-modulated STDP synapses to the output.",
+    "Designed decentralised federated learning between devices: each one broadcasts its averaged weight changes every 100 updates over HTTP, and the others listen and merge them into their own model.",
+    "Reported the negative result plainly: the model ran out of memory on a Raspberry Pi 3B (1 GB), and on a laptop it had not converged after 12 hours. Conclusion: neuromorphic computing on classical hardware isn't ready for this task yet."
    ],
-   "story": "",
+   "story": "The plan was four Raspberry Pis as \"surveillance cameras\" under different simulated weather (day, dimmed night, blurred rain), learning on-device and sharing knowledge, with a fifth joining later to show federated learning speeding it up. Lava runs its parallelism as threads, the Pi was killed for running out of memory, and the study became an honest write-up of why. A follow-on idea from the same weeks, iControl, planned four simulated legged robots (Isaac Lab ANYmal, repo iRobot_Sim) each driven by a Pi running an SNN, sharing walking knowledge but not body-specific knowledge.",
+   "playlist": null,
+   "verified": null
+  },
+  {
+   "id": "atlas",
+   "title": "atlas",
+   "role": null,
+   "tagline": "A national signal-fusion engine for Malaysia, built in seven weeks, audited by its own author",
+   "period": "2026-06 – 2026-07",
+   "status": "archived",
+   "kind": "product",
+   "track": "side",
+   "group": "re-news",
+   "size": "big",
+   "mix": {
+    "ml": 0.5,
+    "backend": 0.35,
+    "infra": 0.15
+   },
+   "stack": [
+    "Python",
+    "FastAPI",
+    "PostgreSQL",
+    "pgvector",
+    "LLMs (Ollama qwen3:32b",
+    "bge-m3",
+    "Claude)",
+    "Next.js",
+    "TypeScript"
+   ],
+   "repo": "https://github.com/BeanBois/RE-News-",
+   "what": "RE-News's predecessor (13 June – 28 July 2026, about 155 versions): a political, economic and social intelligence engine for Malaysia. Per-source encoders turn news, government, economic and public-opinion data into one citable signal shape, and an LLM fuses only those signals into reports whose every claim resolves to evidence. Renamed and narrowed to RE-News on 28 July 2026.",
+   "bullets": [
+    "Built a working pipeline in a day and real-data ingestion within a week (CPI, OPR, fuel prices, government feeds, social comments), then widened it to six domains with 30 months of history.",
+    "Framed the system as retrieval-augmented reasoning over evidence rather than in-context learning, so signal selection draws on the RAG literature; signals are append-only and immutable, with salience in a separate table rebuilt each run.",
+    "Separated what people say from what they do (stated vs revealed preference) as its own axis, independent of source family, and built a cross-source corroboration linker measured against hand-labelled pairs before shipping.",
+    "Audited my own system twice: a 13-finding data-science audit of ingestion, and a literature-grounded critique of the architecture that found its biggest risk was silent error upstream of the verifier, answered with a counterfactual citation-faithfulness grade.",
+    "Designed deployment as backend-agnostic seams (cloud, hybrid with the home GPU, or self-hosted as configuration, not a rewrite), one app with route-based modules, a three-tier access model, and a register of 155 dated decisions."
+   ],
+   "story": "**Measure, then decide.** The next phase depended on links between sources of different kinds; measured, there were none, so it was deferred on evidence instead of built. The linker turned out to be reason-blind (two signals for the same policy for incompatible reasons counted as agreement), so corroboration became basis-aware. **Knowing when to stop.** A campaign decision-support side (party views, elections, a war-room) was built and then set aside, over the legal and data-protection questions around political profiling and because measurement showed the party-attribution chain was too weak to stand on. What survived became RE-News.",
    "playlist": null,
    "verified": null
   },
@@ -384,7 +476,7 @@
    "title": "CarDesigner",
    "role": null,
    "tagline": "Scan a real car with LiDAR, repaint it in 3D, park the result in your driveway in AR",
-   "period": "2026-06",
+   "period": "2026-04 – 2026-06",
    "status": "paused",
    "kind": "product",
    "track": "side",
@@ -401,7 +493,7 @@
     "LiDAR"
    ],
    "repo": null,
-   "what": "",
+   "what": "An iOS app, fully offline: scan a real car with LiDAR (photogrammetry on phones without it), design paint and livery on it in an isolated 3D studio, then see it at real scale in AR and record it. 55 Swift files, about 7,600 lines, built with xcodegen; no git history (Swift files dated 2026-04-18 to 04-25, last change in the folder 2026-06-04).",
    "bullets": [
     "Building a fully offline iOS app that scans a car with LiDAR (photogrammetry fallback), lets you design paint and livery in 3D, and shows it at real scale in AR."
    ],
@@ -414,7 +506,7 @@
    "title": "chessAI",
    "role": null,
    "tagline": "AlphaZero-style chess: self-play, MCTS, and a lot of GPU tuning",
-   "period": "2026-03",
+   "period": "2026-03-26 – 2026-03-27",
    "status": "paused",
    "kind": "model-from-scratch",
    "track": "side",
@@ -442,7 +534,7 @@
    "title": "Data terminal",
    "role": null,
    "tagline": "A C++ market-data feed, streamed over a socket to a Python plotter",
-   "period": "2026-01",
+   "period": "2026-01-29 – 2026-02-03",
    "status": "archived",
    "kind": "tool",
    "track": "side",
@@ -474,7 +566,7 @@
    "title": "expense-tracker",
    "role": null,
    "tagline": "A keyboard-driven budget tracker in the terminal",
-   "period": "2026-03",
+   "period": "2026-03 – 2026-04",
    "status": "shipped",
    "kind": "tool",
    "track": "side",
@@ -490,41 +582,47 @@
     "SQLite"
    ],
    "repo": null,
-   "what": "",
+   "what": "Where Wallet started: Wallet inherits this tracker. A terminal budget tracker: monthly \"trackings\" with category budgets carried forward from the last month, scheduled payments, a performance tab averaging spend over a chosen window, and (from v2.1) investments and a GUI. 6 commits, 2026-03-26 to 2026-04-18, about 5,000 lines of Go.",
    "bullets": [
     "Wrote a personal-finance TUI in Go (Bubble Tea) on pure-Go SQLite, with monthly trackings that carry budgets forward."
    ],
    "story": "",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "fps-rl-agent",
    "title": "RL agent for an FPS game",
    "role": null,
-   "tagline": "An actor-critic agent learning a 3D shooter, trained across three machines",
-   "period": "2023",
+   "tagline": "A reinforcement-learning agent that plays Counter-Strike, run across three laptops",
+   "period": "2022 – 2023-04",
    "status": "shipped",
    "kind": "model-from-scratch",
    "track": "academic",
    "group": null,
-   "size": "small",
+   "size": "big",
    "mix": {
     "ml": 0.7,
     "infra": 0.3
    },
    "stack": [
     "Python",
-    "PyTorch"
+    "PyTorch",
+    "OpenAI Gym",
+    "YOLOv5",
+    "sockets",
+    "CS:GO Game State Integration"
    ],
-   "repo": null,
-   "what": "",
+   "repo": "https://github.com/BeanBois/CSGO_AI",
+   "what": "BSc final year project at King's College London (6CCS3PRJ, supervised by Prof. Agi Kurucz, report April 2023): \"An AI Agent that plays FPS games\". An agent learns to play Counter-Strike: Global Offensive bomb rounds against the game's own bots, through the real game client, with the aim of playing well *and* playing like a human.",
    "bullets": [
-    "Built an RNN actor-critic agent in PyTorch for a partially observable 3D first-person environment with continuous actions.",
-    "Distributed training across 3 machines with asynchronous (A3C-style) updates, cutting wall-clock training time by about 60%.",
-    "Evaluated quantitatively (reward, episode length, policy entropy) and qualitatively (emergent behaviours)."
+    "Framed CS:GO as a reinforcement-learning problem and built an asymmetric actor-critic agent with DDPG and Hindsight Experience Replay in PyTorch: the critic trains on the fully observed game state, the actor plays from what a player can see.",
+    "Replaced a hand-shaped reward with HER and a sparse win/lose reward (+1 / −1) over the game's two win conditions, avoiding reward engineering.",
+    "Built the environment as an OpenAI Gym-style interface over the live game, split across 3 laptops talking over sockets: an Agent (learning), a Player (turns encoded actions into mouse and keyboard input, runs YOLOv5 enemy detection) and a Spectator (streams full game state through CS:GO Game State Integration).",
+    "Chose YOLOv5 for enemy detection: about 60 fps on the player machine against 16 fps for the first approach.",
+    "Evaluated over 100 rounds against the built-in bots: 39 wins. The write-up is honest that the agent learnt to exploit bot behaviour (constant movement against slow bot aim, suppressive fire that makes bots cautious) rather than to play well."
    ],
-   "story": "",
+   "story": "The agent found a real strategy, just not the one he wanted. Bots aim slowly and play cautiously when they hear gunfire, so the agent learnt to keep moving and fire now and then to run the clock down: 39 wins out of 100. The report's critique names what went wrong: hard-coded mouse moves that limited exploration, a visual system with no \"where am I being shot from\" cue, no sound, a naive RNN whose policy loss sat at 0, 5 days of training on one instance, and latency between seeing an enemy and shooting. Next steps he wrote down: LSTM, curriculum (bomb-defuse scenarios first), self-play as in DeepMind's Quake III work. A project site with gameplay videos lives at beanbois.github.io/CSGO_AI.",
    "playlist": null,
    "verified": null
   },
@@ -532,8 +630,8 @@
    "id": "irecognise",
    "title": "iRecognise",
    "role": null,
-   "tagline": "Face recognition from motion, the neuromorphic way",
-   "period": "2025-02",
+   "tagline": "The neuromorphic study's experiment: a spiking network that learns on-device and shares what it learns",
+   "period": "2025-02 – 2025-03",
    "status": "archived",
    "kind": "model-from-scratch",
    "track": "side",
@@ -545,15 +643,19 @@
    },
    "stack": [
     "Python",
+    "Lava",
     "spiking neural networks",
-    "R-STDP"
+    "R-STDP",
+    "HTTP"
    ],
    "repo": "https://github.com/BeanBois/iRecognise-",
-   "what": "",
+   "what": "The code behind the [neuromorphic computing study](../research/neuromorphic.md). A spiking neural network in Intel's Lava classifies whether a face mask is worn properly, learns with reward-modulated STDP, and shares its weight updates with other devices through a small federated training server. About 3,100 lines of Python.",
    "bullets": [
-    "Built a motion-based facial-recognition model in the neuromorphic paradigm: spiking network with reward-modulated STDP learning, plus a federated training server."
+    "Built a winner-take-all spiking network in Lava (10 excitatory modules of 200 neurons in two competing groups, 2 inhibitory modules of 400) with reward-modulated STDP learning, for binary face-mask classification.",
+    "Encoded images as Poisson spike trains: grayscale, pixels ordered along a Hilbert curve, binned into 100.",
+    "Wrote a federated training server: each device broadcasts its averaged weight changes every 100 updates, and listeners merge them into their own model."
    ],
-   "story": "",
+   "story": "Meant to run on Raspberry Pi 3Bs as stand-in surveillance cameras; it ran out of memory on them. Accuracy and response-rate logs from a laptop run are in the repo (`accuracies.npy`, `prediction speed.npy`). The README's original pitch, \"motion-based facial recognition\", is where it started, before it narrowed to the mask task in the report.",
    "playlist": null,
    "verified": null
   },
@@ -561,7 +663,7 @@
    "id": "kkp-wallet",
    "title": "Wallet",
    "role": null,
-   "tagline": "Personal finance for Malaysia, read from your own bank statements, on your phone",
+   "tagline": "Personal finance for Malaysia, read from your own statements, on your phone, and nowhere else",
    "period": "2026-08 – present",
    "status": "active",
    "kind": "product",
@@ -569,9 +671,8 @@
    "group": null,
    "size": "big",
    "mix": {
-    "backend": 0.5,
-    "product": 0.45,
-    "ml": 0.05
+    "backend": 0.55,
+    "product": 0.45
    },
    "stack": [
     "Kotlin Multiplatform",
@@ -581,16 +682,19 @@
     "SQLite"
    ],
    "repo": null,
-   "what": "An iOS app that parses Malaysian bank and card statements **on the phone**, builds a ledger, and shows what you hold and what you spent. Nothing leaves the device. Card recommendation is a later phase.",
+   "what": "An iOS app for personal finance in Malaysia, in development since August 2026 and used by me only so far. It reads statements from several banks and an e-wallet **on the phone**, reconciles them to the sen into a local ledger, and shows balances, spending, budgets, bills and a financial profile. There is no server: nothing leaves the device. The engine is Kotlin Multiplatform (13 Gradle modules) under an interactive SwiftUI front end with its own original design.",
    "bullets": [
-    "Building a Kotlin Multiplatform finance app with a SwiftUI front end; statements are parsed on-device into a local ledger and nothing leaves the phone.",
-    "The balance sheet is reconciled by replaying every movement against each statement's closing balance. A screen that can't reconcile says so instead of drawing a zero.",
-    "Enforced module boundaries in the build (Gradle rules that fail if the phone links a forbidden module), with 600+ unit tests across JVM and iOS targets.",
-    "Money is integer minor units end to end, decided and recorded on day one."
+    "Building an on-device personal-finance app: a Kotlin Multiplatform engine compiled into a SwiftUI iOS app, with no server; statements from several Malaysian banks and an e-wallet are parsed on the phone into a local, append-only ledger.",
+    "A statement counts only if replaying its rows reproduces every balance it prints, checkpoint by checkpoint; a screen that can't work a figure out says so instead of showing zero. Tested across many real statements.",
+    "Money is integer sen and rates integer basis points from day one, with half-to-even rounding applied once: no floating point anywhere, and the same type on the phone and the laptop.",
+    "Architecture kept honest by the build: 13 modules whose dependency rules fail the build when broken, about 1,200 tests across JVM and iOS with CI, and the home screen's refresh cut from 5.8 s to 221 ms (26x) by caching log reads.",
+    "Security and privacy by design: bank notifications are read strictly (every figure must appear word for word, a suspected one-time passcode drops the whole message, refusals are kept without their text), parsing rules ship as signed packs that refuse tampered or older versions, secrets stay in the device Keychain, consent is per purpose, and real data is scanned out of the repo before every push.",
+    "Designed an interactive, original UI from scratch over four frontend versions, each with written layout rules every screen follows.",
+    "Kept it maintainable with versioning: product, design and frontend docs each carry their own version (a major freezes the old one), code versions count readiness groups met on the way to launch, 22 dated decision records, and a docs tree where each doc names the code it covers."
    ],
-   "story": "Statements are monthly and retrospective, so the roadmap splits into what works from statements alone and what needs live capture (bank notifications). Phase 1 shipped from real statements, and live capture is now running on an iPhone. Also: a docs tree where each leaf names the code it covers, queryable by a script, so every session reads only what it touches.",
+   "story": "- **The statement is the judge.** Statements are monthly and look back, so the app's truth comes from them: a parsed statement is only used once it reproduces the balances the bank itself printed. Anything else is a claim, and a claim is used by nothing.\n- **Why not BigDecimal.** The design first called for it, but Kotlin's shared standard library doesn't have it, so the most correctness-critical type would have differed between phone and laptop. Integer sen with half-to-even rounding also avoids drifting from the bank's own figures, which half-up would do on every tie.\n- **A boundary is a module.** Kotlin has no package-private, so a rule inside a module is only a naming convention. Every boundary worth keeping became its own Gradle module, checked by the build.\n- **No server, on purpose.** An early design had one; it was dropped on 2 September 2026 for parsing on the phone. Live capture from Apple Pay taps and bank notifications works but is early: detection still raises too many false positives. Before launch the app must pass a written readiness bar, security and data privacy included.",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "mybudixc",
@@ -612,7 +716,7 @@
     "WebSockets"
    ],
    "repo": null,
-   "what": "",
+   "what": "An exchange engine in Go (about 1,400 lines, no git history, last touched 2025-11-24): orders that can fill now match on a price-time order book; the rest wait in a batch queue with deadlines and are paired every few minutes to maximise matched volume.",
    "bullets": [
     "Built a Go exchange engine: a price-time-priority order book for instant matches, and a deadline-aware batch matcher that globally pairs unmatched orders every N minutes to maximise volume, with a WebSocket market feed."
    ],
@@ -642,7 +746,7 @@
     "Windows"
    ],
    "repo": null,
-   "what": "",
+   "what": "A Windows PC with WSL runs Ollama (qwen3:32b and qwen3-coder:30b) and serves it over Tailscale; a few shell scripts start, stop and check the server, and the client scripts ping, list models, chat and code against it from a laptop. 2 commits on 2026-06-10. TradingJoe and RE-News both used it as their LLM backend.",
    "bullets": [
     "Run a private LLM serving box (Ollama on Windows + WSL) reachable from my devices over a Tailscale mesh, the default inference backend for RE-News (qwen3:32b)."
    ],
@@ -654,8 +758,8 @@
    "id": "plate-recognition",
    "title": "Malaysian licence plate recognition",
    "role": null,
-   "tagline": "YOLOv8 finds the plate, a small CNN reads it",
-   "period": "2025",
+   "tagline": "A three-day take-home: YOLOv8 finds the plate, three OCR engines vote on what it says",
+   "period": "2025-11",
    "status": "shipped",
    "kind": "product",
    "track": "side",
@@ -668,12 +772,17 @@
    "stack": [
     "Python",
     "YOLOv8",
-    "PyTorch"
+    "EasyOCR",
+    "PaddleOCR",
+    "Tesseract",
+    "OpenCV"
    ],
-   "repo": null,
-   "what": "",
+   "repo": "https://github.com/BeanBois/malaysia_carplate_take_home_assignment",
+   "what": "A take-home assessment (3 days, November 2025): detect and read Malaysian licence plates in images and video. Two stages: a fine-tuned YOLOv8 detector, then an ensemble of off-the-shelf OCR engines.",
    "bullets": [
-    "Built an end-to-end OCR pipeline for Malaysian plates: YOLOv8 detection plus a custom CNN character recogniser, 94% character-level accuracy on 2,000+ self-collected images in varied lighting."
+    "Built a two-stage plate reader in 3 days: YOLOv8 fine-tuned for detection (precision 0.96, recall 0.80, F1 0.87 on a 28-image hand-labelled Malaysian test set), then EasyOCR, PaddleOCR and Tesseract run together with the best read picked by confidence and plate format.",
+    "Worked around scarce Malaysian data: 168 Malaysian and 400+ foreign plates mixed, 60 hand-picked hard negatives (road signs, billboards, bumpers without plates), heavy augmentation for light, weather and angle, and size and aspect filters against false positives.",
+    "Reported the weak stage honestly: character accuracy 0.26 because the OCR wasn't fine-tuned, with a CRNN fine-tuned on plates as the next step."
    ],
    "story": "",
    "playlist": null,
@@ -727,19 +836,23 @@
    },
    "stack": [
     "Python",
+    "FastAPI",
     "PostgreSQL",
-    "LLMs (Ollama qwen3",
+    "LLMs (Ollama qwen3:32b",
     "Claude)",
-    "TypeScript frontend"
+    "React",
+    "TypeScript"
    ],
    "repo": "https://github.com/BeanBois/RE-News-",
-   "what": "Scans news, government, economic and public-opinion sources, compresses each into a common citable \"signal\", and has an LLM fuse only those signals into ranked, cited causal chains: \"policy X led to Y, so Z feels W.\"",
+   "what": "Scans news, government, economic and public-opinion sources, compresses each into a common citable \"signal\", and has an LLM fuse only those signals into ranked, cited causal chains: \"policy X led to Y, so Z feels W.\" Built as \"atlas\" from June 2026 and renamed RE-News on 2026-07-28, when it was narrowed to a public issue-scan for Malaysia.",
    "bullets": [
-    "Designed a pipeline of per-source encoders (news, government, CPI/OPR/fiscal data, public opinion, search trends) that compress raw data into one citable signal schema.",
-    "Restricted the LLM to a fusion layer over signals, never raw documents, so every claim in a report resolves to its evidence.",
-    "Made the model backend switchable per stage: a local qwen3:32b on the home-lab GPU by default, Claude as an opt-in."
+    "Designed a pipeline of 8 per-source encoders (news, government, CPI/OPR/fuel-price data, public opinion, search trends and others) that compress raw data into one citable signal schema, fed by 17 ingest modules.",
+    "Restricted the LLM to a fusion layer over signals, never raw documents; every claim carries evidence references that a verifier resolves before the report is shown.",
+    "Made the model backend switchable per stage: a local qwen3:32b on the home-lab GPU by default, Claude as an opt-in.",
+    "Built it to production habits in six weeks: 392 commits, about 70,000 lines of Python and 23,000 of TypeScript, 58 PostgreSQL migrations, 17 API route modules, and 102 test files (about 1,800 passing tests).",
+    "Reports are navigated as a tree (report, chat, guided next steps, branch, back), each node an immutable, auditable record."
    ],
-   "story": "\"Grey is correct\": the system shows nothing rather than an extrapolation. Ties to the home lab, which the LLM runs on.",
+   "story": "\"Grey is correct\": the system shows nothing rather than an extrapolation. The repo runs on a decision register (D1 to D155) and a \"current state\" census taken from source, because the docs had started to disagree with each other. Ties to the home lab, which the LLM runs on.",
    "playlist": null,
    "verified": null
   },
@@ -772,7 +885,7 @@
    "title": "SRGAN from scratch",
    "role": null,
    "tagline": "4× super-resolution, reproducing the paper on a Windows GPU",
-   "period": "2025",
+   "period": "2025-11 – 2025-12",
    "status": "shipped",
    "kind": "model-from-scratch",
    "track": "side",
@@ -787,11 +900,11 @@
     "PyTorch",
     "DirectML"
    ],
-   "repo": null,
+   "repo": "https://github.com/BeanBois/SRGAN",
    "what": "",
    "bullets": [
-    "Implemented SRGAN from scratch in PyTorch (ResNet generator, VGG perceptual loss, adversarial training) and trained it on DIV2K at 4× upscaling, reaching 29.3 dB PSNR and 0.82 SSIM on validation.",
-    "Worked around DirectML gaps for Windows GPU training with custom replacements for unsupported operations.",
+    "Implemented SRGAN from scratch in PyTorch (ResNet generator, VGG perceptual loss, adversarial training) and trained it on DIV2K at 4× upscaling, with an SRCNN baseline and a pre-GAN warm-up, reaching 29.3 dB PSNR and 0.82 SSIM on validation.",
+    "Worked around DirectML gaps for Windows GPU training with custom replacements for unsupported operations (the training script picks DirectML, then CUDA, then CPU).",
     "Ran ablations of pixel-wise MSE vs. perceptual loss, quantifying the perceptual-quality/PSNR trade-off."
    ],
    "story": "",
@@ -817,27 +930,33 @@
    "stack": [
     "Python",
     "PyTorch (GNN)",
-    "LLMs",
+    "LLMs (Ollama qwen3",
+    "Claude)",
+    "RAG",
     "yfinance",
-    "Moomoo API"
+    "SEC EDGAR",
+    "Moomoo API",
+    "cron"
    ],
    "repo": null,
-   "what": "A modular portfolio system for Bursa Malaysia and US equities: Black-Litterman, Fama-French (FF3/Carhart), momentum and mean-reversion, views from analyst targets, SEC insider buys and LLM signals, and a meta-strategy blending them. Walk-forward backtests, paper and live trading via Moomoo.",
+   "what": "A modular portfolio system for Bursa Malaysia and US equities (China, Hong Kong and London added later): Black-Litterman, Fama-French (FF3 and Carhart), momentum and mean-reversion, views from analyst targets, SEC insider buys and LLM signals, and a meta-strategy blending them. Walk-forward backtests and paper trading via Moomoo (paper money only). Paused since the 2026-07-28 rebuild. Then an LLM \"conviction\" line, a red team that took it apart, and a rebuild.",
    "bullets": [
-    "Built a multi-strategy portfolio system (Black-Litterman, Fama-French, momentum, mean-reversion, a blended meta-strategy) with walk-forward backtesting and paper or live execution through Moomoo.",
-    "Added GNN and LLM view generators feeding Black-Litterman, using SEC Form 4 insider buys and analyst targets as views.",
-    "Ran a five-agent red team over my own results (leakage, finance, ML, LLM, execution), found no demonstrated out-of-sample edge, retracted the claims in writing, and disabled the affected strategy pending fixes."
+    "Built a multi-strategy portfolio system in Python (about 28,000 lines, 154 commits over Apr–Jul 2026): Black-Litterman, Fama-French, momentum, mean-reversion, and a 7-sleeve meta blend (4 quant, 2 qualitative, 1 LLM) re-weighted quarterly by Sharpe, with walk-forward backtests and paper trading through Moomoo.",
+    "Added GNN and LLM view generators for Black-Litterman, a point-in-time RAG store so the LLM only sees documents dated before the decision, and SEC Form 4 insider buys and analyst targets as views.",
+    "Ran a five-reviewer red team over my own results (leakage, finance, ML, LLM, execution): the \"5/5 beats MinVar\" result was an in-sample artifact (0/5 markets significant) and the LLM was citing documents that had never been ingested. Retracted the claims in writing and disabled the strategy.",
+    "Fixed what the red team found with fail-closed engineering: execution reconciliation that refuses to trade on drift, a book validator that falls back to the prior book, a replay guard and point-in-time assertions, a drawdown circuit breaker, and ticker-identity checks.",
+    "Moved to pre-registered experiments: each live book's rules and success test written down before it trades, and a twin-book design (mechanical baseline vs LLM on the same universe) to measure what the LLM actually adds."
    ],
-   "story": "The best story in the bank. A backtest said \"5/5 beats MinVar\". The red team found leakage and an LLM citing documents that had never been ingested. I published the retraction in the repo and replaced fabricated citations with an honest \"no documents found\". This is the one for the website.",
+   "story": "The best story in the bank. A backtest said \"5/5 beats MinVar\". The red team found the GNN line was \"MinVariance wearing a model's name\", and the LLM line reasoning over zero documents while emitting citations. Its one live data point: −9.4% in 12 sessions, with a casino operator as its top electric-vehicle holding, because the ticker `BYD` is Boyd Gaming, not the carmaker. The retraction went into the repo's README, fabricated citations became an honest \"no documents found\", and the paper books were closed out (the EV book at −10.5%, a frozen long-term book at −1.4%) and rebuilt from scratch in late July 2026 as twin, pre-registered books. Ties to the home lab: the LLM ran on its qwen3:32b.",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "transformer-from-scratch",
    "title": "Attention Is All You Need, from scratch",
    "role": null,
    "tagline": "The original Transformer, rebuilt and trained on every season of Archer",
-   "period": "2026-02",
+   "period": "2026-02-04 – 2026-02-06",
    "status": "shipped",
    "kind": "model-from-scratch",
    "track": "academic",
@@ -865,7 +984,7 @@
    "title": "Tencent",
    "role": "ML Engineer",
    "period": "2026-03 – present",
-   "what": "The team's model-serving platform deploys, scales, health-checks and tears down GPU model-serving services on Kubernetes for several business units, safely over 1,000 GPUs' worth. I build the platform; other teams run the GPUs and the services on it. The codebase dates from 2024. I joined in March 2026, and by October I had written about 450 of its 550 commits: the GPU autoscaler, multi-tenancy, most of the reliability work and the handover. In October 2026 I started on a second service, a query service for gameplay-session conversation data."
+   "what": "The team's model-serving platform deploys, scales, health-checks and tears down GPU model-serving services on Kubernetes for several business units: 50+ services on well over 1,000 GPUs. I build the platform; other teams run the GPUs and the services on it. The codebase dates from 2024. I joined in March 2026, and by October I had written about 450 of its 550 commits: the GPU autoscaler, the everyday deployment features, a month-long hardening audit, multi-tenancy, the refactoring and the handover."
   }
  },
  "log": [
@@ -888,11 +1007,6 @@
    "2026-09-10",
    "tencent-multitenancy",
    "tenant table moves into per-environment config"
-  ],
-  [
-   "2026-09-07",
-   "tencent-cloning",
-   "strict copy check reverted after breaking every real copy"
   ],
   [
    "2026-07-28",
@@ -987,7 +1101,7 @@
   }
  ],
  "counts": {
-  "entries": 35,
-  "public": 29
+  "entries": 52,
+  "public": 31
  }
 }

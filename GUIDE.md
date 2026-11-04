@@ -147,6 +147,7 @@ For `music.playlists`. For `pages.highlights`, use the volume's id: most are the
 |---|---|
 | `9loop` | 9Loop |
 | `aki-predictor` | Acute kidney injury predictor |
+| `atlas` | atlas |
 | `blockhub` | BlockHub |
 | `car-designer` | CarDesigner |
 | `chess-ai` | chessAI |
@@ -167,10 +168,11 @@ For `music.playlists`. For `pages.highlights`, use the volume's id: most are the
 | `sales-signatures` | Sales signatures |
 | `srgan` | SRGAN from scratch |
 | `tencent-autoscaler` | Time-of-day GPU autoscaler |
-| `tencent-cloning` | Cross-environment service cloning |
+| `tencent-hardening` | The hardening audit |
+| `tencent-maintainability` | Keeping it maintainable |
+| `tencent-models` | Deploying models |
 | `tencent-conversation-service` | Gameplay conversation query service |
 | `tencent-multitenancy` | Multi-tenant model deployment |
-| `tencent-reliability` | Platform reliability |
 | `tradingjoe` | TradingJoe |
 | `transformer-from-scratch` | Attention Is All You Need, from scratch |
 

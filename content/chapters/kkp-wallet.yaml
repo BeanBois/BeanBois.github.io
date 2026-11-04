@@ -12,33 +12,55 @@ episodes:
     panels:
       - span: 6
         art: tui
-        caption: The legacy
-        text: Before Wallet, a personal-finance TUI in Go (Bubble Tea) on pure-Go SQLite, with monthly trackings that carry budgets forward.
+        caption: Where it started
+        text: Wallet started here, as a personal-finance TUI in Go (Bubble Tea) on pure-Go SQLite, with monthly trackings that carry budgets forward. Wallet inherits it.
   - n: 1
     title: Nothing leaves the phone
     panels:
       - span: 4
         art: phone
         caption: The idea
-        text: An iOS app that parses Malaysian bank and card statements on the phone, builds a ledger, and shows what you hold and what you spent. Nothing leaves the device.
+        text: An iOS app for personal finance in Malaysia. It reads statements from several banks and an e-wallet on the phone, reconciles them into a local ledger, and shows what you hold and what you spent. There is no server.
       - span: 2
         art: sen
         caption: Day one
-        text: Money is integer minor units end to end, decided and recorded on day one.
+        text: Money is integer sen and rates integer basis points, with half-to-even rounding applied once. No floating point anywhere.
       - span: 6
         art: ledger
-        caption: The rule
-        text: The balance sheet is reconciled by replaying every movement against each statement's closing balance. A screen that can't reconcile says so instead of drawing a zero.
+        caption: The statement is the judge
+        text: A statement counts only if replaying its rows reproduces every balance it prints. Anything else is a claim, and a claim is used by nothing. A screen that can't work a figure out says so instead of showing zero.
       - span: 3
         art: wall
         caption: The wall
-        text: Module boundaries are enforced in the build. Gradle rules fail if the phone links a forbidden module, with 600+ unit tests across JVM and iOS targets.
+        text: Kotlin has no package-private, so every boundary worth keeping is its own Gradle module. Thirteen of them, with rules that fail the build, and about 1,200 tests across JVM and iOS.
       - span: 3
         art: month
-        caption: The catch
-        text: Statements are monthly and looking back, so the roadmap splits into what works from statements alone and what needs live capture from bank notifications. Phase 1 shipped from real statements.
+        caption: 26 times faster
+        text: The home screen's refresh went from 5.8 s to 221 ms once the log reads were cached.
+  - n: 2
+    title: What a thief could take
+    panels:
+      - span: 3
+        art: wall
+        caption: No passcodes
+        text: Bank notifications are read strictly. Every figure must appear word for word, a suspected one-time passcode drops the whole message, and a refusal is kept without its text.
+      - span: 3
+        art: sen
+        caption: Signed rules
+        text: The parsing rules ship as signed packs, and a tampered or older pack is refused. Secrets stay in the device Keychain, and consent is given purpose by purpose.
       - span: 6
+        art: ledger
+        caption: Kept in order
+        text: Product, design and frontend docs each carry a version, code versions count the readiness groups met on the way to launch, 22 dated decisions record why, and each doc names the code it covers.
+  - n: 3
+    title: Not yet
+    panels:
+      - span: 4
+        art: phone
+        caption: The face
+        text: An interactive, original UI, designed from scratch over four frontend versions.
+      - span: 2
         art: live
         caption: Now
-        text: Live capture is running on an iPhone.
-    next: Card recommendation, a later phase.
+        text: Live capture from Apple Pay taps and bank notifications works, but is early. It still hears too much that isn't money.
+    next: A written readiness bar, security and privacy included, before anyone else uses it.

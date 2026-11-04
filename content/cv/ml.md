@@ -6,9 +6,9 @@ ML Engineer at Tencent, building the platform that deploys and scales 1,000+ GPU
 
 ## Experience
 **Tencent**, ML Engineer, AI infrastructure · Mar 2026 – present
-- Main contributor (about 450 of 550 commits) to a Go/tRPC platform through which 1,000+ GPUs of model-serving services are deployed and scaled across multiple Kubernetes clusters and business units.
+- Main contributor (about 450 of 550 commits) to a Go/tRPC platform through which 50+ model-serving services on 1,000+ GPUs are deployed and scaled across multiple Kubernetes clusters and business units.
 - Designed and built time-of-day GPU autoscaling from scratch: conflict-validated schedules, a multi-config scheduler/executor, staged two-phase scale-up and a database-enforced lock against concurrent fires.
-- Made the platform multi-tenant (per-tenant query scoping and layered config); added request-ID tracing, GPU usage history and self-healing cluster clients.
+- Made the platform multi-tenant (per-tenant query scoping and layered config); audited the server and fixed about 30 latent defects in a month; added GPU usage history and self-healing cluster clients.
 - Since Oct 2026, second-in-command on a new query service for gameplay-session conversation data (Go, MySQL, LLM workers).
 
 **9Loop**, Software Engineer Intern · 2024

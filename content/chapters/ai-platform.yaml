@@ -1,8 +1,8 @@
-# Volume for the Tencent model-deployment platform: bank/experience/tencent.md (What it is, Story) and the four work
+# Volume for the Tencent model-deployment platform: bank/experience/tencent.md (What it is, Story) and the five work
 # items it folds in. Panel text comes from those entries; captions are editorial. No internal names, ever.
 id: ai-platform
 entry: tencent
-members: [tencent-autoscaler, tencent-multitenancy, tencent-cloning, tencent-reliability]
+members: [tencent-autoscaler, tencent-models, tencent-hardening, tencent-multitenancy, tencent-maintainability]
 title: AI Model Deployment Platform
 tagline: The platform that deploys, scales and tears down GPU model serving for several business units
 kana: モデル基盤
@@ -15,7 +15,7 @@ episodes:
       - span: 4
         art: racks
         caption: The platform
-        text: The team's model-serving platform deploys, scales, health-checks and tears down GPU model-serving services on Kubernetes for several business units, safely over 1,000 GPUs' worth. I build the platform; other teams run the GPUs and the services on it.
+        text: The team's model-serving platform deploys, scales, health-checks and tears down GPU model-serving services on Kubernetes for several business units, 50+ services on well over 1,000 GPUs. I build the platform; other teams run the GPUs and the services on it.
       - span: 2
         art: commits
         caption: The handover in
@@ -27,7 +27,7 @@ episodes:
       - span: 6
         art: clock
         caption: The idea
-        text: Built from scratch. Model-serving services scale their GPUs up and down on a daily schedule, with schedules checked for conflicts and a scheduler that fires several configs per tick.
+        text: Built from scratch, starting on 30 March 2026. Inference services scale their GPUs up and down on a daily schedule, with schedules checked for conflicts and a scheduler that fires several configs per tick.
       - span: 3
         art: lock
         caption: Exactly once
@@ -35,7 +35,7 @@ episodes:
       - span: 3
         art: twostep
         caption: Two steps
-        text: Asking a shared cluster for every GPU at once can starve other workloads or fail on the last few replicas. So scale-up takes 80% first, waits for it to be ready, then asks for the rest.
+        text: A design choice, asked for in May. Asking a shared cluster for every GPU at once can starve other workloads or fail on the last few replicas. So scale-up takes 80% first, waits for it to be ready, then asks for the rest.
       - span: 4
         art: history
         caption: The record
@@ -45,13 +45,69 @@ episodes:
         caption: Clean-up
         text: Reconciliation turns off schedules whose services have gone.
   - n: 3
+    entry: tencent-models
+    title: Which model, which GPU
+    panels:
+      - span: 3
+        art: gpu
+        caption: The bill
+        text: GPU usage totals per project and per service group, first as two API calls, then refactored into one.
+      - span: 3
+        art: versus
+        caption: The right versions
+        text: Each service is bound to the model versions it can be updated to, so an update only offers valid models.
+      - span: 6
+        art: k8s
+        caption: Where it lands
+        text: Deploys from GPU-type templates, the GPU cards each template supports, cluster and namespace selection, and model-version search. And a fix for the platform taking services offline whenever its own access to the cluster manager was refused.
+  - n: 4
+    entry: tencent-hardening
+    title: Bugs that make no noise
+    panels:
+      - span: 6
+        art: postmortem
+        caption: Three spare weeks
+        text: In July the frontend's schedule slipped, so I audited the server end to end. About 30 defects found and fixed between 9 July and 11 August, each written up with its cause and fix, then tested and merged to production on 17–19 August.
+      - span: 3
+        art: ghost
+        caption: Offline, still running
+        text: Two status constants had been copied the wrong way round, so the scheduler could scale an offline service back up. On one call path, taking a service offline did nothing at all and still returned success.
+      - span: 3
+        art: guards
+        caption: The clean-up that never ran
+        text: The rollback after a failed deploy only deleted zero-replica deployments, so it was refused on every real deploy, and the GPU leak it existed to stop happened every time.
+      - span: 4
+        art: table
+        caption: Ten models
+        text: "\"The TTS model is missing from the wizard\" was a hard-coded LIMIT 10. And a duplicate job ID hid a whole service group, because MySQL treats every NULL deleted_at as distinct."
+      - span: 2
+        art: timeout
+        caption: Guards
+        text: An empty config push can no longer wipe the templates and cluster credentials. The Kubernetes client rebuilds itself when its token expires, and one slow cluster no longer hangs every list.
+      - span: 3
+        art: token
+        caption: Keys out of the code
+        text: The object-storage keys and the cluster manager's API token used to sit in the source. Now the config centre and the cluster credentials deliver them, the server won't start without them, and the keys that had been committed were rotated.
+      - span: 3
+        art: reconcile
+        caption: Both ends
+        text: In November, still in testing. A deploy now finishes its database write even past the request's deadline, and a sweep removes Deployments no service row points to. The orphaned-GPU leak is closed from both ends.
+      - span: 4
+        art: copy
+        caption: The copy that broke everything
+        text: Later, one version of cloning refused any copy whose saved config held values the template no longer declared. Correct in principle, it broke every real copy within 24 hours. I reverted it to report those values instead, and kept the principle.
+      - span: 2
+        art: revert
+        caption: 24 hours
+        text: A copy replays the service; it doesn't copy the row.
+  - n: 5
     entry: tencent-multitenancy
     title: Whose config is it?
     panels:
       - span: 6
         art: tenants
         caption: The job
-        text: Turned a single-tenant deployment platform into a multi-tenant one. Every query is scoped by business unit with ownership checks, and environment tags are bound to the clusters each tenant may deploy into.
+        text: From 19 August to 30 September 2026, turned a single-tenant deployment platform into a multi-tenant one, so several business units and their app groups share it. Every query is scoped by business unit with ownership checks, and environment tags are bound to the clusters each tenant may deploy into.
       - span: 3
         art: missingdir
         caption: The guess
@@ -64,35 +120,19 @@ episodes:
         art: pin
         caption: Don't rebuild it
         text: I rejected a server-side config-merge layer, because the company's config system already copies shared config into each tenant's group. As a bonus, each tenant can pin a known-good version.
-  - n: 4
-    entry: tencent-cloning
-    title: The copy that broke everything
+  - n: 6
+    entry: tencent-maintainability
+    title: For the next person
     panels:
-      - span: 4
-        art: copy
-        caption: The rule
-        text: Copying a service between environments has to replay it and re-derive everything that belongs where it lands, not copy the row. A copy never carries the source's models, resets values on unsupported GPU types, and refuses copies made stale by a template change.
-      - span: 2
-        art: revert
-        caption: 24 hours
-        text: One version refused any copy whose saved config held values the template no longer declared. Correct in principle, it broke every real copy within 24 hours. I reverted it to report those values instead, and kept the principle.
-  - n: 5
-    entry: tencent-reliability
-    title: Keeping it standing
-    panels:
+      - span: 3
+        art: commits
+        caption: Less code
+        text: A four-phase refactor splitting monolith handlers into packages, shorter modular functions, and dead code removed.
       - span: 3
         art: trace
-        caption: Tracing
-        text: Request-ID tracing across every RPC.
-      - span: 3
-        art: token
-        caption: Self-healing
-        text: The Kubernetes client rebuilds itself when its token expires.
-      - span: 3
-        art: guards
-        caption: Guards
-        text: Namespace guards before deploys, bounded cluster-probe budgets, and a migration for 29 stuck orphaned records. Also one batch call in place of N detail calls, and transactional DAO writes.
-      - span: 3
+        caption: Readable logs
+        text: Request-ID tracing across every RPC and logs that say what they mean, plus the team's protocol for moving config changes between dev and prod, both ways.
+      - span: 6
         art: handover
         caption: The handover out
         text: The platform's bilingual (English and Chinese) handover. Runtime view, release and rollback, eleven recorded design decisions, a runbook, and the known debt.

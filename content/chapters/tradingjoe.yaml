@@ -18,7 +18,7 @@ episodes:
       - span: 3
         art: walkforward
         caption: The test
-        text: Walk-forward backtests, then paper or live trading through Moomoo.
+        text: Walk-forward backtests, then paper trading through Moomoo, with paper money only.
   - n: 2
     title: The retraction
     panels:
