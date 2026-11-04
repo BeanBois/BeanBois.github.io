@@ -1,21 +1,26 @@
 # Volume for bank/work/tencent-conversation-service.md. Panel text from that entry; captions editorial.
 entry: tencent-conversation-service
 kana: 会話
-obi: Second-in-command, from day one.
+obi: Learning a second service from the inside.
 cover: newservice
 episodes:
   - n: 1
-    title: A new service
+    title: A second service
     panels:
       - span: 6
         art: newservice
         caption: The job
-        text: Since October 2026, second-in-command on a new Go, tRPC and Protobuf query service for gameplay-session conversation data.
-      - span: 3
+        text: Since October 2026, training to be second-in-command on a Go, tRPC and Protobuf service that analyses conversations between players and an in-game AI. It flags negative feedback and problems in the AI's replies, and serves them through a query API and a web page.
+      - span: 2
         art: tz
         caption: First fix
-        text: MySQL DATETIME writes that were timezone-wrong, fixed with a tested migration runbook.
-      - span: 3
+        text: MySQL DATETIME writes in the wrong timezone, fixed in the service, with the migration moved to a tested runbook.
+      - span: 2
         art: timeout
         caption: Second fix
-        text: LLM worker timeouts.
+        text: LLM worker timeouts, stopped by turning the model's reasoning off where the job didn't need it.
+      - span: 2
+        art: guards
+        caption: Third fix
+        text: The web image's build, and an nginx config that kept nginx from starting.
+    next: A taxonomy of the AI's reply problems, with a severity and summary for each.

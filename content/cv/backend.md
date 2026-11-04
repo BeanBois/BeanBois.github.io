@@ -11,7 +11,7 @@ ML Engineer at Tencent writing the Go services behind its model-serving platform
 - Built a time-of-day autoscaling scheduler with conflict-validated schedules, staged scale-up and a database-enforced lock (UNIQUE constraint) against double fires.
 - Audited the server and fixed about 30 latent defects in a month: an SQL injection, swapped status constants, an offline call that silently left workloads running, rollbacks that leaked GPU-holding pods; moved secrets out of the code and rotated leaked keys; shipped with three data migrations, 19 robustness tests and transactional DAO writes.
 - Led a four-phase refactor of monolith handlers into packages, removed dead code, made logs readable, and set the team's protocol for moving config between dev and prod.
-- Since Oct 2026, second-in-command on a new gameplay-conversation query service: fixed timezone-wrong DATETIME writes with a tested migration runbook, and LLM worker timeouts.
+- Since Oct 2026, training as second-in-command on a service that analyses player conversations with an in-game AI: fixed timezone-wrong DATETIME writes with a tested migration runbook, and LLM worker timeouts.
 
 **9Loop**, Software Engineer Intern · 2024
 - Integrated a third-party game API with an automated integration-test suite (coverage 40% → 85%); refactored a Svelte/TypeScript page generator (30% lower render latency).

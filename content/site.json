@@ -110,7 +110,7 @@
    "id": "tencent-conversation-service",
    "title": "Gameplay conversation query service",
    "role": null,
-   "tagline": "A new service for querying conversation data from game sessions",
+   "tagline": "Reading what players and an in-game AI say to each other, and where the AI goes wrong",
    "period": "2026-10 – present",
    "status": "active",
    "kind": "job",
@@ -129,13 +129,13 @@
     "MySQL"
    ],
    "repo": null,
-   "what": "",
+   "what": "A Go/tRPC/Protobuf service at Tencent that analyses conversations between players and an in-game AI: it flags negative feedback and problems in the AI's replies, and serves the results through a query API and a web page. Started in September 2026; I joined it in October and am training to be its second-in-command.",
    "bullets": [
-    "Since Oct 2026, second-in-command on a new Go/tRPC/Protobuf query service for gameplay-session conversation data; first fixes: timezone-wrong MySQL DATETIME writes (with a tested migration runbook) and LLM worker timeouts."
+    "Since Oct 2026, training as second-in-command on a Go/tRPC/Protobuf service that analyses player conversations with an in-game AI; first fixes: timezone-wrong MySQL DATETIME writes (with a tested migration runbook), LLM worker timeouts, and the web image and nginx start-up."
    ],
    "story": "",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "tencent-hardening",
