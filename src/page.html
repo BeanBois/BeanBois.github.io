@@ -287,24 +287,37 @@ html:has(.lp-grid) { overflow-x: clip; }   /* a record pulled out of the last co
 /* the screentone: a canvas over the page; each dot starts when the front from (ox, oy) reaches it and fills its cell a
    band later (grow), or starts full and shrinks to nothing the same way (!grow) */
 const toneVeil = () => {
-  const cv = document.createElement("canvas"), d = Math.min(devicePixelRatio || 1, 2);
-  cv.className = "tone-veil"; cv.setAttribute("aria-hidden", "true"); cv.width = innerWidth * d; cv.height = innerHeight * d;
+  /* sharp on a phone, but a big screen at 2x is five million pixels to repaint every frame of the turn: keep it to
+     about 2.6 million (a laptop's dots come out a touch soft, which you can't see while they move) */
+  const d = Math.max(1, Math.min(devicePixelRatio || 1, 2, Math.sqrt(2.6e6 / (innerWidth * innerHeight)))), cv = document.createElement("canvas");
+  cv.className = "tone-veil"; cv.setAttribute("aria-hidden", "true"); cv.width = Math.round(innerWidth * d); cv.height = Math.round(innerHeight * d);
   document.body.append(cv); return cv;
 };
 const toneDots = (cv, ox, oy, ms, grow = true) => new Promise(done => {
   const W = innerWidth, H = innerHeight, g = cv.getContext("2d"), d = cv.width / W;
   g.setTransform(d, 0, 0, d, 0, 0); g.fillStyle = getComputedStyle(document.body).backgroundColor;
   const C = 11, R = C * 0.72, band = Math.max(W, H) * 0.32;
-  const far = Math.max(Math.hypot(ox, oy), Math.hypot(W - ox, oy), Math.hypot(ox, H - oy), Math.hypot(W - ox, H - oy)) + band;
+  /* the cells nearest the start first, so each frame touches only the ring the front has just passed through:
+     a dot ahead of it hasn't changed, and one a band behind is finished */
+  const cx = [], cy = [], cd = [];
+  for (let y = C / 2; y < H + C; y += C) for (let x = C / 2; x < W + C; x += C) { cx.push(x); cy.push(y); cd.push(Math.hypot(x - ox, y - oy)); }
+  const ord = Uint32Array.from(cd.keys()).sort((i, j) => cd[i] - cd[j]), n = ord.length;
+  const far = cd[ord[n - 1]] + band;
+  if (!grow) { g.beginPath(); for (let i = 0; i < n; i++) { g.moveTo(cx[i] + R, cy[i]); g.arc(cx[i], cy[i], R, 0, 6.2832); } g.fill(); }
   const t0 = performance.now(), ease = t => t < .5 ? 2 * t * t : 1 - (2 - 2 * t) ** 2 / 2;
+  let lo = 0, prev = -Infinity;
   const frame = now => {
     const t = Math.min(1, (now - t0) / ms), f = ease(t) * far;
-    g.clearRect(0, 0, W, H); g.beginPath();
-    for (let y = C / 2; y < H + C; y += C) for (let x = C / 2; x < W + C; x += C) {
-      const k = Math.min(1, Math.max(0, (f - Math.hypot(x - ox, y - oy)) / band)), r = R * (grow ? k : 1 - k);
-      if (r > 0.2) { g.moveTo(x + r, y); g.arc(x, y, r, 0, 6.2832); }
+    while (lo < n && cd[ord[lo]] < prev - band) lo++;           // finished on an earlier frame
+    let hi = lo; while (hi < n && cd[ord[hi]] <= f) hi++;          // beyond hi the front hasn't arrived
+    // growing dots only get bigger, so they're drawn over what's there; shrinking ones clear their cell first
+    if (!grow) for (let j = lo; j < hi; j++) { const i = ord[j]; g.clearRect(cx[i] - C / 2, cy[i] - C / 2, C, C); }
+    g.beginPath();
+    for (let j = lo; j < hi; j++) {
+      const i = ord[j], k = Math.min(1, (f - cd[i]) / band), r = R * (grow ? k : 1 - k);
+      if (r > 0.2) { g.moveTo(cx[i] + r, cy[i]); g.arc(cx[i], cy[i], r, 0, 6.2832); }
     }
-    g.fill();
+    g.fill(); prev = f;
     t < 1 ? requestAnimationFrame(frame) : done();
   };
   requestAnimationFrame(frame);
