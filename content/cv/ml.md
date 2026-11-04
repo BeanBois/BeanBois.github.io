@@ -12,7 +12,7 @@ ML Engineer at Tencent, building the platform that deploys and scales 1,000+ GPU
 - Since Oct 2026, training as second-in-command on a service that analyses player conversations with an in-game AI (Go, MySQL, LLM workers).
 
 **9Loop**, Software Engineer Intern · 2024
-- Refactored a Svelte/TypeScript page generator (30% lower render latency); built an integration-test suite for a game API (coverage 40% → 85%).
+- Wrote integration tests for the two gaming platforms the site runs on, designed database changes to support it, and refactored its Svelte/TypeScript page generator.
 
 ## Research
 **In-context imitation learning with non-Euclidean methods**, Imperial MSc project · 2024 – 2025
@@ -23,7 +23,7 @@ ML Engineer at Tencent, building the platform that deploys and scales 1,000+ GPU
 **Acute kidney injury predictor**, Imperial · 2024
 - Gradient-boosted classifier on NHS creatinine data (87% AUC), deployed on Kubernetes with Prometheus monitoring and automated rollback; wrote the live-failure postmortem.
 
-**Neuromorphic computing**, independent study, Imperial · 2024 · winner-take-all spiking network in Lava (Loihi 2) for face-mask classification.
+**Neuromorphic computing**, independent study, Imperial · 2025 · winner-take-all spiking network for face-mask classification in Intel's Lava, with decentralised federated learning across devices.
 
 ## Projects
 **TradingJoe**, multi-strategy portfolio system · 2026

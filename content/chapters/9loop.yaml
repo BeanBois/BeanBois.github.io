@@ -9,13 +9,13 @@ episodes:
     panels:
       - span: 6
         art: week
-        caption: One week
-        text: Learnt TypeScript in a week to refactor and extend a Svelte page generator, improving component reuse.
-      - span: 3
-        art: latency
-        caption: Faster
-        text: Render latency down by 30%.
+        caption: Three months
+        text: A software engineering internship in 2024 at 9Loop, a gaming website. Learnt TypeScript in a week to refactor and extend its Svelte page generator.
       - span: 3
         art: coverage
-        caption: Tested
-        text: Integrated a third-party game API and built an automated integration-test suite, raising test coverage from 40% to 85%.
+        caption: Two platforms
+        text: The site runs on two gaming platforms. I wrote the integration tests against both.
+      - span: 3
+        art: table
+        caption: The data
+        text: Designed database changes to better support the site.

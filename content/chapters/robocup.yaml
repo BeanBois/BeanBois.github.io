@@ -8,10 +8,10 @@ episodes:
     title: At home
     panels:
       - span: 3
+        art: switch
+        caption: The flow
+        text: I designed the service robot's state-flow diagram, the states it moves through for a task and what moves it between them.
+      - span: 3
         art: robot
         caption: Listening
-        text: The speech-recognition module (Dialogflow) for natural-language commands on a service robot.
-      - span: 3
-        art: rooms
-        caption: Seeing
-        text: Robot perception with ROS and rospy, identifying people and detecting rooms.
+        text: And built the dialogue side, natural-language commands through Dialogflow into the robot's ROS state machine.

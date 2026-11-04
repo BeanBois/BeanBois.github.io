@@ -13,7 +13,7 @@ ML Engineer at Tencent and main author of its model-serving platform: deployment
 - Made the platform multi-tenant, with environment tags bound to the clusters each tenant may deploy into; wrote the bilingual (EN/CN) handover with eleven recorded design decisions.
 
 **9Loop**, Software Engineer Intern · 2024
-- Built an automated integration-test suite for a third-party game API (coverage 40% → 85%); refactored a Svelte/TypeScript page generator.
+- Wrote integration tests for the two gaming platforms the site runs on, designed database changes to support it, and refactored its Svelte/TypeScript page generator.
 
 ## Projects
 **Acute kidney injury predictor**, Imperial · 2024

@@ -3,31 +3,35 @@
 entry: neuromorphic
 members: [irecognise]
 title: Neuromorphic Computing
-tagline: Spiking neural networks, from Intel's Loihi stack to a face recogniser that learns from motion
+tagline: Can spiking networks learn on cheap edge devices, and share what they learn?
 kana: スパイク
-obi: Only what moved.
+obi: The Pi ran out of memory. The report says why.
 cover: spikes
 episodes:
   - n: 1
-    title: Spikes
+    title: The study
     panels:
-      - span: 3
+      - span: 4
         art: chip
-        caption: The study
-        text: An independent study of the hardware and software advances in neuromorphic computing, Intel Loihi 2 and Lava, for inference at the edge.
-      - span: 3
+        caption: The module
+        text: A formal independent-study module at Imperial in 2025, one the department warns students off for how demanding it is, with Dr Eiman Kanjo. A review of neuromorphic hardware (Loihi, TrueNorth, SpiNNaker 2), Intel's Lava framework, and learning rules from STDP to surrogate gradients.
+      - span: 2
         art: spikes
-        caption: The network
-        text: A winner-take-all spiking neural network in Lava for face-mask classification.
+        caption: The question
+        text: Can spiking networks learn on-device on cheap hardware, and share what they learn without a central server?
   - n: 2
     entry: irecognise
     title: iRecognise
     panels:
-      - span: 4
+      - span: 3
         art: motionface
-        caption: The idea
-        text: Face recognition from motion, the neuromorphic way. A spiking network learning with reward-modulated STDP.
-      - span: 2
+        caption: The network
+        text: A winner-take-all spiking network in Lava for face-mask classification. Images become Poisson spike trains along a Hilbert curve, and reward-modulated STDP does the learning.
+      - span: 3
         art: federated
         caption: Together
-        text: Plus a federated training server.
+        text: Each device broadcasts its averaged weight changes every 100 updates over HTTP, and the others merge them into their own model.
+      - span: 6
+        art: machines
+        caption: The result
+        text: The plan was four Raspberry Pis as cameras in different weather. The model ran out of memory on a Pi 3B, and on a laptop it hadn't converged after 12 hours. Neuromorphic computing on classical hardware isn't ready for this task yet, and the report says so.

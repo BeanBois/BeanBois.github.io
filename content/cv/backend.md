@@ -14,7 +14,7 @@ ML Engineer at Tencent writing the Go services behind its model-serving platform
 - Since Oct 2026, training as second-in-command on a service that analyses player conversations with an in-game AI: fixed timezone-wrong DATETIME writes with a tested migration runbook, and LLM worker timeouts.
 
 **9Loop**, Software Engineer Intern · 2024
-- Integrated a third-party game API with an automated integration-test suite (coverage 40% → 85%); refactored a Svelte/TypeScript page generator (30% lower render latency).
+- Wrote integration tests for the two gaming platforms the site runs on, designed database changes to support it, and refactored its Svelte/TypeScript page generator.
 
 ## Projects
 **Wallet**, on-device personal finance (Kotlin Multiplatform + SwiftUI) · 2026 – present

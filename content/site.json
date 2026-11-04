@@ -19,25 +19,27 @@
    "title": "9Loop",
    "role": "Software Engineer Intern",
    "tagline": "",
-   "period": "2024",
+   "period": "2024 (3 months)",
    "status": "shipped",
    "kind": "job",
    "track": "work",
    "group": null,
    "size": "small",
    "mix": {
-    "product": 0.6,
-    "backend": 0.4
+    "backend": 0.6,
+    "product": 0.4
    },
    "stack": [
     "TypeScript",
-    "Svelte"
+    "Svelte",
+    "SQL"
    ],
    "repo": null,
-   "what": "Internship on a Svelte page generator and a game-API integration.",
+   "what": "A three-month software engineering internship in 2024 at 9Loop, a gaming website. The site runs on two gaming platforms; I wrote the integration tests against both, designed database changes to support the site better, and refactored its Svelte page generator.",
    "bullets": [
-    "Learnt TypeScript in a week to refactor and extend a Svelte page generator, improving component reuse and cutting render latency by 30%.",
-    "Integrated a third-party game API and built an automated integration-test suite, raising test coverage from 40% to 85%."
+    "Wrote automated integration tests for the two gaming platforms the website runs on.",
+    "Designed database changes to better support the gaming website.",
+    "Learnt TypeScript in a week to refactor and extend the site's Svelte page generator, improving component reuse."
    ],
    "story": "",
    "playlist": null,
@@ -61,15 +63,14 @@
    "stack": [
     "ROS",
     "rospy",
-    "Gazebo",
     "Dialogflow",
     "Python"
    ],
    "repo": null,
-   "what": "",
+   "what": "Volunteer on King's College London's RoboCup@Home team in 2022, building a service robot that takes spoken commands. I designed the robot's state flow and built the dialogue side.",
    "bullets": [
-    "Implemented the speech-recognition module (Dialogflow) for natural-language commands on a service robot.",
-    "Worked on robot perception: person identification and room detection with ROS/rospy."
+    "Designed the service robot's state-flow diagram: the states the robot moves through for a task and what moves it between them.",
+    "Built the dialogue-flow interfacing: natural-language commands through Dialogflow into the robot's ROS (rospy) state machine."
    ],
    "story": "",
    "playlist": null,
@@ -392,16 +393,16 @@
     "HTTP"
    ],
    "repo": null,
-   "what": "An independent study at Imperial with Dr Eiman Kanjo: \"Neuromorphic Computing for Decentralised Federated and Constrained Edge AI devices\". A 21-page review of neuromorphic hardware (Intel Loihi 1 and 2, IBM TrueNorth, SpiNNaker 2), software (Lava) and learning rules (STDP, surrogate gradients, three-factor learning), then an experiment: can spiking networks learn on-device on cheap hardware, and share what they learn by federated learning? The experiment's code is [iRecognise](../projects/irecognise.md).",
+   "what": "A formal independent-study module at Imperial (MSc year, Feb–Mar 2025), one the department warns students off for how demanding it is, with Dr Eiman Kanjo: \"Neuromorphic Computing for Decentralised Federated and Constrained Edge AI devices\". A 21-page review of neuromorphic hardware (Intel Loihi 1 and 2, IBM TrueNorth, SpiNNaker 2), software (Lava) and learning rules (STDP, surrogate gradients, three-factor learning), then an experiment: can spiking networks learn on-device on cheap hardware, and share what they learn by federated learning? The experiment's code is [iRecognise](../projects/irecognise.md).",
    "bullets": [
     "Reviewed neuromorphic computing for constrained edge devices: the properties that matter (event-driven, sparse, in-memory, on-device learning), the hardware (Loihi 2, TrueNorth, SpiNNaker 2), Intel's Lava framework, and how federated learning could run without a central server.",
     "Built a winner-take-all spiking network in Lava for face-mask classification: images turned to Poisson spike trains over 100 Hilbert-ordered bins, 10 excitatory modules of 200 neurons in two competing mega-modules, 2 inhibitory modules of 400, and reward-modulated STDP synapses to the output.",
     "Designed decentralised federated learning between devices: each one broadcasts its averaged weight changes every 100 updates over HTTP, and the others listen and merge them into their own model.",
     "Reported the negative result plainly: the model ran out of memory on a Raspberry Pi 3B (1 GB), and on a laptop it had not converged after 12 hours. Conclusion: neuromorphic computing on classical hardware isn't ready for this task yet."
    ],
-   "story": "The plan was four Raspberry Pis as \"surveillance cameras\" under different simulated weather (day, dimmed night, blurred rain), learning on-device and sharing knowledge, with a fifth joining later to show federated learning speeding it up. Lava runs its parallelism as threads, the Pi was killed for running out of memory, and the study became an honest write-up of why. A follow-on idea from the same weeks, iControl, planned four simulated legged robots (Isaac Lab ANYmal, repo iRobot_Sim) each driven by a Pi running an SNN, sharing walking knowledge but not body-specific knowledge.",
+   "story": "The experiment ran in Intel's Lava framework on a laptop and a Raspberry Pi, not on Loihi hardware. The plan was four Raspberry Pis as \"surveillance cameras\" under different simulated weather (day, dimmed night, blurred rain), learning on-device and sharing knowledge, with a fifth joining later to show federated learning speeding it up. Lava runs its parallelism as threads, the Pi was killed for running out of memory, and the study became an honest write-up of why. A follow-on idea from the same weeks, iControl, planned four simulated legged robots (Isaac Lab ANYmal, repo iRobot_Sim) each driven by a Pi running an SNN, sharing walking knowledge but not body-specific knowledge.",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "atlas",
@@ -657,7 +658,7 @@
    ],
    "story": "Meant to run on Raspberry Pi 3Bs as stand-in surveillance cameras; it ran out of memory on them. Accuracy and response-rate logs from a laptop run are in the repo (`accuracies.npy`, `prediction speed.npy`). The README's original pitch, \"motion-based facial recognition\", is where it started, before it narrowed to the mask task in the report.",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "kkp-wallet",
@@ -1090,7 +1091,7 @@
    "what": "MSc Computing (Artificial Intelligence & Machine Learning), Imperial College London"
   },
   {
-   "period": "2024",
+   "period": "2024 (3 months)",
    "what": "Software Engineer Intern, 9Loop"
   },
   {
