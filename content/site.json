@@ -304,7 +304,7 @@
   },
   {
    "id": "icl-hyperbolic",
-   "title": "Instant Policy++: in-context imitation learning with hyperbolic embeddings",
+   "title": "Instant Policy++",
    "role": null,
    "tagline": "Teaching a robot a task from a few demonstrations, embedding them in hyperbolic space",
    "period": "2025-05 – 2025-09",
@@ -335,7 +335,7 @@
    ],
    "story": "The idea was that a demonstration has a tree shape (a task splits into sub-goals, sub-goals into moves) and hyperbolic space holds trees with little distortion. The model lost to the baseline, so the last chapter asks why and tests it: are the next-action semantics actually in the frozen hyperbolic embeddings? A linear probe says no, and a small MLP only gets to 34%, still under a bigram. Instant Policy learns local dynamics end to end; the tree embedding didn't. He also names his own mistake in the baseline (downsampling demonstrations evenly instead of keeping the important frames, which made policies oscillate) and lays out what next: tree-structured demonstration signatures with low-to-high resolution graph generation.\n\nThe road there: the project started on RLBench in 3D (May 2025), moved to a 2D game made for the purpose within ten days, and went through four repositories: icl-fyp (217 commits, first attempt), my_icl_agent then my_icl_agent_duchess (the main model), my_instant_policy (the baseline, refactored), and instant_policy_pp (the submission).",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "kurf",

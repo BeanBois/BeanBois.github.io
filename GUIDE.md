@@ -154,7 +154,7 @@ For `music.playlists`. For `pages.highlights`, use the volume's id: most are the
 | `data-terminal` | Data terminal |
 | `expense-tracker` | expense-tracker |
 | `fps-rl-agent` | RL agent for an FPS game |
-| `icl-hyperbolic` | In-context imitation learning with non-Euclidean methods |
+| `icl-hyperbolic` | Instant Policy++ |
 | `irecognise` | iRecognise |
 | `kkp-wallet` | Wallet |
 | `kurf` | KURF research programme (King's) |

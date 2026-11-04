@@ -18,7 +18,7 @@ ML Engineer at Tencent, building the platform that deploys and scales 1,000+ GPU
 **In-context imitation learning with non-Euclidean methods**, Imperial MSc project · 2024 – 2025
 - Designed a dual-channel architecture embedding actions and observations separately for few-shot imitation learning.
 - Developed a Hyperbolic Graph Attention Network (Poincaré ball) and a Product Manifold Attention module combining Euclidean and hyperbolic channels.
-- Used Sarkar's construction for training-free hyperbolic embeddings; benchmarked against Instant Policy (the baseline scored higher; the work showed the approach is feasible).
+- Used Sarkar's construction for training-free hyperbolic embeddings; benchmarked against Instant Policy; the baseline won, and a linear-probe analysis showed why.
 
 **Acute kidney injury predictor**, Imperial · 2024
 - Gradient-boosted classifier on NHS creatinine data (87% AUC), deployed on Kubernetes with Prometheus monitoring and automated rollback; wrote the live-failure postmortem.
