@@ -12,7 +12,7 @@ episodes:
       - span: 6
         art: subtitles
         caption: Archer bot
-        text: October 2023, a first chatbot trained on Archer. A data getter, a processor, two model versions and a trainer. The idea came back in 2026, from the paper up.
+        text: October 2023, a first try. I scraped the Archer scripts, tokenised them with spaCy, and trained a word-level RNN, first in Keras, then rewritten in PyTorch. It never wrote anything usable. The idea came back in 2026, from the paper up.
   - n: 1
     title: The paper, rebuilt
     panels:

@@ -10,4 +10,4 @@ episodes:
       - span: 6
         art: book
         caption: The hub
-        text: A small toolkit for learning German. Grammar rules on a page, a practice chatbot through OpenAI's API, and a screen translator. Screenshot, pick a region, read it with OCR, put the characters back into lines, and show the translation.
+        text: A small toolkit for learning German. Grammar rules on a page, a practice chatbot through OpenAI's API, and a screen translator. Screenshot, pick a region, read it with OCR, put the characters back into lines, and show the translation. I used it on German websites.

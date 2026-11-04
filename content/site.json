@@ -351,8 +351,10 @@
     "Jupyter"
    ],
    "repo": "https://github.com/BeanBois/dgl-cw1",
-   "what": "Imperial MSc coursework (February 2025, 4 commits): three notebooks on graph classification, heterogeneous node classification and graph topology, with an implementation of graph Ricci curvature. Background for the hyperbolic-geometry thesis that followed.",
-   "bullets": [],
+   "what": "Imperial MSc coursework in graph deep learning (February 2025, 4 commits). Q1, graph classification: GCN layers from scratch in PyTorch (symmetric adjacency normalisation, two layers), made graph-level with sum, mean and max pooling and compared on loss, accuracy and F1. Q2, node classification on a heterogeneous graph whose two node types have different feature sizes, handled by zero-padding. Q3, how topology affects node classification: two graphs compared by degree, betweenness and Ollivier–Ricci curvature; the curvature module's skeleton was provided and I wrote its main part, the Wasserstein-distance computation. Background for the hyperbolic-geometry thesis that followed.",
+   "bullets": [
+    "Implemented GCNs from scratch in PyTorch for graph-level classification (sum, mean, max pooling) and heterogeneous node classification, and wrote the core of an Ollivier–Ricci curvature computation (Wasserstein distance) to study how graph topology affects GNNs."
+   ],
    "story": "",
    "playlist": null,
    "verified": "2026-11-04"
@@ -479,8 +481,10 @@
     "Python"
    ],
    "repo": null,
-   "what": "Imperial MSc coursework (70067, 2025-02-05 to 02-07, 7 commits): a two-joint robot arm reaching a goal around an obstacle, in five parts: planning with the cross-entropy method, learning a dynamics model, model-based reinforcement learning, closed-loop planning, and imitation learning. Set by Dr Edward Johns, who later supervised the thesis.",
-   "bullets": [],
+   "what": "Imperial MSc coursework (70067, set by Dr Edward Johns, individual, 5–7 February 2025): a two-joint robot arm whose hand must reach a goal around an obstacle, in five parts that build on each other. Planning with the cross-entropy method, tuned until the hand reaches within 0.01 of the goal; a neural dynamics model trained on 100 random episodes; model-based RL with CEM planning through the learned model, with a second, better dynamics model; closed-loop planning, replanning after every step, which beat open-loop; and behavioural cloning from a demonstrator. All five worked. It is where the imitation-learning thread of my thesis began, with the same supervisor.",
+   "bullets": [
+    "Took a simulated robot arm from planning to learning in five parts: cross-entropy planning, a learned neural dynamics model, model-based RL, closed-loop replanning (which beat open-loop), and behavioural cloning."
+   ],
    "story": "",
    "playlist": null,
    "verified": "2026-11-04"
@@ -530,11 +534,17 @@
     "ml": 1.0
    },
    "stack": [
-    "Python"
+    "Python",
+    "BeautifulSoup",
+    "spaCy",
+    "Keras",
+    "PyTorch"
    ],
    "repo": null,
-   "what": "One commit on 2023-10-21: data getter, processor, two model versions and a trainer. The same idea came back in 2026 as [Attention Is All You Need, from scratch](transformer-from-scratch.md), trained on all fourteen seasons of Archer subtitles.",
-   "bullets": [],
+   "what": "A first try (one commit, 2023-10-21): scraped the Archer scripts, tokenised them with spaCy, and trained a word-level RNN text generator, first in Keras, then rewritten in PyTorch on purpose. It never produced anything usable. The same idea came back in 2026 as [Attention Is All You Need, from scratch](transformer-from-scratch.md), trained on all fourteen seasons of Archer subtitles.",
+   "bullets": [
+    "Scraped a TV show's scripts, tokenised them with spaCy and trained a word-level RNN text generator, in Keras and then in PyTorch."
+   ],
    "story": "",
    "playlist": null,
    "verified": "2026-11-04"
@@ -807,8 +817,8 @@
    "group": null,
    "size": "small",
    "mix": {
-    "product": 0.6,
-    "ml": 0.4
+    "ml": 0.5,
+    "product": 0.5
    },
    "stack": [
     "JavaScript",
@@ -819,8 +829,10 @@
     "Tkinter"
    ],
    "repo": null,
-   "what": "A small toolkit for learning German, for myself: a page of grammar rules, a practice chatbot that talks through a small Express server to OpenAI's API, and a screen translator that screenshots the screen, lets you pick a region, reads it with Tesseract OCR, groups the characters back into lines and shows the translation in a window. A chatbot model of my own (with the GloVe paper in its notes) was started but not built. 2 commits: started 2023-12-30, \"first beta up\" 2024-02-16.",
-   "bullets": [],
+   "what": "A small toolkit for learning German, for myself, run locally: a page of grammar rules, a practice chatbot that talks through a small Express server to OpenAI's API, and a screen translator that screenshots the screen, lets you pick a region, reads it with Tesseract OCR, groups the characters back into lines and shows the translation in a window; I used it on German websites. A chatbot model of my own (with the GloVe paper in its notes) was started but not built. 2 commits: started 2023-12-30, \"first beta up\" 2024-02-16.",
+   "bullets": [
+    "Built a German-learning toolkit for myself: a grammar page, a practice chatbot through OpenAI's API, and a screen translator (screenshot, region select, Tesseract OCR, my own regrouping of characters into lines, translation) that I used on German websites."
+   ],
    "story": "",
    "playlist": null,
    "verified": "2026-11-04"

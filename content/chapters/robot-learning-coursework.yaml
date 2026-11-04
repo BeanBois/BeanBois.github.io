@@ -1,13 +1,18 @@
 # Volume for bank/research/robot-learning-coursework.md. Panel text from that entry; captions editorial.
 entry: robot-learning-coursework
 kana: 学習
-obi: A robot learning to move.
-cover: robot
+obi: Where the imitation learning began.
+cover: arm2
 episodes:
   - n: 1
-    title: Learning to move
+    title: Learning to reach
     panels:
-      - span: 6
+      - span: 3
+        art: arm2
+        caption: Plan
+        text: Imperial MSc coursework, February 2025, set by Dr Edward Johns. A two-joint arm reaches a goal around an obstacle. First by planning with the cross-entropy method, tuned until the hand lands within 0.01.
+      - span: 3
         art: robot
-        caption: The coursework
-        text: Imperial MSc coursework, February 2025, set by Dr Edward Johns. A two-joint arm reaches a goal around an obstacle, in five parts. Planning with the cross-entropy method, learning a dynamics model, model-based RL, closed-loop planning, and imitation learning.
+        caption: Learn
+        text: Then a neural dynamics model learnt from random play, model-based RL planning through it, replanning after every step (which beat open-loop), and finally behavioural cloning from demonstrations.
+    next: The same thread, and the same supervisor, became the thesis.
