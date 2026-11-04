@@ -5,9 +5,13 @@ obi: Late tasks send email.
 cover: set
 episodes:
   - n: 1
-    title: Checklists
+    title: Built for a team
     panels:
-      - span: 6
+      - span: 3
         art: set
+        caption: The brief
+        text: A favour for an engineering team. I turned their requirements into the product design, built it alone, and they used it.
+      - span: 3
+        art: guards
         caption: The app
-        text: A PHP web app built in a day, as a favour. Token-based login and logout-everywhere, admin roles that activate users, checklists with progress and review, cleanup of expired tokens, and email when a task runs late.
+        text: Token login with admin roles, tasks assigned with files and reviews, checklists with progress, a performance dashboard, and cron jobs that clean up and email when a task runs late.

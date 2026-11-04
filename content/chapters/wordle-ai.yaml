@@ -1,13 +1,18 @@
 # Volume for bank/projects/wordle-ai.md. Panel text from that entry; captions editorial.
 entry: wordle-ai
 kana: 単語
-obi: Three ways to guess five letters.
+obi: Rewarded for what it learns, not for winning.
 cover: chars
 episodes:
   - n: 1
     title: Five letters
     panels:
-      - span: 6
+      - span: 4
         art: chars
+        caption: The reward
+        text: A learning exercise over four days. Wordle as reinforcement learning, where the reward is information gain, how much a guess narrows the answer against an optimal guess.
+      - span: 2
+        art: ablate
         caption: Three players
-        text: A learning exercise. A Wordle game as a Gym environment and the agents to play it, written over four days. A simple agent that scores letters from rewards, a DQN agent and an LSTM-DQN agent, judged by the average number of guesses. A dictionary agent using information theory was planned next.
+        text: A letter-by-position probability table, a DQN, and an LSTM-DQN that reads the guesses so far. Judged by the average number of guesses.
+    next: A dictionary agent built on information theory.

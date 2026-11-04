@@ -5,20 +5,20 @@ obi: The fire alarm writes itself.
 cover: ghost
 episodes:
   - n: 1
-    title: Forty-eight hours
+    title: Thirty hours
     panels:
       - span: 4
         art: ghost
         caption: The game
-        text: Imperial's student hackathon, February 2025, in a team of six. A game for job interviews. A 2D game drops you into an office fire alarm, and an LLM writes each act from scripted beats as you play.
+        text: Imperial's student hackathon, February 2025, thirty hours non-stop in a team of six. A game for job interviews. A 2D game drops you into an office fire alarm, and an LLM writes each act from scripted beats as you play.
       - span: 2
         art: sources
-        caption: Remembering you
-        text: RAG over your past answers keeps the story consistent.
+        caption: Scoring you
+        text: Each answer is matched by embedding similarity to reference actions with known Big Five levels, in a vector database.
       - span: 3
         art: views
         caption: The reading
-        text: The point of it. Your choices are scored into a Big Five personality sheet, printed as a PDF, for the interviewer.
+        text: The point of it. Your choices are scored into a Big Five personality sheet, printed as a PDF, for the interviewer. It ran end to end at the demo.
       - span: 3
         art: commits
         caption: My part

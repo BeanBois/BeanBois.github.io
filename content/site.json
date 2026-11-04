@@ -843,20 +843,20 @@
    },
    "stack": [
     "Python",
-    "LLMs",
-    "RAG",
-    "vector database",
-    "pygame-style 2D graphics",
-    "serial (Arduino)"
+    "Claude (LangChain)",
+    "sentence-transformers",
+    "InterSystems IRIS vector DB",
+    "ReportLab",
+    "2D game graphics"
    ],
    "repo": "https://github.com/BeanBois/IC_HACK25",
-   "what": "Imperial's student hackathon, February 2025, a team of six. A 2D game drops the player into an office fire alarm; an LLM generates each act from scripted beats (a friend at the start, someone calling for help, getting separated, a plan that stops working), the player says what they do, and the answers are scored into a Big Five personality sheet printed as a PDF. That reading is the point: a game an employer could use in a job interview.",
+   "what": "Imperial's student hackathon, February 2025: 30 hours non-stop, in a team of six. A 2D game drops the player into an office fire alarm; an LLM generates each act from scripted beats (a friend at the start, someone calling for help, getting separated, a plan that stops working), the player says what they do, and each answer is embedded and matched by similarity to reference actions with known Big Five levels, stored in a vector database; the scores add up into a personality sheet printed as a PDF. That reading is the point: a game an employer could use in a job interview.",
    "bullets": [
-    "Built an LLM-driven game in a 2-day team hackathon: prompts that force a scripted sequence of events, RAG over the player's past answers, and a Big Five personality report generated from their choices."
+    "In a 30-hour hackathon team of six, built the 2D game (graphics, sprites, fire and maze, and their wiring to the engine; 42 of 97 commits, the most) for an LLM-driven interview game: Claude writes each act from scripted beats, answers are scored by embedding similarity to reference actions with known Big Five levels, and a personality report prints at the end. It ran end to end at the demo; RAG over past answers was planned but there wasn't time."
    ],
    "story": "",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-05"
   },
   {
    "id": "irecognise",
@@ -1014,9 +1014,10 @@
     "headless Chrome"
    ],
    "repo": "https://github.com/BeanBois/BeanBois.github.io",
-   "what": "beanbois.github.io: every project as a volume of a manga series (cover, contents shelf, volumes, author page, colophon), with a vinyl record on the cover that turns at the tempo of whatever Kai Shun is playing on Spotify. Facts come from this bank only, through a leak-scanned export; the site itself is a static build.",
+   "what": "beanbois.github.io: every project as a volume of a manga series (cover, contents shelf, volumes, author page, colophon), with a vinyl record on the cover that turns at the tempo of whatever I'm listening to on Spotify, live. Facts come from this bank only, through a leak-scanned export; the site itself is a static build. Designed by me, built with Claude Code.",
    "bullets": [
-    "Designed and built a static portfolio site in a manga-series structure, with a record cover laid out by shape contrast, and per-part light and dark palettes from one settings file; the site is in four parts by reader (a hook, the brief, the projects in depth, a colophon), with record sleeves and screentone on the contents page and a wave as the page turn.",
+    "Designed a static portfolio site and built it with Claude Code: a manga-series structure, with a record cover laid out by shape contrast, and per-part light and dark palettes from one settings file; the site is in four parts by reader (a hook, the brief, the projects in depth, a colophon), with record sleeves and screentone on the contents page and a wave as the page turn.",
+    "Designed the vinyl as the site's one interactive object: a record half out of its sleeve on the cover, spinning at the tempo of the song I'm playing, with the song printed on its rim; on the contents page, record sleeves that pull out and carry the record into each project, where the tonearm tracks your reading.",
     "Wrote a Cloudflare Worker that reads Spotify's now-playing and finds the tempo from a trust-ordered chain of sources (his own list, ReccoBeats, Deezer by ISRC, a strict Deezer search), so the record follows song changes within about 5 seconds.",
     "Kept one source of truth: a knowledge bank of Markdown entries feeds the CVs and the site through an export that refuses to run if anything private or any internal employer name would leak; a closing check lints the bank and catches drift between bank and CVs.",
     "Deploys on push with GitHub Actions; design drafts on `design/*` branches deploy as previews; CVs are printed to one-page PDFs with headless Chrome at every deploy."
@@ -1075,12 +1076,12 @@
    },
    "stack": [
     "JavaScript",
-    "HTML",
+    "HTML Canvas",
     "CSS",
     "Python"
    ],
    "repo": null,
-   "what": "My first personal website, started around September 2023: inspired by Pokémon-themed presentations, it showed my projects as an exhibition you walk through like a Pokémon game, with an area for the CS:GO agent (linking its project site) and an area for poems I wrote, read in a chatbox. No longer live. 29 commits from 2023-10-23 to 2024-02-20 in the private repo BeanBois/personal_website, about 170 KB of JavaScript.",
+   "what": "My first personal website, started around September 2023 and hand-built in vanilla JavaScript on a canvas, no framework. Inspired by Pokémon-themed presentations, it showed my projects as an exhibition you walk through like a Pokémon game: a character on a tile map (laid out with a small Python script), collision and interaction, text in a Pokémon-style chatbox, and your position kept in a cookie between visits. Rooms were pages: a poems room where you read poems I wrote, and a CS:GO room with the FPS agent's report figures, linking its project site. The same Pokémon font came back a year later in my IC Hack 25 game. No longer live. 29 commits from 2023-10-23 to 2024-02-20 in the private repo BeanBois/personal_website, about 170 KB of JavaScript.",
    "bullets": [],
    "story": "",
    "playlist": null,
@@ -1235,7 +1236,9 @@
    ],
    "repo": null,
    "what": "A PHP web app built as a favour and pushed in one day (2025-12-15, 3 commits, README \"Done by Teoh Kai Shun\"): token-based login, registration and logout-everywhere, admin roles that activate users, checklists with progress and review, scheduled cleanup of expired tokens, and email notifications for delayed tasks.",
-   "bullets": [],
+   "bullets": [
+    "Designed from the client's requirements and built alone a task and checklist tracker used by an engineering team: a PHP REST API with token auth and admin roles, task assignment with files and reviews, checklists, a performance dashboard, and cron jobs for token cleanup and late-task email."
+   ],
    "story": "",
    "playlist": null,
    "verified": "2026-11-04"
@@ -1264,9 +1267,9 @@
     "Vercel"
    ],
    "repo": null,
-   "what": "A web terminal for data analysis, for my own analysis and for fun: a Remix (TypeScript) front end where you write and save analyses, sending Python to a separate shell server hosted on Vercel (with Prisma for storage) that runs it and returns output, including matplotlib plots. Two repos: terminel (56 commits, 2023-09-10 to 10-18) and terminel_python_server (72 commits, 2023-10-18 to 10-22).",
+   "what": "A web terminal for data analysis, mainly of market data, for my own use and for fun: a Remix (TypeScript) front end where you write and save analyses, sending Python to a separate shell server hosted on Vercel (with Prisma for storage) that runs it and returns output, including matplotlib plots. Two repos: terminel (56 commits, 2023-09-10 to 10-18) and terminel_python_server (72 commits, 2023-10-18 to 10-22).",
    "bullets": [
-    "Built a browser terminal for data analysis in Remix and TypeScript, backed by a Python execution server on Vercel that returns text and matplotlib plots."
+    "Built a browser terminal for analysing market data in Remix and TypeScript: accounts with sessions, a Prisma-backed dashboard of analyses you create, edit, run and delete, and a separate Python execution server on Vercel that returns text and matplotlib plots."
    ],
    "story": "It worked end to end locally; live, the serverless host wasn't computationally strong enough to run the analyses. The TODO file opens with \"TLDR we finally succeeded in adding code\", and the server's last commits are a run of \"fix5\", \"fix6\": running untrusted Python in a serverless function was the hard part.",
    "playlist": null,
@@ -1343,7 +1346,7 @@
    "id": "wordle-ai",
    "title": "Wordle AI",
    "role": null,
-   "tagline": "Teaching agents to play Wordle: letter scores, a DQN and an LSTM-DQN",
+   "tagline": "Wordle as reinforcement learning, rewarded by information gain: letter scores, a DQN and an LSTM-DQN",
    "period": "2024-10-13 – 2024-10-16",
    "status": "archived",
    "kind": "model-from-scratch",
@@ -1359,7 +1362,9 @@
    ],
    "repo": null,
    "what": "A learning exercise: a Wordle game as a Gym environment and agents to play it, written over four days (5 commits): a simple agent that scores letters from rewards, a DQN agent and an LSTM-DQN agent, both tracking the average number of guesses per 500 games. A dictionary agent using information theory was planned but not written.",
-   "bullets": [],
+   "bullets": [
+    "Framed Wordle as reinforcement learning with an information-gain reward in a Gym environment, and built three agents for it: a letter-position probability table, a DQN and an LSTM-DQN, judged by average guesses."
+   ],
    "story": "",
    "playlist": null,
    "verified": "2026-11-04"
