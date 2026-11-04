@@ -453,7 +453,7 @@
    "title": "BlockHub",
    "role": null,
    "tagline": "Blockchain for social good, read as open source: impactful projects find their developers, and contributors vote on what matters",
-   "period": "2023",
+   "period": "2022-10",
    "status": "shipped",
    "kind": "product",
    "track": "side",
@@ -465,10 +465,13 @@
    },
    "stack": [
     "Polygon",
-    "full-stack web"
+    "Polygon ID",
+    "Lens Protocol",
+    "React",
+    "JavaScript"
    ],
    "repo": null,
-   "what": "A hackathon project (Polygon × EasyA Blockchain Hackathon, 2023) whose theme was blockchain for social good. I read \"social good\" differently: open-source software is a public good that struggles to reach the developers it needs. BlockHub was my idea: a platform where open-source projects reach potential contributors, and contributors vote on-chain to rank projects, so the ones judged most impactful draw the most contribution. I pitched it to my team of six, we sharpened it together, and it won 1st place overall for the best project built on Polygon (50+ teams, 5,000 USD prize).",
+   "what": "A hackathon project (Polygon × EasyA Blockchain Hackathon at King's, October 2022) whose theme was blockchain for social good. I read \"social good\" differently: open-source software is a public good that struggles to reach the developers it needs. BlockHub was my idea: a platform where open-source projects reach potential contributors, and contributors vote on-chain to rank projects, so the ones judged most impactful draw the most contribution. Users sign in with Lens Protocol, and a major contributor gets a Polygon ID membership certificate they can carry anywhere on Polygon to prove it. I pitched it to my team of six, we sharpened it together, and it won 1st place overall for the best project built on Polygon (50+ teams, 5,000 USD prize).",
    "bullets": [
     "Came up with and pitched the idea that won the Polygon × EasyA Blockchain Hackathon (1st of 50+ teams, best overall project on Polygon, 5,000 USD): reading the \"social good\" theme as open source, a platform where impactful projects reach their developers and contributors rank projects by on-chain voting.",
     "Led most of the design, then worked across the backend and frontend in a team of six while planning what came next."
