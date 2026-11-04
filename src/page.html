@@ -311,11 +311,17 @@ const toneDots = (cv, ox, oy, ms, grow = true) => new Promise(done => {
 });
 /* leaving a volume: remember where its record is, so going back the volume breaks up from there, and which volume
    this was, for browsers that can't say where a page was opened from (Safari has no navigation.activation) */
-addEventListener("pageswap", () => {
+addEventListener("pageswap", e => {
+  /* read from the foot of the page (the 目次 links there), the sleeve, and on a phone the record too, are far above the
+     screen and would turn up halfway through the flight: start them just above the top edge instead. A transform, so
+     nothing else moves; undone on pageshow if Back brings this page out of the cache */
+  if (e.viewTransition) document.querySelectorAll(".deck .rec-wrap, .vsleeve").forEach(el => {
+    const b = el.getBoundingClientRect(); if (b.bottom < 0) el.style.transform = `translateY(${(-b.bottom - 8).toFixed(0)}px)`; });
   const r = document.querySelector(".deck .rec-wrap")?.getBoundingClientRect(), v = location.pathname.match(/vol-([\w-]+)\.html$/);
   try { if (r) sessionStorage.vtrec = JSON.stringify([r.left + r.width / 2, r.top + r.height / 2]);
         if (v) sessionStorage.vtvol = JSON.stringify([v[1], Date.now()]); } catch (_) {}
 });
+addEventListener("pageshow", () => document.querySelectorAll(".deck .rec-wrap, .vsleeve").forEach(el => el.style.transform = ""));
 /* back on the shelf from a volume: that volume's record and sleeve go home to their card */
 addEventListener("pagereveal", e => {
   document.querySelectorAll("[data-vt] .disc, [data-vt] .sl").forEach(el => el.style.viewTransitionName = "");
