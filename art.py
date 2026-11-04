@@ -258,6 +258,29 @@ def terminal(x, y, w, h, lines=(), cursor=True):
     return r(x, y, w, h, INK, 5, rx=6) + ln(f"M{x} {y + 24} H{x + w}", 2, colour="var(--paper)") + dot(x + 14, y + 12, 4, PAPER) + dot(x + 28, y + 12, 4, PAPER) + body + cur
 
 
+
+def arm2():
+    """A two-joint arm reaching round an obstacle to the goal: the robot-learning coursework. A slow loop, still under reduced motion."""
+    bx, by, l1, l2 = 110, 250, 120, 100
+    # joint angles (degrees) at each keyframe, from inverse kinematics of the hand path drawn below
+    keys = [(-100.3, 135.8), (-94.7, 97.4), (-70.5, 72.3), (-49.2, 64.2), (-34.7, 70.3)]
+    times = [0, 22, 45, 68, 88]
+    def frames(i):
+        f = "".join(f"{t}%{{transform:rotate({k[i]}deg)}}" for t, k in zip(times, keys))
+        return f + f"100%{{transform:rotate({keys[-1][i]}deg)}}"
+    css = (f"@keyframes arm2a{{{frames(0)}}}@keyframes arm2b{{{frames(1)}}}"
+           f".arm2-s{{transform-origin:{bx}px {by}px;transform:rotate({keys[-1][0]}deg);animation:arm2a 7s ease-in-out infinite alternate}}"
+           f".arm2-e{{transform-origin:{bx + l1}px {by}px;transform:rotate({keys[-1][1]}deg);animation:arm2b 7s ease-in-out infinite alternate}}"
+           "@media (prefers-reduced-motion: reduce){.arm2-s,.arm2-e{animation:none}}")
+    path = ln("M170 190 C175 150 185 135 200 135 S240 132 250 140 S282 165 285 185 S290 225 290 240", 3, "5 8", "var(--muted)")
+    return (f"<style>{css}</style>" + ln("M40 270 H410", 6) + r(178, 220, 34, 50, INK, 5)
+            + ring(290, 240, 16, 5, SPOT) + path
+            + r(bx - 40, by, 80, 20, INK, 5)
+            + f'<g class="arm2-s">' + ln(f"M{bx} {by} H{bx + l1}", 14)
+            + f'<g class="arm2-e">' + ln(f"M{bx + l1} {by} H{bx + l1 + l2}", 11) + dot(bx + l1 + l2, by, 9, SPOT) + "</g>"
+            + ring(bx + l1, by, 10, 5) + "</g>" + ring(bx, by, 12, 5, INK))
+
+
 ART = {
     # --- the model deployment platform (Tencent) ---
     "commits": lambda: ("".join(dot(52 + (i % 11) * 32, 70 + (i // 11) * 32, 11) if i < 45 else ring(52 + (i % 11) * 32, 70 + (i // 11) * 32, 9, 3) for i in range(55))
@@ -364,6 +387,7 @@ ART = {
                            + note(225, 290, "only what moved", "middle")),
     "federated": lambda: (server(185, 30, 80, 110, 3) + "".join(laptop(30 + i * 150, 210, 90) + arrow(75 + i * 150, 200, 225 - (1 - i) * 30, 150, 4, "7 6") for i in range(3))),
     # --- KURF ---
+    "arm2": arm2,
     "arm": lambda: (ln("M40 260 H410", 6) + r(90, 230, 80, 30, INK, 5) + ln("M130 230 L170 130 L270 90", 16) + ring(170, 130, 12, 5) + ring(130, 230, 12, 5, INK)
                     + ln("M270 78 l26 -6 M270 102 l26 6", 7) + r(300, 196, 64, 64, SPOT, 5) + arrow(300, 86, 330, 186, 3, "6 6")),
     "ablate": lambda: ("".join(r(30 + (i % 3) * 136, 30 + (i // 3) * 130, 120, 110, PAPER, 4) + curve(40 + (i % 3) * 136, 40 + (i // 3) * 130, 100, 86, lambda s, i=i: (1 - math.exp(-4 * s)) * (0.5 + 0.5 * seed("ab", i)), 20, 3) for i in range(6))),
