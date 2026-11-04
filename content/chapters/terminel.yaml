@@ -14,4 +14,4 @@ episodes:
       - span: 2
         art: timeout
         caption: The hard part
-        text: Running untrusted Python in a serverless function. The server's last commits are fix5, fix6.
+        text: Running Python in a serverless function. It worked end to end on my machine; live, the host wasn't strong enough. The server's last commits are fix5, fix6.

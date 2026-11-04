@@ -10,4 +10,4 @@ episodes:
       - span: 6
         art: robot
         caption: The coursework
-        text: Imperial MSc coursework, February 2025. A simulated robot with its own graphics and a learning loop, in four parts.
+        text: Imperial MSc coursework, February 2025, set by Dr Edward Johns. A two-joint arm reaches a goal around an obstacle, in five parts. Planning with the cross-entropy method, learning a dynamics model, model-based RL, closed-loop planning, and imitation learning.

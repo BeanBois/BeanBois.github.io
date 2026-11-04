@@ -329,7 +329,7 @@
    "bullets": [],
    "story": "",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "dgl-coursework",
@@ -355,7 +355,7 @@
    "bullets": [],
    "story": "",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "icl-hyperbolic",
@@ -465,7 +465,7 @@
    "id": "robot-learning-coursework",
    "title": "Robot learning coursework",
    "role": null,
-   "tagline": "A simulated robot learning to move, in four parts",
+   "tagline": "A simulated robot arm learning to reach, from planning to imitation, in five parts",
    "period": "2025-02",
    "status": "shipped",
    "kind": "study",
@@ -479,11 +479,11 @@
     "Python"
    ],
    "repo": null,
-   "what": "Imperial MSc coursework (70067, 2025-02-05 to 02-07, 7 commits): a robot environment with graphics and a learning loop, in four parts.",
+   "what": "Imperial MSc coursework (70067, 2025-02-05 to 02-07, 7 commits): a two-joint robot arm reaching a goal around an obstacle, in five parts: planning with the cross-entropy method, learning a dynamics model, model-based reinforcement learning, closed-loop planning, and imitation learning. Set by Dr Edward Johns, who later supervised the thesis.",
    "bullets": [],
    "story": "",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "archer-bot",
@@ -507,7 +507,7 @@
    "bullets": [],
    "story": "",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "atlas",
@@ -762,7 +762,7 @@
    "bullets": [],
    "story": "",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "ic-hack-25",
@@ -789,13 +789,13 @@
     "serial (Arduino)"
    ],
    "repo": "https://github.com/BeanBois/IC_HACK25",
-   "what": "Imperial's student hackathon, February 2025, a team of six. A 2D game drops the player into an office fire alarm; an LLM generates each act from scripted beats (a friend at the start, someone calling for help, getting separated, a plan that stops working), the player says what they do, and the answers are scored into a Big Five personality sheet printed as a PDF. A serial link drove hardware effects.",
+   "what": "Imperial's student hackathon, February 2025, a team of six; it won a prize of 5,000 USD. A 2D game drops the player into an office fire alarm; an LLM generates each act from scripted beats (a friend at the start, someone calling for help, getting separated, a plan that stops working), the player says what they do, and the answers are scored into a Big Five personality sheet printed as a PDF. A serial link drove hardware effects.",
    "bullets": [
-    "Built an LLM-driven game in a 2-day team hackathon: prompts that force a scripted sequence of events, RAG over the player's past answers, and a Big Five personality report generated from their choices."
+    "Built a prize-winning (5,000 USD) LLM-driven game in a 2-day team hackathon: prompts that force a scripted sequence of events, RAG over the player's past answers, and a Big Five personality report generated from their choices."
    ],
    "story": "",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "irecognise",
@@ -962,7 +962,7 @@
    ],
    "story": "Built in a week (2026-10-20 to 10-23) with a staged process: requirements, research and design with competing prototypes (a 2D then 3D Poincaré-ball layout, then the record), implementation, monitoring, tests. A 2023–24 predecessor, a Pokémon-styled site, is [Poke-Exhibition](poke-exhibition.md).",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "plate-recognition",
@@ -1023,7 +1023,7 @@
    "bullets": [],
    "story": "",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "polyarb",
@@ -1173,11 +1173,11 @@
     "CSS"
    ],
    "repo": null,
-   "what": "A PHP web app pushed in one day (2025-12-15, 3 commits, README \"Done by Teoh Kai Shun\"): token-based login, registration and logout-everywhere, admin roles that activate users, checklists with progress and review, scheduled cleanup of expired tokens, and email notifications for delayed tasks.",
+   "what": "A PHP web app built at someone's request and pushed in one day (2025-12-15, 3 commits, README \"Done by Teoh Kai Shun\"): token-based login, registration and logout-everywhere, admin roles that activate users, checklists with progress and review, scheduled cleanup of expired tokens, and email notifications for delayed tasks.",
    "bullets": [],
    "story": "",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "terminel",
@@ -1207,9 +1207,9 @@
    "bullets": [
     "Built a browser terminal for data analysis in Remix and TypeScript, backed by a Python execution server on Vercel that returns text and matplotlib plots."
    ],
-   "story": "The TODO file opens with \"TLDR we finally succeeded in adding code\", and the server's last commits are a run of \"fix5\", \"fix6\": running untrusted Python in a serverless function was the hard part.",
+   "story": "It worked end to end locally; live, the serverless host wasn't computationally strong enough to run the analyses. The TODO file opens with \"TLDR we finally succeeded in adding code\", and the server's last commits are a run of \"fix5\", \"fix6\": running untrusted Python in a serverless function was the hard part.",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "tradingjoe",
@@ -1282,7 +1282,7 @@
    "id": "wordle-ai",
    "title": "Wordle AI",
    "role": null,
-   "tagline": "Three ways to play Wordle: a dictionary filter, an LSTM and an RL agent",
+   "tagline": "Teaching agents to play Wordle: letter scores, a DQN and an LSTM-DQN",
    "period": "2024-10-13 – 2024-10-16",
    "status": "archived",
    "kind": "model-from-scratch",
@@ -1297,11 +1297,11 @@
     "PyTorch"
    ],
    "repo": null,
-   "what": "A Wordle game and agents to play it, written over four days (5 commits): a simple agent, a dictionary agent that filters candidates by feedback, an LSTM agent and a reinforcement-learning agent.",
+   "what": "A Wordle game as a Gym environment and agents to play it, written over four days (5 commits): a simple agent that scores letters from rewards, a DQN agent and an LSTM-DQN agent, both tracking the average number of guesses per 500 games. A dictionary agent using information theory was planned but not written.",
    "bullets": [],
    "story": "",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   }
  ],
  "groups": {
