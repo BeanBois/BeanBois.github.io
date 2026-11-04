@@ -35,11 +35,11 @@
     "SQL"
    ],
    "repo": null,
-   "what": "A three-month software engineering internship in 2024 at 9Loop, a gaming website. The site runs on two gaming platforms; I wrote the integration tests against both, designed database changes to support the site better, and refactored its Svelte page generator.",
+   "what": "A three-month software engineering internship in 2024 at 9Loop, a website that connects players with games. The site runs on two gaming platforms; I wrote the integration tests against both, designed database changes to support the site better, and refactored its Svelte page generator.",
    "bullets": [
-    "Wrote automated integration tests for the two gaming platforms the website runs on.",
+    "Designed and integrated one of the games' APIs into the site, and wrote automated integration tests for the two gaming platforms it runs on.",
     "Designed database changes to better support the gaming website.",
-    "Learnt TypeScript in a week to refactor and extend the site's Svelte page generator, improving component reuse."
+    "Learnt TypeScript in a week to refactor the site's Svelte page generator and write its tests."
    ],
    "story": "",
    "playlist": null,
@@ -67,10 +67,11 @@
     "Python"
    ],
    "repo": null,
-   "what": "Volunteer on King's College London's RoboCup@Home team in 2022, building a service robot that takes spoken commands. I designed the robot's state flow and built the dialogue side.",
+   "what": "Volunteer on King's College London's RoboCup@Home team in 2022, which entered RoboCup with a service robot for everyday human tasks. I designed the robot's state flow and built the dialogue side for the receptionist task, and helped with two perception tasks.",
    "bullets": [
     "Designed the service robot's state-flow diagram: the states the robot moves through for a task and what moves it between them.",
-    "Built the dialogue-flow interfacing: natural-language commands through Dialogflow into the robot's ROS (rospy) state machine."
+    "Built the dialogue-flow interfacing for the receptionist task: speech recognition and spoken responses through Dialogflow, wired into the robot's ROS (rospy) state machine.",
+    "Helped with identifying a person from attributes read off an image of them, and with detecting whether a person is in a given room."
    ],
    "story": "",
    "playlist": null,
@@ -342,7 +343,7 @@
    "id": "kurf",
    "title": "KURF research programme (King's)",
    "role": null,
-   "tagline": "How much should an RL agent explore, and when should it exploit what it knows?",
+   "tagline": "Measuring and improving curiosity-driven exploration in RL agents for robotics",
    "period": "2022",
    "status": "shipped",
    "kind": "research",
@@ -362,9 +363,9 @@
     "Google Colab"
    ],
    "repo": null,
-   "what": "King's Undergraduate Research Fellowship (KURF), summer 2022: research on the trade-off between exploration and exploitation in reinforcement learning, on robotic manipulation tasks in simulation. My part was mostly the analysis.",
+   "what": "King's Undergraduate Research Fellowship (KURF), summer 2022: research on measuring and improving curiosity-driven exploration in reinforcement-learning agents (the exploration–exploitation trade-off), on robotic tasks in simulation. My part was mostly the analysis.",
    "bullets": [
-    "Researched the exploration–exploitation trade-off in reinforcement learning on simulated robotic manipulation tasks (CoppeliaSim/PyRep), mostly analysing how agents' exploration strategies played out in training and evaluation.",
+    "Researched how to measure and improve curiosity-driven exploration in RL agents for robotics: built a custom simulation in CoppeliaSim, integrated the agent through PyRep, and did most of the analysis, plotting and comparing training runs with TensorFlow tooling.",
     "Ran the robotic simulation software and RL agents (PyTorch, TensorFlow, RLlib) on Google Colab, back when Colab could still host a simulator; it no longer can."
    ],
    "story": "",
@@ -395,7 +396,7 @@
     "HTTP"
    ],
    "repo": null,
-   "what": "A formal independent-study module at Imperial (MSc year, Feb–Mar 2025), one the department warns students off for how demanding it is, with Dr Eiman Kanjo: \"Neuromorphic Computing for Decentralised Federated and Constrained Edge AI devices\". A 21-page review of neuromorphic hardware (Intel Loihi 1 and 2, IBM TrueNorth, SpiNNaker 2), software (Lava) and learning rules (STDP, surrogate gradients, three-factor learning), then an experiment: can spiking networks learn on-device on cheap hardware, and share what they learn by federated learning? The experiment's code is [iRecognise](../projects/irecognise.md).",
+   "what": "A formal independent-study module at Imperial (MSc year, Feb–Mar 2025), in which a student joins an ongoing research project and works with its supervisor, and one the department warns students off for how demanding it is, with Dr Eiman Kanjo: \"Neuromorphic Computing for Decentralised Federated and Constrained Edge AI devices\". A 21-page review of neuromorphic hardware (Intel Loihi 1 and 2, IBM TrueNorth, SpiNNaker 2), software (Lava) and learning rules (STDP, surrogate gradients, three-factor learning), then an experiment: can spiking networks learn on-device on cheap hardware, and share what they learn by federated learning? The experiment's code is [iRecognise](../projects/irecognise.md).",
    "bullets": [
     "Argued in the review that decentralised federated learning's limits on edge devices are inherent to classical computing, and made the case for neuromorphic hardware's in-memory, sparse, event-driven computation as the fit, before testing it.",
     "Reviewed neuromorphic computing for constrained edge devices: the properties that matter (event-driven, sparse, in-memory, on-device learning), the hardware (Loihi 2, TrueNorth, SpiNNaker 2), Intel's Lava framework, and how federated learning could run without a central server.",
@@ -451,7 +452,7 @@
    "id": "blockhub",
    "title": "BlockHub",
    "role": null,
-   "tagline": "Open-source collaboration where contributors vote on-chain. Won its hackathon.",
+   "tagline": "Blockchain for social good, read as open source: impactful projects find their developers, and contributors vote on what matters",
    "period": "2023",
    "status": "shipped",
    "kind": "product",
@@ -467,9 +468,10 @@
     "full-stack web"
    ],
    "repo": null,
-   "what": "",
+   "what": "A hackathon project (Polygon × EasyA Blockchain Hackathon, 2023) whose theme was blockchain for social good. I read \"social good\" differently: open-source software is a public good that struggles to reach the developers it needs. BlockHub was my idea: a platform where open-source projects reach potential contributors, and contributors vote on-chain to rank projects, so the ones judged most impactful draw the most contribution. I pitched it to my team of six, we sharpened it together, and it won 1st place overall for the best project built on Polygon (50+ teams, 5,000 USD prize).",
    "bullets": [
-    "In a team of six, co-designed and built a decentralised open-source collaboration platform with on-chain contributor voting and reputation; built backend and frontend. 1st place of 50+ teams at the Polygon × EasyA hackathon."
+    "Came up with and pitched the idea that won the Polygon × EasyA Blockchain Hackathon (1st of 50+ teams, best overall project on Polygon, 5,000 USD): reading the \"social good\" theme as open source, a platform where impactful projects reach their developers and contributors rank projects by on-chain voting.",
+    "Led most of the design, then worked across the backend and frontend in a team of six while planning what came next."
    ],
    "story": "",
    "playlist": null,
@@ -622,7 +624,7 @@
     "Proposed my own final-year project and research framing: reduced CS:GO's post-plant round to a robotic control problem (positioning plus a risk trade-off) so that goal-conditioned RL methods from robotics would carry over, and argued from prior work why RL fits better than imitation learning.",
     "Framed CS:GO as a reinforcement-learning problem and built an asymmetric actor-critic agent with DDPG and Hindsight Experience Replay in PyTorch: the critic trains on the fully observed game state, the actor plays from what a player can see.",
     "Replaced a hand-shaped reward with HER and a sparse win/lose reward (+1 / −1) over the game's two win conditions, avoiding reward engineering.",
-    "Built the environment as an OpenAI Gym-style interface over the live game, split across 3 laptops talking over sockets: an Agent (learning), a Player (turns encoded actions into mouse and keyboard input, runs YOLOv5 enemy detection) and a Spectator (streams full game state through CS:GO Game State Integration).",
+    "Built the environment as an OpenAI Gym-style interface over the live game, split across 3 laptops talking over sockets for more compute, a better frame rate and faster reactions: an Agent (learning), a Player (turns encoded actions into mouse and keyboard input, runs YOLOv5 enemy detection) and a Spectator (streams full game state through CS:GO Game State Integration).",
     "Chose YOLOv5 for enemy detection: about 60 fps on the player machine against 16 fps for the first approach.",
     "Evaluated over 100 rounds against the built-in bots: 39 wins. The write-up is honest that the agent learnt to exploit bot behaviour (constant movement against slow bot aim, suppressive fire that makes bots cautious) rather than to play well."
    ],
@@ -1108,7 +1110,7 @@
   }
  ],
  "counts": {
-  "entries": 52,
+  "entries": 53,
   "public": 31
  }
 }

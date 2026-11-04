@@ -14,4 +14,8 @@ episodes:
       - span: 3
         art: robot
         caption: Listening
-        text: And built the dialogue side, natural-language commands through Dialogflow into the robot's ROS state machine.
+        text: And built the dialogue side of the receptionist task, speech recognition and spoken replies through Dialogflow, wired into the robot's ROS state machine.
+      - span: 6
+        art: rooms
+        caption: Helping out
+        text: I also helped with identifying a person from attributes read off an image of them, and with telling whether a person is in a given room.

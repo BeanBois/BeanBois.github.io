@@ -10,11 +10,11 @@ episodes:
       - span: 6
         art: week
         caption: Three months
-        text: A software engineering internship in 2024 at 9Loop, a gaming website. Learnt TypeScript in a week to refactor and extend its Svelte page generator.
+        text: A software engineering internship in 2024 at 9Loop, a website that connects players with games. Learnt TypeScript in a week to refactor its Svelte page generator and write its tests.
       - span: 3
         art: coverage
         caption: Two platforms
-        text: The site runs on two gaming platforms. I wrote the integration tests against both.
+        text: I designed and integrated one of the games' APIs, and wrote the integration tests for the two gaming platforms the site runs on.
       - span: 3
         art: table
         caption: The data

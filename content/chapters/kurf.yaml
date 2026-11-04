@@ -10,7 +10,7 @@ episodes:
       - span: 4
         art: arm
         caption: The question
-        text: King's undergraduate research fellowship, summer 2022. How much should a reinforcement-learning agent explore, and when should it exploit what it already knows? Asked on robotic manipulation tasks in CoppeliaSim and PyRep.
+        text: King's undergraduate research fellowship, summer 2022. How do you measure, and improve, the curiosity that drives a reinforcement-learning agent to explore? Asked on robotic tasks, in a custom CoppeliaSim simulation driven through PyRep.
       - span: 2
         art: ablate
         caption: My part
