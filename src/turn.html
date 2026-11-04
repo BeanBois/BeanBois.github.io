@@ -109,6 +109,7 @@ html.vt-head::view-transition-new(vt-wave) { animation: none !important; }
 
   /* arriving */
   addEventListener("pagereveal", e => {
+    if (where(location.href) === "home") try { sessionStorage.removeItem("vtvol"); } catch (_) {}   // a volume's note is for the shelf only (src/page.html)
     const vt = e.viewTransition, from = window.navigation && navigation.activation && navigation.activation.from && navigation.activation.from.url;
     if (!vt || reduce || !from) return;
     const A = where(from), B = where(location.href);

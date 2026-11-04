@@ -309,16 +309,28 @@ const toneDots = (cv, ox, oy, ms, grow = true) => new Promise(done => {
   };
   requestAnimationFrame(frame);
 });
-/* leaving a volume: remember where its record is, so going back the volume breaks up from there */
-addEventListener("pageswap", () => {
-  const r = document.querySelector(".deck .rec-wrap")?.getBoundingClientRect();
-  try { if (r) sessionStorage.vtrec = JSON.stringify([r.left + r.width / 2, r.top + r.height / 2]); } catch (_) {}
+/* leaving a volume: remember where its record is, so going back the volume breaks up from there, and which volume
+   this was, for browsers that can't say where a page was opened from (Safari has no navigation.activation) */
+addEventListener("pageswap", e => {
+  /* read from the foot of the page (the 目次 links there), the sleeve, and on a phone the record too, are far above the
+     screen and would turn up halfway through the flight: start them just above the top edge instead. A transform, so
+     nothing else moves; undone on pageshow if Back brings this page out of the cache */
+  if (e.viewTransition) document.querySelectorAll(".deck .rec-wrap, .vsleeve").forEach(el => {
+    const b = el.getBoundingClientRect(); if (b.bottom < 0) el.style.transform = `translateY(${(-b.bottom - 8).toFixed(0)}px)`; });
+  const r = document.querySelector(".deck .rec-wrap")?.getBoundingClientRect(), v = location.pathname.match(/vol-([\w-]+)\.html$/);
+  try { if (r) sessionStorage.vtrec = JSON.stringify([r.left + r.width / 2, r.top + r.height / 2]);
+        if (v) sessionStorage.vtvol = JSON.stringify([v[1], Date.now()]); } catch (_) {}
 });
+addEventListener("pageshow", () => document.querySelectorAll(".deck .rec-wrap, .vsleeve").forEach(el => el.style.transform = ""));
 /* back on the shelf from a volume: that volume's record and sleeve go home to their card */
 addEventListener("pagereveal", e => {
   document.querySelectorAll("[data-vt] .disc, [data-vt] .sl").forEach(el => el.style.viewTransitionName = "");
-  const m = e.viewTransition && (window.navigation?.activation?.from?.url || "").match(/vol-([\w-]+)\.html/);
-  const card = m && document.querySelector(`[data-vt="${m[1]}"]`);
+  let left = null; try { left = JSON.parse(sessionStorage.vtvol || "null"); sessionStorage.removeItem("vtvol"); } catch (_) {}
+  const act = window.navigation?.activation;
+  const vid = !e.viewTransition ? null
+    : act ? ((act.from?.url || "").match(/vol-([\w-]+)\.html/) || [])[1]     // the browser says where we came from
+    : left && Date.now() - left[1] < 8000 ? left[0] : null;                   // else the note the volume left, if it's fresh
+  const card = vid && document.querySelector(`[data-vt="${vid}"]`);
   if (!card) return;
   /* by the 目次 link (not Back) the shelf opens at its top, so most cards are off screen: bring this one to the middle
      first, or the record and sleeve fly home off the bottom of the screen */
