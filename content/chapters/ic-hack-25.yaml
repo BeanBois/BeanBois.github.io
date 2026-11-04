@@ -10,7 +10,7 @@ episodes:
       - span: 4
         art: ghost
         caption: The game
-        text: Imperial's student hackathon, February 2025, in a team of six, and a 5,000 USD prize. A 2D game drops you into an office fire alarm, and an LLM writes each act from scripted beats as you play.
+        text: Imperial's student hackathon, February 2025, in a team of six. A game for job interviews. A 2D game drops you into an office fire alarm, and an LLM writes each act from scripted beats as you play.
       - span: 2
         art: sources
         caption: Remembering you
@@ -18,8 +18,8 @@ episodes:
       - span: 3
         art: views
         caption: The reading
-        text: Your choices are scored into a Big Five personality sheet, printed as a PDF.
+        text: The point of it. Your choices are scored into a Big Five personality sheet, printed as a PDF, for the interviewer.
       - span: 3
         art: commits
         caption: My part
-        text: 42 of the team's 97 commits, the most of anyone. The graphics and sprites, the fire and the maze, wiring the engine to them, and the serial link to the hardware.
+        text: 42 of the team's 97 commits, the most of anyone. The graphics and sprites, the fire and the maze, and wiring the engine to them.

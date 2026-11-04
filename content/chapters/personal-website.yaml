@@ -12,14 +12,14 @@ episodes:
       - span: 6
         art: rooms
         caption: Poke-Exhibition
-        text: My first personal website, from 2023 into 2024, played like a Pokémon game.
+        text: My first personal website, from 2023 into 2024. Inspired by Pokémon-themed presentations, it showed my projects as an exhibition you walk through like a Pokémon game, with an area for the CS:GO agent and one for poems I wrote.
   - n: 1
     title: A manga series with a record on it
     panels:
       - span: 4
         art: book
         caption: The series
-        text: Every project is a volume of a manga series, with a cover, a contents shelf, an author page and a colophon. The record on the cover turns at the tempo of whatever I'm playing on Spotify.
+        text: Every project is a volume of a manga series, in four parts by reader, from a hook on the cover to a colophon. Record sleeves on the contents page, screentone behind them, a wave for a page turn. The record on the cover turns at the tempo of whatever I'm playing on Spotify.
       - span: 2
         art: clock
         caption: Now playing

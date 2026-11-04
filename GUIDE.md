@@ -151,6 +151,7 @@ For `music.playlists`. For `pages.highlights`, use the volume's id: most are the
 | `atlas` | atlas |
 | `blockhub` | BlockHub |
 | `car-designer` | CarDesigner |
+| `carbon-coin` | carbon-coin |
 | `chess-ai` | chessAI |
 | `clucker` | Clucker |
 | `data-terminal` | Data terminal |
@@ -176,6 +177,7 @@ For `music.playlists`. For `pages.highlights`, use the volume's id: most are the
 | `sales-signatures` | Sales signatures |
 | `srgan` | SRGAN from scratch |
 | `task-tracker` | Task tracker |
+| `team-elk` | Team Elk clubs app |
 | `tencent-autoscaler` | Time-of-day GPU autoscaler |
 | `tencent-conversation-service` | Gameplay conversation query service |
 | `tencent-hardening` | The hardening audit |

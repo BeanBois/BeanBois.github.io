@@ -1,0 +1,13 @@
+# Volume for bank/projects/carbon-coin.md. Panel text from that entry; captions editorial.
+entry: carbon-coin
+kana: 炭素
+obi: Companies, ranked by what they burn.
+cover: table
+episodes:
+  - n: 1
+    title: One day
+    panels:
+      - span: 6
+        art: table
+        caption: The app
+        text: A hackathon build in one day, November 2022, in a team of three. A Remix app scoring companies by carbon and ESG, with company pages and graphs, products, a leaderboard and a scanner. I wrote the company listing and the component structure.

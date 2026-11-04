@@ -50,7 +50,7 @@
    "title": "RoboCup@Home (King's)",
    "role": "Volunteer",
    "tagline": "",
-   "period": "2022",
+   "period": "2021-09 – 2022",
    "status": "shipped",
    "kind": "job",
    "track": "academic",
@@ -67,7 +67,7 @@
     "Python"
    ],
    "repo": null,
-   "what": "Volunteer on King's College London's RoboCup@Home team in 2022, which entered RoboCup with a service robot for everyday human tasks. I designed the robot's state flow and built the dialogue side for the receptionist task, and helped with two perception tasks.",
+   "what": "Volunteer on King's College London's RoboCup@Home team in 2022, which entered RoboCup 2022 with a service robot for everyday human tasks. I designed the robot's state flow and built the dialogue side for the receptionist task, and helped with two perception tasks.",
    "bullets": [
     "Designed the service robot's state-flow diagram: the states the robot moves through for a task and what moves it between them.",
     "Built the dialogue-flow interfacing for the receptionist task: speech recognition and spoken responses through Dialogflow, wired into the robot's ROS (rospy) state machine.",
@@ -313,7 +313,7 @@
    "status": "shipped",
    "kind": "study",
    "track": "academic",
-   "group": null,
+   "group": "team-elk",
    "size": "small",
    "mix": {
     "backend": 0.7,
@@ -397,7 +397,7 @@
    "title": "KURF research programme (King's)",
    "role": null,
    "tagline": "Measuring and improving curiosity-driven exploration in RL agents for robotics",
-   "period": "2022",
+   "period": "2022-06 – 2022-09",
    "status": "shipped",
    "kind": "research",
    "track": "academic",
@@ -484,6 +484,36 @@
    "story": "",
    "playlist": null,
    "verified": "2026-11-04"
+  },
+  {
+   "id": "team-elk",
+   "title": "Team Elk clubs app",
+   "role": null,
+   "tagline": "King's second-year small-group project, a Django app for running clubs",
+   "period": "2021-11 – 2021-12",
+   "status": "shipped",
+   "kind": "study",
+   "track": "academic",
+   "group": null,
+   "size": "small",
+   "mix": {
+    "backend": 0.8,
+    "product": 0.2
+   },
+   "stack": [
+    "Python",
+    "Django",
+    "Heroku",
+    "GitHub Actions"
+   ],
+   "repo": "https://github.com/jc121F1/TeamElk",
+   "what": "King's Software Engineering Group small-group project (November–December 2021), in a team of five: a Django app for running clubs, with membership applications and approvals, promoting and demoting members, and user profiles, deployed on Heroku with GitHub Actions CI and coverage. It came after [Clucker](clucker.md), the warm-up.",
+   "bullets": [
+    "In a team of five, built a Django clubs app deployed on Heroku with CI: wrote about 70 of its roughly 400 commits, the second most, including the refactor of views into classes (edit profile, application approval), promote and demote, and a change-password feature with full test coverage."
+   ],
+   "story": "",
+   "playlist": null,
+   "verified": null
   },
   {
    "id": "archer-bot",
@@ -611,6 +641,35 @@
    "verified": "2026-11-04"
   },
   {
+   "id": "carbon-coin",
+   "title": "carbon-coin",
+   "role": null,
+   "tagline": "A one-day hackathon app that ranks companies and products by their carbon and ESG scores",
+   "period": "2022-11",
+   "status": "archived",
+   "kind": "product",
+   "track": "side",
+   "group": null,
+   "size": "small",
+   "mix": {
+    "product": 0.7,
+    "backend": 0.3
+   },
+   "stack": [
+    "JavaScript",
+    "Remix",
+    "React"
+   ],
+   "repo": null,
+   "what": "A hackathon build in one day (19 November 2022), in a team of three: a Remix web app that scores companies by carbon and ESG, with company pages and graphs, products, a leaderboard and a scanner.",
+   "bullets": [
+    "In a one-day hackathon team of three, built a Remix app ranking companies and products by carbon and ESG score; wrote the company listing and the component structure."
+   ],
+   "story": "",
+   "playlist": null,
+   "verified": null
+  },
+  {
    "id": "chess-ai",
    "title": "chessAI",
    "role": null,
@@ -704,7 +763,7 @@
    "title": "RL agent for an FPS game",
    "role": null,
    "tagline": "A reinforcement-learning agent that plays Counter-Strike, run across three laptops",
-   "period": "2022 – 2023-04",
+   "period": "2022-06 – 2023-04",
    "status": "shipped",
    "kind": "model-from-scratch",
    "track": "academic",
@@ -768,7 +827,7 @@
    "id": "ic-hack-25",
    "title": "IC Hack 25 game",
    "role": null,
-   "tagline": "A hackathon game where an LLM writes a fire-evacuation scenario as you play, and reads your personality from your choices",
+   "tagline": "A hackathon game for job interviews, where an LLM writes a fire evacuation as you play and reads your personality from your choices",
    "period": "2025-02-01 – 2025-02-02",
    "status": "shipped",
    "kind": "product",
@@ -789,9 +848,9 @@
     "serial (Arduino)"
    ],
    "repo": "https://github.com/BeanBois/IC_HACK25",
-   "what": "Imperial's student hackathon, February 2025, a team of six; it won a prize of 5,000 USD. A 2D game drops the player into an office fire alarm; an LLM generates each act from scripted beats (a friend at the start, someone calling for help, getting separated, a plan that stops working), the player says what they do, and the answers are scored into a Big Five personality sheet printed as a PDF. A serial link drove hardware effects.",
+   "what": "Imperial's student hackathon, February 2025, a team of six. A 2D game drops the player into an office fire alarm; an LLM generates each act from scripted beats (a friend at the start, someone calling for help, getting separated, a plan that stops working), the player says what they do, and the answers are scored into a Big Five personality sheet printed as a PDF. That reading is the point: a game an employer could use in a job interview.",
    "bullets": [
-    "Built a prize-winning (5,000 USD) LLM-driven game in a 2-day team hackathon: prompts that force a scripted sequence of events, RAG over the player's past answers, and a Big Five personality report generated from their choices."
+    "Built an LLM-driven game in a 2-day team hackathon: prompts that force a scripted sequence of events, RAG over the player's past answers, and a Big Five personality report generated from their choices."
    ],
    "story": "",
    "playlist": null,
@@ -955,12 +1014,12 @@
    "repo": "https://github.com/BeanBois/BeanBois.github.io",
    "what": "beanbois.github.io: every project as a volume of a manga series (cover, contents shelf, volumes, author page, colophon), with a vinyl record on the cover that turns at the tempo of whatever Kai Shun is playing on Spotify. Facts come from this bank only, through a leak-scanned export; the site itself is a static build.",
    "bullets": [
-    "Designed and built a static portfolio site in a manga-series structure, with a record cover laid out by shape contrast, per-part light and dark palettes from one settings file, and a type scale on a 4/8 px grid.",
+    "Designed and built a static portfolio site in a manga-series structure, with a record cover laid out by shape contrast, and per-part light and dark palettes from one settings file; the site is in four parts by reader (a hook, the brief, the projects in depth, a colophon), with record sleeves and screentone on the contents page and a wave as the page turn.",
     "Wrote a Cloudflare Worker that reads Spotify's now-playing and finds the tempo from a trust-ordered chain of sources (his own list, ReccoBeats, Deezer by ISRC, a strict Deezer search), so the record follows song changes within about 5 seconds.",
     "Kept one source of truth: a knowledge bank of Markdown entries feeds the CVs and the site through an export that refuses to run if anything private or any internal employer name would leak; a closing check lints the bank and catches drift between bank and CVs.",
     "Deploys on push with GitHub Actions; design drafts on `design/*` branches deploy as previews; CVs are printed to one-page PDFs with headless Chrome at every deploy."
    ],
-   "story": "Built in a week (2026-10-20 to 10-23) with a staged process: requirements, research and design with competing prototypes (a 2D then 3D Poincaré-ball layout, then the record), implementation, monitoring, tests. A 2023–24 predecessor, a Pokémon-styled site, is [Poke-Exhibition](poke-exhibition.md).",
+   "story": "Built from 2026-10-20 with a staged process: requirements, research and design with competing prototypes (a 2D then 3D Poincaré-ball layout, then the record), implementation, monitoring, tests. The first version was live in four days; the four-part structure followed on 2026-11-04, and every project in it was vetted the same night. A 2023–24 predecessor, a Pokémon-styled site, is [Poke-Exhibition](poke-exhibition.md).",
    "playlist": null,
    "verified": "2026-11-04"
   },
@@ -1019,7 +1078,7 @@
     "Python"
    ],
    "repo": null,
-   "what": "An interactive personal website using a Pokémon-game interface, started around September 2023 (README). 29 commits from 2023-10-23 to 2024-02-20 in the private repo BeanBois/personal_website, about 170 KB of JavaScript.",
+   "what": "My first personal website, started around September 2023: inspired by Pokémon-themed presentations, it showed my projects as an exhibition you walk through like a Pokémon game, with an area for the CS:GO agent (linking its project site) and an area for poems I wrote, read in a chatbox. No longer live. 29 commits from 2023-10-23 to 2024-02-20 in the private repo BeanBois/personal_website, about 170 KB of JavaScript.",
    "bullets": [],
    "story": "",
    "playlist": null,
@@ -1203,7 +1262,7 @@
     "Vercel"
    ],
    "repo": null,
-   "what": "A web terminal for data analysis: a Remix (TypeScript) front end where you write and save analyses, sending Python to a separate shell server hosted on Vercel (with Prisma for storage) that runs it and returns output, including matplotlib plots. Two repos: terminel (56 commits, 2023-09-10 to 10-18) and terminel_python_server (72 commits, 2023-10-18 to 10-22).",
+   "what": "A web terminal for data analysis, for my own analysis and for fun: a Remix (TypeScript) front end where you write and save analyses, sending Python to a separate shell server hosted on Vercel (with Prisma for storage) that runs it and returns output, including matplotlib plots. Two repos: terminel (56 commits, 2023-09-10 to 10-18) and terminel_python_server (72 commits, 2023-10-18 to 10-22).",
    "bullets": [
     "Built a browser terminal for data analysis in Remix and TypeScript, backed by a Python execution server on Vercel that returns text and matplotlib plots."
    ],
@@ -1405,7 +1464,7 @@
    "what": "BSc Computer Science with Intelligent Systems, King's College London · First Class"
   },
   {
-   "period": "2022",
+   "period": "2021-09 – 2022",
    "what": "Volunteer, RoboCup@Home (King's)"
   },
   {
@@ -1426,7 +1485,7 @@
   }
  ],
  "counts": {
-  "entries": 53,
-  "public": 42
+  "entries": 55,
+  "public": 44
  }
 }

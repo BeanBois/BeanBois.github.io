@@ -1,0 +1,26 @@
+# Volume for bank/research/team-elk.md, with clucker as its prologue. Panel text from those entries; captions editorial.
+entry: team-elk
+members: [clucker]
+kana: 部活
+obi: Where team work started.
+cover: views
+episodes:
+  - n: 0
+    entry: clucker
+    title: The warm-up
+    panels:
+      - span: 6
+        art: views
+        caption: Clucker
+        text: King's second-year software engineering warm-up, autumn 2021. A Django micro-blogging site with login-protected feeds and user pages, tests with fixtures and coverage, and a GitHub Actions workflow.
+  - n: 1
+    title: Running clubs
+    panels:
+      - span: 4
+        art: tenants
+        caption: Team Elk
+        text: Then the real small-group project, in a team of five. A Django app for running clubs, with applications and approvals, promoting and demoting members, and profiles, deployed on Heroku with CI.
+      - span: 2
+        art: commits
+        caption: My part
+        text: About 70 of its 400 commits, the second most. Views refactored into classes, promote and demote, and a change-password feature with full test coverage.

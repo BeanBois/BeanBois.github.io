@@ -10,7 +10,7 @@ episodes:
       - span: 4
         art: tui
         caption: The idea
-        text: A web terminal for data analysis. Write and save analyses in a Remix front end, send the Python to a server that runs it, and get back text and matplotlib plots.
+        text: A web terminal for my own data analysis, and for fun. Write and save analyses in a Remix front end, send the Python to a server that runs it, and get back text and matplotlib plots.
       - span: 2
         art: timeout
         caption: The hard part
