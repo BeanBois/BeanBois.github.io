@@ -742,6 +742,61 @@
    "verified": "2026-11-04"
   },
   {
+   "id": "defect-inspection",
+   "title": "Defect inspection on a production line",
+   "role": null,
+   "tagline": "Machine vision that judges real parts against the manufacturer's own spec",
+   "period": "2026-08 – present",
+   "status": "active",
+   "kind": "product",
+   "track": "side",
+   "group": null,
+   "size": "big",
+   "mix": {
+    "ml": 0.75,
+    "infra": 0.15,
+    "backend": 0.1
+   },
+   "stack": [
+    "Python",
+    "computer vision"
+   ],
+   "repo": null,
+   "what": "Automated visual inspection for a manufacturer's production line: cameras photograph each part, and the system decides whether it passes or is rejected. The details are kept general on purpose, for client confidentiality.",
+   "bullets": [
+    "Building multi-camera machine-vision inspection for a live production line, sorting each part by the defects it finds.",
+    "Reframed the problem from open-set anomaly detection to criteria-driven checks with numeric limits, so every verdict traces back to a line of the manufacturer's specification.",
+    "Treats a missed defect as the costly error: thresholds are calibrated on held-out production data, and frames that can't be judged reliably are refused rather than guessed.",
+    "Runs in shadow mode beside the existing system, so new checks are compared on the same parts before any is trusted."
+   ],
+   "story": "It began as anomaly detection, learning what \"normal\" looks like and flagging the rest, and was turned into named checks against the manufacturer's own criteria, because a verdict a line engineer can trace to the spec is worth more than an anomaly score.",
+   "playlist": null,
+   "verified": "2026-11-05"
+  },
+  {
+   "id": "envite",
+   "title": "Envite",
+   "role": null,
+   "tagline": "A curated events guide whose moat is a consent-first cross-host audience graph",
+   "period": "2026-06",
+   "status": "idea",
+   "kind": "venture",
+   "track": "side",
+   "group": null,
+   "size": "small",
+   "mix": {
+    "product": 0.6,
+    "backend": 0.4
+   },
+   "stack": [],
+   "repo": null,
+   "what": "Venture design docs: editorial rubric, host outreach, monetisation, and a PDPA-compliant cross-host attendee graph where hosts reach each other's opted-in audiences without seeing raw contact lists.",
+   "bullets": [],
+   "story": "",
+   "playlist": null,
+   "verified": "2026-11-05"
+  },
+  {
    "id": "expense-tracker",
    "title": "expense-tracker",
    "role": null,
@@ -943,6 +998,29 @@
    "verified": "2026-11-04"
   },
   {
+   "id": "manunet",
+   "title": "Manunet",
+   "role": null,
+   "tagline": "A surplus-and-shortage marketplace for Penang's electronics supply chain, with signed provenance",
+   "period": "2026-05",
+   "status": "idea",
+   "kind": "venture",
+   "track": "side",
+   "group": null,
+   "size": "small",
+   "mix": {
+    "product": 0.6,
+    "backend": 0.4
+   },
+   "stack": [],
+   "repo": null,
+   "what": "Plan for a B2B marketplace (RFQ, offer, counter) for electronic components, starting with sub-contractors as buyers. Signed provenance attestations plus a transparency log instead of a consortium blockchain.",
+   "bullets": [],
+   "story": "",
+   "playlist": null,
+   "verified": "2026-11-05"
+  },
+  {
    "id": "mybudixc",
    "title": "myBudiXc",
    "role": null,
@@ -1100,6 +1178,39 @@
    "story": "",
    "playlist": null,
    "verified": "2026-11-04"
+  },
+  {
+   "id": "pollector",
+   "title": "Pollector",
+   "role": null,
+   "tagline": "Election-night results tracker with a tamper-evident ledger",
+   "period": "2026-08-03 – 2026-08-05",
+   "status": "idea",
+   "kind": "product",
+   "track": "side",
+   "group": null,
+   "size": "small",
+   "mix": {
+    "backend": 0.75,
+    "product": 0.15,
+    "infra": 0.1
+   },
+   "stack": [
+    "TypeScript",
+    "pnpm monorepo",
+    "zod",
+    "Docker"
+   ],
+   "repo": null,
+   "what": "An idea for a live, non-partisan tracker for Malaysian election night, with a three-day prototype. Official per-stream tallies are keyed in twice by independent operators before entering a hash-chained ledger. A separate, clearly labelled crowd layer collects self-reported votes as an unofficial leading indicator.",
+   "bullets": [
+    "Designed a pure domain reducer (`reduce(definition, events) → state`) with no I/O, covering first-past-the-post clinch and majority maths and hung-assembly logic.",
+    "Built a tamper-evident, hash-chained results ledger with dual independent entry, and wrote the case for why it doesn't need a blockchain.",
+    "Wrote a threat model and kept the crowd sample visibly separate from official results, because it is self-selected and not random."
+   ],
+   "story": "",
+   "playlist": null,
+   "verified": "2026-11-05"
   },
   {
    "id": "polyarb",
@@ -1507,6 +1618,6 @@
  ],
  "counts": {
   "entries": 55,
-  "public": 44
+  "public": 48
  }
 }

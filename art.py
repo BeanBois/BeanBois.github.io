@@ -484,6 +484,29 @@ ART = {
                       + f'<path d="M290 40 h130 v60 h-90 l-20 20 v-20 h-20 z" style="fill:var(--paper);stroke:var(--ink);stroke-width:5"/>' + t(355, 78, "bring me…", 13, "mono", "middle")),
     "rooms": lambda: (r(30, 30, 390, 240, PAPER, 6) + ln("M200 30 V140 M200 190 V270 M30 150 H120 M160 150 H200 M200 120 H420", 5)
                       + person(320, 200, 0.9, SPOT) + note(110, 100, "kitchen", "middle") + note(310, 80, "living room", "middle")),
+    # --- VIM4: kept generic on purpose (a client's line) ---
+    "inspect": lambda: ("".join(r(70 + i * 105, 30, 70, 44, INK, 5) + ring(105 + i * 105, 82, 12, 5) + ln(f"M{105 + i * 105} 94 L200 168", 2, "6 6") for i in range(3))
+                        + ln("M30 196 H250", 8) + ring(200, 178, 18, 5) + arrow(250, 196, 410, 150) + arrow(250, 196, 410, 250)
+                        + note(416, 140, "pass", "end") + note(416, 284, "reject", "end")),
+    "spec": lambda: (r(40, 30, 370, 240, PAPER, 5) + ln("M40 70 H410", 4) + t(60, 58, "check", 14) + t(250, 58, "limit", 14)
+                     + "".join(f'<rect x="60" y="{88 + i * 36}" width="{70 + 80 * seed("spec", i):.0f}" height="6" style="{INK}"/>'
+                               + t(250, 96 + i * 36, "≤ x", 14, "mono", "start", MUTED) for i in range(5))
+                     + "".join(ln(f"M372 {90 + i * 36} l7 7 l14 -14", 4) for i in (0, 1, 3, 4)) + cross(382, 162, 9, 4)),
+    "shadow": lambda: (r(40, 60, 150, 90, INK, 5) + t(115, 112, "current", 16, "mono", "middle", PAPER) + r(40, 170, 150, 90, PAPER, 5, dash="10 7") + t(115, 222, "new", 16, "mono", "middle")
+                       + arrow(195, 105, 290, 150) + arrow(195, 215, 290, 170) + ring(330, 160, 34, 5) + t(330, 170, "=?", 24, "display", "middle") + note(330, 230, "same parts, compared", "middle")),
+    # --- Pollector ---
+    "tally": lambda: (person(70, 50, 0.9) + person(70, 170, 0.9) + doc(110, 40, 70, 80, 3, -3, False) + doc(110, 160, 70, 80, 3, 3, False)
+                      + arrow(185, 80, 235, 135) + arrow(185, 200, 235, 155) + t(260, 154, "=", 30, "display", "middle")
+                      + "".join(r(290 + i * 54, 125, 40, 40, INK if i < 2 else PAPER, 4) + (ln(f"M{330 + i * 54} 145 h14", 4) if i < 2 else "") for i in range(3))
+                      + note(345, 200, "hash-chained", "middle")),
+    # --- Envite ---
+    "audience": lambda: ("".join(ring(90 + i * 135, 120, 40, 5, INK) + "".join(dot(90 + i * 135 + 70 * math.cos(a), 120 + 70 * math.sin(a), 7, PAPER if seed("env", i * 9 + k) > 0.4 else INK)
+                                                                         + ring(90 + i * 135 + 70 * math.cos(a), 120 + 70 * math.sin(a), 7, 2, "fill:none")
+                                                                         for k, a in enumerate(x * 0.9 + 0.3 for x in range(7))) for i in range(3))
+                         + ln("M160 145 Q225 230 290 145 M295 145 Q360 230 425 145", 3, "6 6") + note(225, 270, "opted-in guests, no lists shared", "middle")),
+    # --- Manunet ---
+    "provenance": lambda: (chip(50, 90, 110, 110, "IC") + arrow(185, 145, 245, 145) + stamp(305, 100, "signed", -6, 18) + doc(260, 150, 100, 110, 4, 3, False)
+                           + arrow(370, 205, 420, 205) + note(225, 40, "surplus → shortage", "middle")),
 }
 
 

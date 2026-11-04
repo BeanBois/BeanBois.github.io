@@ -1,0 +1,13 @@
+# Volume for bank/projects/envite.md. Shown as an idea for now (Kai Shun, 2026-11-05).
+entry: envite
+kana: イベント
+obi: Hosts share audiences, not lists.
+cover: audience
+episodes:
+  - n: 1
+    title: An idea
+    panels:
+      - span: 6
+        art: audience
+        caption: The idea
+        text: A curated events guide. Hosts reach each other's opted-in audiences without ever seeing raw contact lists, consent-first and PDPA-compliant.
