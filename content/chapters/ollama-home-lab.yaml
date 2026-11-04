@@ -10,4 +10,4 @@ episodes:
       - span: 6
         art: homelab
         caption: The setup
-        text: A private LLM serving box, Ollama on Windows and WSL, reachable from my devices over a Tailscale mesh. It's the default inference backend for RE-News (qwen3:32b).
+        text: A private LLM serving box, Ollama on a 48 GB GPU under Windows and WSL, reachable from my devices over a Tailscale mesh. It served qwen3:32b to TradingJoe and RE-News.

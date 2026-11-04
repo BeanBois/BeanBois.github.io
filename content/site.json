@@ -468,11 +468,11 @@
    "repo": null,
    "what": "",
    "bullets": [
-    "Co-designed and built a decentralised open-source collaboration platform with on-chain contributor voting and reputation; built backend and frontend. 1st place of 50+ teams at the Polygon × EasyA hackathon."
+    "In a team of six, co-designed and built a decentralised open-source collaboration platform with on-chain contributor voting and reputation; built backend and frontend. 1st place of 50+ teams at the Polygon × EasyA hackathon."
    ],
    "story": "",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "car-designer",
@@ -486,8 +486,7 @@
    "group": null,
    "size": "small",
    "mix": {
-    "product": 0.8,
-    "ml": 0.2
+    "product": 1.0
    },
    "stack": [
     "Swift",
@@ -502,7 +501,7 @@
    ],
    "story": "",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "chess-ai",
@@ -562,7 +561,7 @@
    ],
    "story": "",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "expense-tracker",
@@ -719,21 +718,21 @@
     "WebSockets"
    ],
    "repo": null,
-   "what": "An exchange engine in Go (about 1,400 lines, no git history, last touched 2025-11-24): orders that can fill now match on a price-time order book; the rest wait in a batch queue with deadlines and are paired every few minutes to maximise matched volume.",
+   "what": "My own exploration of an exchange for a business idea: an exchange engine in Go (about 1,400 lines, no git history, last touched 2025-11-24): orders that can fill now match on a price-time order book; the rest wait in a batch queue with deadlines and are paired every few minutes to maximise matched volume.",
    "bullets": [
     "Built a Go exchange engine: a price-time-priority order book for instant matches, and a deadline-aware batch matcher that globally pairs unmatched orders every N minutes to maximise volume, with a WebSocket market feed."
    ],
    "story": "",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "ollama-home-lab",
    "title": "Ollama home lab",
    "role": null,
    "tagline": "My own GPU box serving local LLMs to my laptops over Tailscale",
-   "period": "2026-06 – present",
-   "status": "active",
+   "period": "2026-06",
+   "status": "shipped",
    "kind": "tool",
    "track": "side",
    "group": null,
@@ -749,13 +748,13 @@
     "Windows"
    ],
    "repo": null,
-   "what": "A Windows PC with WSL runs Ollama (qwen3:32b and qwen3-coder:30b) and serves it over Tailscale; a few shell scripts start, stop and check the server, and the client scripts ping, list models, chat and code against it from a laptop. 2 commits on 2026-06-10. TradingJoe and RE-News both used it as their LLM backend.",
+   "what": "A Windows PC with a 48 GB GPU, under WSL, runs Ollama (qwen3:32b and qwen3-coder:30b) and serves it over Tailscale; a few shell scripts start, stop and check the server, and the client scripts ping, list models, chat and code against it from a laptop. 2 commits on 2026-06-10. TradingJoe and RE-News both used it as their LLM backend.",
    "bullets": [
-    "Run a private LLM serving box (Ollama on Windows + WSL) reachable from my devices over a Tailscale mesh, the default inference backend for RE-News (qwen3:32b)."
+    "Set up a private LLM serving box (Ollama on Windows + WSL, a 48 GB GPU) reachable from my devices over a Tailscale mesh, the default inference backend for RE-News (qwen3:32b)."
    ],
    "story": "",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "plate-recognition",
@@ -812,14 +811,14 @@
     "Polymarket CLOB API"
    ],
    "repo": null,
-   "what": "",
+   "what": "A two-person project (March 2026, paused): an engine that buys a complete set of a Polymarket market's outcomes when, at the size it would trade, the set costs less than it pays out. I designed it and wrote the risk logic; my collaborator wrote most of the code.",
    "bullets": [
-    "Built a Polymarket complete-set arbitrage engine: depth-aware VWAP-at-size bundle costing, live opportunity detection from the order book, and paper trading by default.",
-    "Added risk controls for non-atomic multi-leg execution, with live trading behind an explicit safety flag, plus SQLite persistence and metrics."
+    "Designed a Polymarket complete-set arbitrage engine (built with a collaborator): depth-aware VWAP-at-size bundle costing, live opportunity detection from the order book, and paper trading by default.",
+    "Wrote its risk logic for non-atomic multi-leg execution, with live trading behind an explicit safety flag, plus SQLite persistence and metrics."
    ],
    "story": "",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "re-news",
@@ -883,7 +882,7 @@
    "bullets": [],
    "story": "",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "srgan",
@@ -907,7 +906,7 @@
     "Google Colab"
    ],
    "repo": "https://github.com/BeanBois/SRGAN",
-   "what": "A learning exercise (November–December 2025): the SRGAN paper reproduced from scratch, trained on the home-lab GPU (Windows, through DirectML) and on Google Colab.",
+   "what": "A learning exercise (November–December 2025): the SRGAN paper reproduced from scratch, trained on my own Windows GPU (through DirectML; this was before the home lab) and on Google Colab.",
    "bullets": [
     "Implemented SRGAN from scratch in PyTorch (ResNet generator, VGG perceptual loss, adversarial training) and trained it on DIV2K at 4× upscaling, with an SRCNN baseline and a pre-GAN warm-up, reaching 29.3 dB PSNR and 0.82 SSIM on validation.",
     "Worked around DirectML gaps for Windows GPU training with custom replacements for unsupported operations (the training script picks DirectML, then CUDA, then CPU).",

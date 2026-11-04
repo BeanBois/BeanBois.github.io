@@ -25,7 +25,7 @@ ML Engineer at Tencent writing the Go services behind its model-serving platform
 - Price-time-priority order book for instant matches plus a deadline-aware batch matcher that pairs unmatched orders to maximise volume; WebSocket market feed.
 
 **polyarb**, Polymarket arbitrage (Python) · 2026
-- Depth-aware VWAP bundle costing from the live order book, risk controls for non-atomic multi-leg execution, paper trading by default, SQLite persistence.
+- Designed it with a collaborator and wrote its risk logic: depth-aware VWAP bundle costing from the live order book, controls for non-atomic multi-leg execution, paper trading by default.
 
 **Also**: C++ market-data terminal (Finnhub ticks → TCP socket → Python plotter) · Go terminal budget tracker (Bubble Tea + SQLite) · BlockHub, 1st of 50+ teams at the Polygon × EasyA hackathon
 

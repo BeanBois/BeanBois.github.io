@@ -10,7 +10,7 @@ episodes:
       - span: 3
         art: book
         caption: Now
-        text: A Go exchange engine with a price-time-priority order book for instant matches.
+        text: My own exploration of an exchange for a business idea. A Go engine with a price-time-priority order book for instant matches.
       - span: 3
         art: batch
         caption: Later
