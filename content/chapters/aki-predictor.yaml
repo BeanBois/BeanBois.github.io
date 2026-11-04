@@ -10,12 +10,12 @@ episodes:
       - span: 4
         art: blood
         caption: The model
-        text: A gradient-boosted classifier trained on NHS creatinine blood-test data, reaching 87% AUC for early detection of acute kidney injury.
+        text: Group coursework at Imperial in 2025. As a group, a gradient-boosted classifier trained on NHS creatinine blood-test data, reaching 87% AUC for early detection of acute kidney injury.
       - span: 2
         art: k8s
         caption: The service
-        text: Deployed on Kubernetes with Prometheus monitoring, alerting and automated rollback on model degradation.
+        text: My part, the deployment. On Kubernetes with Prometheus monitoring, alerting and automated rollback on model degradation.
       - span: 6
         art: postmortem
         caption: The failure
-        text: The model failed during live deployment. The postmortem covers the impact, the root cause and the resolution.
+        text: The model failed during live deployment. My postmortem covers the impact, the root cause and the resolution.

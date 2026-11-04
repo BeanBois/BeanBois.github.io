@@ -293,15 +293,15 @@
     "Prometheus"
    ],
    "repo": null,
-   "what": "Imperial coursework (ML systems): train a model on NHS creatinine test data, then run it as a monitored service, and handle a real failure.",
+   "what": "Imperial group coursework (ML systems, spring 2025): train a model on NHS creatinine test data, then run it as a monitored service, and handle a real failure. My part was the deployment: Kubernetes, monitoring and rollback, and the postmortem.",
    "bullets": [
-    "Trained a gradient-boosted classifier on NHS creatinine blood-test data, reaching 87% AUC for early AKI detection.",
-    "Deployed the inference pipeline on Kubernetes with Prometheus monitoring, alerting and automated rollback on model degradation.",
+    "As a group, trained a gradient-boosted classifier on NHS creatinine blood-test data, reaching 87% AUC for early AKI detection.",
+    "Owned the deployment: put the inference pipeline on Kubernetes with Prometheus monitoring, alerting and automated rollback on model degradation.",
     "Wrote the postmortem for a model failure during live deployment: impact, root cause, resolution."
    ],
    "story": "",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "icl-hyperbolic",

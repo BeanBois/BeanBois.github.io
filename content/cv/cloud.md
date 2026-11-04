@@ -16,8 +16,8 @@ ML Engineer at Tencent and main author of its model-serving platform: deployment
 - Wrote integration tests for the two gaming platforms the site runs on, designed database changes to support it, and refactored its Svelte/TypeScript page generator.
 
 ## Projects
-**Acute kidney injury predictor**, Imperial · 2024
-- Deployed an ML inference service on Kubernetes with Prometheus monitoring, alerting and automated rollback on model degradation; wrote the postmortem for a live failure.
+**Acute kidney injury predictor**, Imperial · 2025
+- In a group project, owned the deployment: an ML inference service on Kubernetes with Prometheus monitoring, alerting and automated rollback on model degradation; wrote the postmortem for a live failure.
 
 **Ollama home lab** · 2026 – present
 - Private GPU inference box (Ollama on Windows + WSL) reachable over a Tailscale mesh; serves qwen3:32b as the default backend for RE-News.
