@@ -308,7 +308,7 @@
    "id": "clucker",
    "title": "Clucker",
    "role": null,
-   "tagline": "A small Twitter-like site in Django, the second-year group-work warm-up",
+   "tagline": "A small Twitter-like site in Django, the second-year warm-up I did on my own",
    "period": "2021-10 – 2021-11",
    "status": "shipped",
    "kind": "study",
@@ -325,8 +325,10 @@
     "GitHub Actions"
    ],
    "repo": null,
-   "what": "The King's Software Engineering Group learning project: a Django micro-blogging site with login-protected feeds and user pages, tests with fixtures and coverage, and a GitHub Actions workflow. 42 commits from 2021-10-08 to 11-22.",
-   "bullets": [],
+   "what": "King's second-year Software Engineering warm-up, done individually from the course's guided steps before the group project ([Team Elk](team-elk.md)): a Django micro-blogging site with login-protected feeds and user pages, tests with fixtures and coverage, and a GitHub Actions workflow. 42 commits from 2021-10-08 to 11-22.",
+   "bullets": [
+    "Built a Django micro-blogging site on my own, with login-protected feeds, tests with fixtures and coverage, and CI on GitHub Actions."
+   ],
    "story": "",
    "playlist": null,
    "verified": "2026-11-04"
@@ -493,7 +495,7 @@
    "id": "team-elk",
    "title": "Team Elk clubs app",
    "role": null,
-   "tagline": "King's second-year small-group project, a Django app for running clubs",
+   "tagline": "King's second-year small-group project, a Django app for running chess clubs",
    "period": "2021-11 – 2021-12",
    "status": "shipped",
    "kind": "study",
@@ -511,13 +513,13 @@
     "GitHub Actions"
    ],
    "repo": "https://github.com/jc121F1/TeamElk",
-   "what": "King's Software Engineering Group small-group project (November–December 2021), in a team of five: a Django app for running clubs, with membership applications and approvals, promoting and demoting members, and user profiles, deployed on Heroku with GitHub Actions CI and coverage. It came after [Clucker](clucker.md), the warm-up.",
+   "what": "King's Software Engineering Group small-group project (November–December 2021), in a team of five: a Django app for running chess clubs: profiles with chess experience and a personal statement; clubs with applicants, members, officers and an owner; applying, approval, promotion and demotion, ownership transfer, disbanding and leaving; a club switcher, seeded data and about 45 test files, deployed on Heroku (no longer live) with GitHub Actions CI and coverage. It came after [Clucker](clucker.md), the warm-up.",
    "bullets": [
-    "In a team of five, built a Django clubs app deployed on Heroku with CI: wrote about 70 of its roughly 400 commits, the second most, including the refactor of views into classes (edit profile, application approval), promote and demote, and a change-password feature with full test coverage."
+    "In a team of five, built a Django chess-clubs app deployed on Heroku with CI: wrote about 70 of its roughly 400 commits, the second most, including the refactor of views into classes (edit profile, application approval), promote and demote, and a change-password feature with full test coverage."
    ],
    "story": "",
    "playlist": null,
-   "verified": "2026-11-04"
+   "verified": "2026-11-05"
   },
   {
    "id": "archer-bot",
@@ -654,7 +656,7 @@
    "id": "carbon-coin",
    "title": "carbon-coin",
    "role": null,
-   "tagline": "HackKing's 2022 runner-up: a one-day app that ranks companies and products by carbon and ESG score",
+   "tagline": "HackKing's 2022 runner-up: carbon coins tracked on a blockchain, so companies in a supply chain are rewarded for staying carbon-friendly",
    "period": "2022-11",
    "status": "archived",
    "kind": "product",
@@ -671,9 +673,9 @@
     "React"
    ],
    "repo": null,
-   "what": "Our HackKing's 2022 entry (19 November 2022), first runner-up, built in one day by a team of three: a Remix web app that scores companies by carbon and ESG, with company pages and graphs, products, a leaderboard and a scanner.",
+   "what": "Our HackKing's 2022 entry (19 November 2022), first runner-up, built in one day by a team of three. The idea: use a blockchain to track and regulate carbon coins, and so give the companies in a supply chain a reason to stay carbon-friendly. The demo was a Remix web app: companies with carbon and ESG scores and graphs, a leaderboard, products with their carbon footprint, and a product scanner shown as a concept.",
    "bullets": [
-    "First runner-up at HackKing's 2022 (sponsored by BlackRock): in a one-day team of three, built a Remix app ranking companies and products by carbon and ESG score; wrote the company listing and the component structure."
+    "First runner-up at HackKing's 2022 (sponsored by BlackRock), in a one-day team of three: a pitch for tracking and regulating carbon coins on a blockchain to reward carbon-friendly companies in a supply chain, demoed as a Remix app ranking companies and products by carbon and ESG score; I wrote the company listing and the component structure."
    ],
    "story": "",
    "playlist": null,

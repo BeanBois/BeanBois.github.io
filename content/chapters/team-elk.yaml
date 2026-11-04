@@ -12,14 +12,14 @@ episodes:
       - span: 6
         art: views
         caption: Clucker
-        text: King's second-year software engineering warm-up, autumn 2021. A Django micro-blogging site with login-protected feeds and user pages, tests with fixtures and coverage, and a GitHub Actions workflow.
+        text: King's second-year software engineering warm-up, autumn 2021, done on my own from the course's guided steps. A Django micro-blogging site with login-protected feeds and user pages, tests with fixtures and coverage, and a GitHub Actions workflow.
   - n: 1
-    title: Running clubs
+    title: Running chess clubs
     panels:
       - span: 4
         art: tenants
         caption: Team Elk
-        text: Then the real small-group project, in a team of five. A Django app for running clubs, with applications and approvals, promoting and demoting members, and profiles, deployed on Heroku with CI.
+        text: Then the real small-group project, in a team of five. A Django app for running chess clubs. Apply, get approved, rise from member to officer to owner, hand the club on or disband it. Deployed on Heroku with CI.
       - span: 2
         art: commits
         caption: My part

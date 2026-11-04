@@ -5,9 +5,13 @@ obi: Runner-up, in a day.
 cover: table
 episodes:
   - n: 1
-    title: One day
+    title: Carbon on a chain
     panels:
-      - span: 6
+      - span: 3
+        art: vote
+        caption: The idea
+        text: Our HackKing's 2022 entry, first runner-up, built in one day by a team of three. Track and regulate carbon coins on a blockchain, so the companies in a supply chain are rewarded for staying carbon-friendly.
+      - span: 3
         art: table
-        caption: Runner-up
-        text: Our HackKing's 2022 entry, first runner-up, built in one day in November 2022 by a team of three. A Remix app scoring companies by carbon and ESG, with company pages and graphs, products, a leaderboard and a scanner. I wrote the company listing and the component structure.
+        caption: The demo
+        text: A Remix app with companies ranked by carbon and ESG score, products with their footprint, and a product scanner shown as a concept. I wrote the company listing and the component structure.
