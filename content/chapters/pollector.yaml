@@ -1,0 +1,13 @@
+# Volume for bank/projects/pollector.md. Shown as an idea for now (Kai Shun, 2026-11-05); non-partisan, no party named.
+entry: pollector
+kana: ひょう
+obi: Count it twice, chain it once.
+cover: tally
+episodes:
+  - n: 1
+    title: An idea
+    panels:
+      - span: 6
+        art: tally
+        caption: The idea
+        text: A live, non-partisan tracker for Malaysian election night. Official tallies are keyed in twice by independent operators before entering a hash-chained ledger, and a clearly labelled crowd layer stays separate from the official count.

@@ -1,0 +1,22 @@
+# Volume for bank/projects/defect-inspection.md. Panel text from that entry's public sections only; captions editorial.
+# Client work: keep to the problem and the generic method (see the comment in the entry).
+entry: defect-inspection
+kana: けんさ
+obi: Pass, or reject.
+cover: inspect
+episodes:
+  - n: 1
+    title: On the line
+    panels:
+      - span: 6
+        art: inspect
+        caption: The problem
+        text: Cameras photograph every part on a live production line, and the system decides whether it passes or is rejected. The details are kept general on purpose, for client confidentiality.
+      - span: 3
+        art: spec
+        caption: Checks, not scores
+        text: It began as anomaly detection and became named checks with numeric limits, so every verdict traces back to a line of the manufacturer's specification.
+      - span: 3
+        art: shadow
+        caption: Trusted slowly
+        text: A missed defect is the costly error. Thresholds are calibrated on held-out production data, frames that can't be judged are refused, and new checks run in shadow beside the existing system first.
