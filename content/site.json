@@ -592,6 +592,36 @@
    "verified": "2026-11-04"
   },
   {
+   "id": "bike-planner",
+   "title": "London Cycle (bike tour app)",
+   "role": null,
+   "tagline": "A London bike-journey planner, and the team I ended up leading",
+   "period": "2022-01 – 2022-04",
+   "status": "shipped",
+   "kind": "product",
+   "track": "academic",
+   "group": null,
+   "size": "big",
+   "mix": {
+    "product": 0.7,
+    "backend": 0.3
+   },
+   "stack": [
+    "Flutter",
+    "Dart",
+    "Google Maps API"
+   ],
+   "repo": null,
+   "what": "King's second-year group project: London Cycle, a Flutter app that finds bicycle docking points around London and navigates users through the destinations they pick, built by a team of eight.",
+   "bullets": [
+    "Learnt Flutter for a second-year group project and built a London bike-planner app with a team of eight.",
+    "When the team was left without leadership, took the lead and supported each member through to a product we were proud of; designed the app's UI flow and much of its functionality."
+   ],
+   "story": "",
+   "playlist": null,
+   "verified": "2026-11-05"
+  },
+  {
    "id": "blockhub",
    "title": "BlockHub",
    "role": null,
@@ -1618,6 +1648,6 @@
  ],
  "counts": {
   "entries": 55,
-  "public": 48
+  "public": 49
  }
 }

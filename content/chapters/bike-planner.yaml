@@ -1,0 +1,17 @@
+# Volume for bank/projects/bike-planner.md. Panel text from that entry; captions editorial.
+entry: bike-planner
+kana: サイクル
+obi: Dock to dock across London.
+cover: docks
+episodes:
+  - n: 1
+    title: Second year
+    panels:
+      - span: 3
+        art: docks
+        caption: The app
+        text: King's second-year group project. A Flutter app that finds bicycle docking points around London and navigates you through the destinations you pick.
+      - span: 3
+        art: team
+        caption: The lead
+        text: A team of eight, left without leadership. I took the lead, supported each member through to a product we were proud of, and designed the app's UI flow and much of its functionality.

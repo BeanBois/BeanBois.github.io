@@ -504,6 +504,13 @@ ART = {
                                                                          + ring(90 + i * 135 + 70 * math.cos(a), 120 + 70 * math.sin(a), 7, 2, "fill:none")
                                                                          for k, a in enumerate(x * 0.9 + 0.3 for x in range(7))) for i in range(3))
                          + ln("M160 145 Q225 230 290 145 M295 145 Q360 230 425 145", 3, "6 6") + note(225, 270, "opted-in guests, no lists shared", "middle")),
+    # --- London Cycle ---
+    "docks": lambda: (ln("M20 210 C120 170 160 250 250 200 S380 120 430 150", 14, colour="var(--tone)") + ln("M60 60 L140 120 L230 90 L300 170 L390 110", 5, "12 8")
+                      + "".join(r(x - 14, y - 14, 28, 28, PAPER if i not in (0, 4) else INK, 4) + t(x, y + 6, "P", 14, "mono", "middle", PAPER if i in (0, 4) else INK)
+                                for i, (x, y) in enumerate([(60, 60), (140, 120), (230, 90), (300, 170), (390, 110)]))
+                      + ring(100, 250, 22, 5) + ring(170, 250, 22, 5) + ln("M100 250 L130 224 L170 250 M130 224 L150 224 M116 230 H156", 4) + note(420, 280, "dock to dock", "end")),
+    "team": lambda: ("".join(person(60 + i * 47, 150, 0.85, SPOT if i == 3 else PAPER) for i in range(8))
+                     + r(140, 40, 170, 60, PAPER, 5) + t(225, 78, "screens → flow", 14, "mono", "middle") + ln("M225 100 L201 132", 3, "5 5") + note(225, 250, "a team of eight", "middle")),
     # --- Manunet ---
     "provenance": lambda: (chip(50, 90, 110, 110, "IC") + arrow(185, 145, 245, 145) + stamp(305, 100, "signed", -6, 18) + doc(260, 150, 100, 110, 4, 3, False)
                            + arrow(370, 205, 420, 205) + note(225, 40, "surplus → shortage", "middle")),
