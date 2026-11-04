@@ -49,10 +49,6 @@ Open **http://127.0.0.1:8765**. Leave the command running: every time you save `
 - **Stop:** Ctrl+C.
 - **"Address already in use":** an old `--watch` is still running somewhere. Close that terminal, or run `pkill -f "build.py --watch"`.
 
-**Trying the page turns (for now, until one of each is chosen).** Add a switch to any page's address; it sticks until you close the tab. Chrome, Edge or Safari only.
-- `?nav=` picks how the four parts turn into each other: `geo` (the page slides along a curve of the ball's space, shrinking into a disc), `wave` (the default, Kai Shun's pick: the new page opens in a soft circle from where you clicked, slowing as it nears the edges, with a few light raised ripples behind it), `ball` (leaving the cover, the ball flies and the page opens out of it; everywhere else as `geo`), `tile` (heptagon tiles fill the screen and empty again), `sleeves` (the same, tiled with your record sleeves), `albums` (the same, tiled with the album covers of what you played lately; needs the worker deployed: `npm run deploy` in `worker/`, see "Music"; until then it shows the sleeves). Try `index.html?nav=wave`.
-- `?bg=` picks what happens behind the record when a volume opens: `ripple` (the default), `tone` (screentone dots) or `dim` (the lights go down). Try `contents.html?bg=tone`.
-
 ## Editing `site.yaml`
 
 Open it in any editor. Every setting has a comment saying where it shows up. A few rules keep YAML happy:

@@ -1,25 +1,22 @@
 <style>
 /* The page turn between the four parts (cover, brief, projects, colophon), shared by src/cover.html and
-   src/page.html. Each part has a fixed place in a Poincaré disk: the cover at the centre, the others out towards
-   the rim. The shelf <-> volume turn (the record) is separate and untouched. Preview switch: ?nav=geo|ball|tile,
-   remembered for the session; ?nav=sleeves tiles the screen with the record sleeves, ?nav=albums with the album covers of what Kai Shun played lately; ?nav=wave is a ripple in the ball's space. Browsers without cross-page transitions, and reduced motion, just open the page. */
+   src/page.html: the wave. Each part has a fixed place in a Poincaré disk (the cover at the centre, the others out
+   towards the rim); the new page opens in a hyperbolic circle round where you clicked, or from the side the old page
+   lies on Back. The shelf <-> volume turn (the record) is separate and untouched. Browsers without cross-page
+   transitions, and reduced motion, just open the page. */
 @view-transition { navigation: auto; }
 @media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }
 html.vt-head .deck .rec-wrap, html.vt-head .vsleeve { view-transition-name: none !important; }
 html.vt-head::view-transition { background: var(--paper) !important; }
 html.vt-head::view-transition-old(root), html.vt-head::view-transition-new(root) {
   animation: none !important; mix-blend-mode: normal !important; clip-path: none; -webkit-mask: none !important; mask: none !important; }
-html.vt-home::view-transition-old(root) { z-index: 1; }        /* back to the cover: the page goes into the ball, on top */
 .vt-wave { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; view-transition-name: vt-wave; }
 html.vt-head::view-transition-group(vt-wave) { z-index: 2; animation: none !important; }
 html.vt-head::view-transition-new(vt-wave) { animation: none !important; }
-.vt-tiles { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 2147483647; pointer-events: none; }
 </style>
 <script>
 (() => {
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let MODE = "wave";
-  try { const q = new URLSearchParams(location.search).get("nav"); if (q) sessionStorage.vtnav = q; MODE = sessionStorage.vtnav || MODE; } catch (_) {}
   const root = document.documentElement;
 
   /* where each part lives in the disk (x right, y down); a volume lives with the projects */
@@ -41,34 +38,10 @@ html.vt-head::view-transition-new(vt-wave) { animation: none !important; }
   const ab = a => Math.hypot(a[0], a[1]);
   const T = (a, z) => div(add(z, a), add([1, 0], mul(cj(a), z)));          // the translation taking 0 to a
   const Tm = (a, z) => T(sc(a, -1), z);
-  const along = (A, B, t) => { const w = Tm(A, B), m = ab(w); return m < 1e-9 ? A : T(A, sc(w, Math.tanh(t * Math.atanh(m)) / m)); };
-  // a page that lives at Z, seen with the view centred on P: where it sits, how big, how turned
-  const seen = (P, Z) => {
-    const den = add([1, 0], sc(mul(cj(P), Z), -1)), d2 = den[0] * den[0] + den[1] * den[1];
-    return { pos: div(add(Z, sc(P, -1)), den), s: (1 - ab(P) ** 2) * (1 - ab(Z) ** 2) / d2, rot: -2 * Math.atan2(den[1], den[0]) };
-  };
-  const ease = k => k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
   const unitv = a => { const m = ab(a); return m < 1e-9 ? [1, 0] : sc(a, 1 / m); };
   const dirTo = (A, B) => unitv(Tm(spot(A), spot(B)));                       // which way B lies, seen from A
   const anim = (frames, pseudo, ms) => root.animate(frames, { duration: ms, easing: "linear", fill: "both", pseudoElement: `::view-transition-${pseudo}(root)` });
 
-  /* 1. geodesic: the view slides along the line from A to B; the old page drifts to the rim, shrinking into a
-     disc and tilting away over the curve, the new one comes in from the other side. The turn on the way is real. */
-  function geodesic(A, B) {
-    const W = innerWidth, H = innerHeight, RS = Math.max(W, H) * 0.6, full = Math.hypot(W, H) / 2, disc = 0.5 * Math.min(W, H);
-    const N = 30, fo = [], fn = [];
-    for (let i = 0; i <= N; i++) {
-      const k = i / N, P = along(spot(A), spot(B), ease(k));
-      const z = 1 - 0.32 * Math.pow(Math.sin(Math.PI * k), 0.7);          // the view pulls back mid-way, so both pages fit
-      const c = Math.min(1, Math.max(0, (1 - z) / 0.3)), cr = full + (disc - full) * c * c * (3 - 2 * c);
-      for (const [Z, out] of [[spot(A), fo], [spot(B), fn]]) {
-        const { pos, s, rot } = seen(P, Z), r = ab(pos), u = unitv(pos);
-        out.push({ offset: k, clipPath: `circle(${cr.toFixed(1)}px at 50% 50%)`,
-          transform: `translate(${(pos[0] * RS).toFixed(1)}px, ${(pos[1] * RS).toFixed(1)}px) perspective(1600px) rotate3d(${(-u[1]).toFixed(3)}, ${u[0].toFixed(3)}, 0, ${(48 * r).toFixed(2)}deg) scale(${(s * z).toFixed(4)}) rotate(${rot.toFixed(4)}rad)` });
-      }
-    }
-    anim(fo, "old", 1000); anim(fn, "new", 1000);
-  }
   /* wave: the new page opens in a hyperbolic circle round where you clicked. Its hyperbolic radius grows evenly, so on
      screen it starts quick and slows towards the rim; a few faint rings trail it at even hyperbolic spacing, bunching
      at the edge, and lean towards the centre of the disk, as circles there do. */
@@ -116,177 +89,14 @@ html.vt-head::view-transition-new(vt-wave) { animation: none !important; }
     requestAnimationFrame(frame);
   }
 
-  /* 2. the ball: leaving the cover, the ball has already flown towards the part you chose and swelled; the page
-     opens out of it. Coming home, the page shrinks back into the ball while it flies home. */
-  function ballOut() {
-    let b; try { b = JSON.parse(sessionStorage.vtball || "null"); sessionStorage.removeItem("vtball"); } catch (_) {}
-    if (!b) b = { x: innerWidth / 2, y: innerHeight / 2, r: Math.min(innerWidth, innerHeight) / 3 };
-    const full = Math.hypot(innerWidth, innerHeight) * 1.1, at = `at ${b.x.toFixed(0)}px ${b.y.toFixed(0)}px`;
-    anim([{ transformOrigin: `${b.x}px ${b.y}px`, transform: "scale(1)", opacity: 1, easing: "cubic-bezier(.45,0,.2,1)" }, { offset: 0.7, opacity: 0.6 },
-          { transformOrigin: `${b.x}px ${b.y}px`, transform: "scale(2.2)", opacity: 0 }], "old", 850);
-    anim([{ clipPath: `circle(${(b.r * 0.3).toFixed(0)}px ${at})`, opacity: 0, transform: "scale(.94)", easing: "cubic-bezier(.45,0,.2,1)" },
-          { offset: 0.12, opacity: 1 }, { clipPath: `circle(${full.toFixed(0)}px ${at})`, opacity: 1, transform: "scale(1)" }], "new", 850);
-  }
-  function ballHome(A) {
-    const b = window.ballArrive ? window.ballArrive(dirTo("home", A)) : { x: innerWidth / 2, y: innerHeight / 2, r: innerHeight / 3 };
-    root.classList.add("vt-home");
-    const full = Math.hypot(innerWidth, innerHeight), at = `at ${b.x.toFixed(0)}px ${b.y.toFixed(0)}px`;
-    anim([{ clipPath: `circle(${full.toFixed(0)}px ${at})`, opacity: 1, easing: "cubic-bezier(.5,0,.2,1)" },
-          { offset: 0.7, opacity: 1 }, { clipPath: `circle(${b.r.toFixed(0)}px ${at})`, opacity: 0 }], "old", 800);
-    anim([{ opacity: 1 }, { opacity: 1 }], "new", 800);
-  }
-
-  /* 3. tiles: a {7,3} tiling of the disk (Escher's Circle Limit heptagons) flows across the screen in the
-     direction of travel, fills in tile by tile over the old page, and empties again over the new one. */
-  const TILINGS = {};
-  function tiling(p = 7, q = 3) {
-    if (TILINGS[p + "," + q]) return TILINGS[p + "," + q];
-    const r0 = Math.sqrt(Math.cos(Math.PI / p + Math.PI / q) / Math.cos(Math.PI / p - Math.PI / q));
-    const first = { c: [0, 0], par: 0, v: [...Array(p)].map((_, k) => [r0 * Math.cos(2 * Math.PI * k / p), r0 * Math.sin(2 * Math.PI * k / p)]) };
-    const tiles = [first], keys = new Set(["0,0"]);
-    for (let i = 0; i < tiles.length && tiles.length < 2200; i++) {
-      const t = tiles[i];
-      for (let e = 0; e < p; e++) {
-        const a = t.v[e], b = t.v[(e + 1) % p], w = Tm(a, b), th = Math.atan2(w[1], w[0]), rot2 = [Math.cos(2 * th), Math.sin(2 * th)];
-        const refl = z => T(a, mul(rot2, cj(Tm(a, z))));
-        const c = refl(t.c);
-        if (ab(c) > 0.995) continue;
-        const key = c[0].toFixed(4) + "," + c[1].toFixed(4);
-        if (keys.has(key)) continue;
-        keys.add(key);
-        tiles.push({ c, par: 1 - t.par, v: t.v.map(refl) });
-      }
-    }
-    for (const t of tiles) {                    // the outline, edges drawn as geodesics
-      t.pts = [];
-      for (let e = 0; e < p; e++) { const a = t.v[e], w = Tm(a, t.v[(e + 1) % p]); for (let j = 0; j < 4; j++) t.pts.push(T(a, sc(w, j / 4))); }
-      t.j = (Math.sin(t.c[0] * 91.7 + t.c[1] * 47.3) * 43758.5) % 1;
-      t.k = Math.floor(Math.abs(Math.sin(t.c[0] * 12.9 + t.c[1] * 78.2) * 43758.5)) ;
-    }
-    return (TILINGS[p + "," + q] = tiles);
-  }
-  /* the squares for the covers, smaller than the {4,5} tiling's own: each square split along geodesics through its
-     edge midpoints into four, and the middle ones into sixteen, so no cover is drawn bigger than a hand */
-  let QUADS = null;
-  function quads() {
-    if (QUADS) return QUADS;
-    const mid = (x, y) => along(x, y, 0.5), out = [];
-    const split = (v, n) => {
-      if (!n) { out.push(v); return; }
-      const [a, b, c, d] = v, ab_ = mid(a, b), bc = mid(b, c), cd = mid(c, d), da = mid(d, a), o = mid(ab_, cd);
-      [[a, ab_, o, da], [ab_, b, bc, o], [o, bc, c, cd], [da, o, cd, d]].forEach(q => split(q, n - 1));
-    };
-    for (const t of tiling(4, 5)) split(t.v, ab(t.c) < 0.75 ? 2 : 1);
-    QUADS = out.map(v => {
-      const q = { v, c: mid(mid(v[0], v[1]), mid(v[2], v[3])), pts: [] };
-      for (let e = 0; e < 4; e++) { const a = v[e], w = Tm(a, v[(e + 1) % 4]); for (let j = 0; j < 4; j++) q.pts.push(T(a, sc(w, j / 4))); }
-      q.j = (Math.sin(q.c[0] * 91.7 + q.c[1] * 47.3) * 43758.5) % 1;
-      q.k = Math.floor(Math.abs(Math.sin(q.c[0] * 12.9 + q.c[1] * 78.2) * 43758.5));
-      return q;
-    });
-    return QUADS;
-  }
-
-  /* the record sleeves (dist/sleeves.json, written by build.py), in this theme's colours, as small square images.
-     Rasterised once and kept for the visit, so the next page has them at its first paint. */
-  let COVERS = null;
-  function covers() {
-    if (COVERS) return COVERS;
-    const dark = matchMedia("(prefers-color-scheme: dark)").matches, key = "vtcovers-" + (MODE === "albums" ? "a" : dark ? "d" : "l");
-    COVERS = { imgs: [], ready: null };
-    let cached = null; try { cached = JSON.parse(sessionStorage[key] || "null"); } catch (_) {}
-    const asImg = src => new Promise(ok => { const im = new Image(); im.onload = () => ok(im); im.onerror = () => ok(null); im.src = src; });
-    if (cached) { COVERS.ready = Promise.all(cached.map(asImg)).then(a => (COVERS.imgs = a.filter(Boolean))); return COVERS; }
-    const css = getComputedStyle(root);
-    const idle = () => new Promise(ok => (window.requestIdleCallback || setTimeout)(ok, { timeout: 200 }));
-    const sleeves = () => fetch("sleeves.json").then(r => r.json()).then(list => list.map(svg => ({ svg })));
-    // albums: the worker's list of covers (proxied with CORS so they can be drawn); the sleeves until it answers
-    const albums = () => !"__MUSIC_API__" ? sleeves() : fetch("__MUSIC_API__/covers").then(r => r.json())
-      .then(j => (j.covers || []).length >= 6 ? j.covers.map(src => ({ src })) : sleeves()).catch(sleeves);
-    const fromSrc = src => new Promise(ok => { const im = new Image(); im.crossOrigin = "anonymous"; im.onload = () => ok(im); im.onerror = () => ok(null); im.src = src; });
-    COVERS.ready = (MODE === "albums" ? albums() : sleeves()).then(list => Promise.all(list.map(({ svg, src }, i) => new Promise(ok => setTimeout(ok, i * 40)).then(idle).then(() => {
-      if (src) return fromSrc(src).then(im => {
-        if (!im) return null;
-        const c = document.createElement("canvas"); c.width = c.height = 256; c.getContext("2d").drawImage(im, 0, 0, 256, 256);
-        COVERS.imgs.push(c);
-        try { return c.toDataURL("image/jpeg", 0.82); } catch (_) { return null; }
-      });
-      svg = svg.replace(/var\((--[\w-]+)\)/g, (_, v) => css.getPropertyValue(v).trim().replace(/"/g, "'"));
-      if (!/^<svg[^>]*xmlns=/.test(svg)) svg = svg.replace("<svg", '<svg xmlns="http://www.w3.org/2000/svg"');
-      return asImg("data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg)).then(im => {
-        if (!im) return null;
-        const c = document.createElement("canvas"); c.width = c.height = 256; c.getContext("2d").drawImage(im, 0, 0, 256, 256);
-        COVERS.imgs.push(c);                         // usable at once; the JPEG is for the next page
-        return c.toDataURL("image/jpeg", 0.82);
-      });
-    })))).then(urls => { try { sessionStorage[key] = JSON.stringify(urls.filter(Boolean)); } catch (_) {} return COVERS.imgs; }).catch(() => []);
-    return COVERS;
-  }
-  function tileLayer() {
-    let cv = document.querySelector(".vt-tiles");
-    if (!cv) { cv = document.createElement("canvas"); cv.className = "vt-tiles"; cv.setAttribute("aria-hidden", "true"); document.body.append(cv); }
-    const dpr = Math.min(devicePixelRatio || 1, 2), W = innerWidth, H = innerHeight;
-    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
-    const ctx = cv.getContext("2d"), css = getComputedStyle(root), ink = css.getPropertyValue("--ink").trim(), paper = css.getPropertyValue("--paper").trim();
-    const RD = Math.hypot(W, H) / 2 * 1.04, SL = MODE === "sleeves" || MODE === "albums", tiles = SL ? quads() : tiling(7, 3), cov = SL ? covers() : null;
-    // u: the way we travel on screen. The tiling flows against it, and the front sweeps in from the far side.
-    const draw = (u, s, p, filling) => {
-      const a = sc(u, -Math.tanh(s / 2));
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
-      ctx.fillStyle = ink; ctx.strokeStyle = paper; ctx.lineWidth = 1.4; ctx.lineJoin = "round";
-      for (const t of tiles) {
-        const c = T(a, t.c), th = 0.5 - 0.42 * (c[0] * u[0] + c[1] * u[1]) + 0.08 * Math.abs(t.j);
-        let v = Math.min(1, Math.max(0, (p - th) / 0.14));
-        if (!filling) v = 1 - v;
-        if (v <= 0) continue;
-        const g = v * v * (3 - 2 * v), sx = W / 2 + c[0] * RD, sy = H / 2 + c[1] * RD;
-        const xy = t.pts.map(z => { const m = T(a, z); return [sx + (W / 2 + m[0] * RD - sx) * g, sy + (H / 2 + m[1] * RD - sy) * g]; });
-        ctx.beginPath(); xy.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.closePath();
-        ctx.fill();
-        const im = SL && cov.imgs.length ? cov.imgs[t.k % cov.imgs.length] : null;
-        if (im) {
-          // the sleeve laid on the tile: corner 0 at its top left, never mirrored, clipped to the tile's curved edges
-          const o = xy[0]; let e1 = [xy[4][0] - o[0], xy[4][1] - o[1]], e2 = [xy[12][0] - o[0], xy[12][1] - o[1]];
-          if (Math.abs(e1[0] * e2[1] - e1[1] * e2[0]) > 60) {
-            if (e1[0] * e2[1] - e1[1] * e2[0] < 0) [e1, e2] = [e2, e1];
-            ctx.save(); ctx.clip();
-            ctx.setTransform(dpr * e1[0], dpr * e1[1], dpr * e2[0], dpr * e2[1], dpr * o[0], dpr * o[1]);
-            ctx.drawImage(im, -0.06, -0.06, 1.12, 1.12);
-            ctx.restore();
-          }
-        }
-        ctx.stroke();
-      }
-    };
-    const run = (u, s0, s1, filling, ms) => new Promise(done => {
-      const t0 = performance.now();
-      const step = now => { const k = Math.min(1, (now - t0) / ms), e = filling ? k * (2 - k) : k;
-        draw(u, s0 + (s1 - s0) * k, e * 1.16, filling);
-        if (k < 1) requestAnimationFrame(step); else { if (!filling) cv.remove(); done(); } };
-      requestAnimationFrame(step);
-    });
-    return { draw, run, cv };
-  }
-
-  if ((MODE === "sleeves" || MODE === "albums") && !reduce) addEventListener("load", () => setTimeout(covers, 300), { once: true });
-
-  /* leaving: the ball dives, or the tiles fill in, before the page turns */
+  /* leaving: remember where the click was, so the wave starts there */
   document.addEventListener("click", e => {
     if (reduce || e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     const a = e.target.closest && e.target.closest("a[href]");
     if (!a || a.target || a.hasAttribute("download") || !("onpagereveal" in window)) return;
     const A = where(location.href), B = where(a.href);
     if (!isHead(A, B)) return;
-    if (MODE === "wave") { try { sessionStorage.vtwave = JSON.stringify([e.clientX, e.clientY]); } catch (_) {} return; }
-    if (MODE === "tile" || MODE === "sleeves" || MODE === "albums") {
-      e.preventDefault();
-      const u = dirTo(A, B);
-      tileLayer().run(u, 0, 0.35, true, 430).then(() => { try { sessionStorage.vttile = "1"; } catch (_) {} location.href = a.href; });
-    } else if (MODE === "ball" && A === "home" && window.ballDive) {
-      e.preventDefault();
-      window.ballDive(dirTo(A, B));
-      setTimeout(() => { try { sessionStorage.vtball = JSON.stringify(window.ballSpot()); } catch (_) {} location.href = a.href; }, 520);
-    }
+    try { sessionStorage.vtwave = JSON.stringify([e.clientX, e.clientY]); } catch (_) {}
   });
   addEventListener("pageswap", e => {
     const to = e.activation && e.activation.entry && e.activation.entry.url;
@@ -294,8 +104,7 @@ html.vt-head::view-transition-new(vt-wave) { animation: none !important; }
   });
   addEventListener("pageshow", e => {
     if (!e.persisted) return;
-    root.classList.remove("vt-head", "vt-home");
-    document.querySelectorAll(".vt-tiles").forEach(c => c.remove());
+    root.classList.remove("vt-head");
   });
 
   /* arriving */
@@ -305,22 +114,11 @@ html.vt-head::view-transition-new(vt-wave) { animation: none !important; }
     const A = where(from), B = where(location.href);
     if (!isHead(A, B)) return;
     root.classList.add("vt-head");
-    vt.finished.finally(() => root.classList.remove("vt-head", "vt-home"));
-    if (MODE === "tile" || MODE === "sleeves" || MODE === "albums") {
-      const L = tileLayer(), u = dirTo(A, B);
-      L.draw(u, 0.35, 0, false);                         // fully covered at first paint
-      vt.ready.then(() => anim([{ opacity: 0 }, { opacity: 1 }], "new", 220));
-      setTimeout(() => L.run(u, 0.35, 1, false, 720), 160);
-      try { sessionStorage.removeItem("vttile"); } catch (_) {}
-    } else {
-      let cv = null;
-      if (MODE === "wave") {
-        cv = document.createElement("canvas"); cv.className = "vt-wave"; cv.setAttribute("aria-hidden", "true");
-        const d = Math.min(devicePixelRatio || 1, 2); cv.width = Math.round(innerWidth * d); cv.height = Math.round(innerHeight * d);
-        document.body.append(cv); vt.finished.finally(() => cv.remove());
-      }
-      vt.ready.then(() => MODE === "wave" ? wave(A, B, cv) : MODE === "ball" && A === "home" ? ballOut() : MODE === "ball" && B === "home" ? ballHome(A) : geodesic(A, B));
-    }
+    vt.finished.finally(() => root.classList.remove("vt-head"));
+    const cv = document.createElement("canvas"); cv.className = "vt-wave"; cv.setAttribute("aria-hidden", "true");
+    const d = Math.min(devicePixelRatio || 1, 2); cv.width = Math.round(innerWidth * d); cv.height = Math.round(innerHeight * d);
+    document.body.append(cv); vt.finished.finally(() => cv.remove());
+    vt.ready.then(() => wave(A, B, cv));
   });
 })();
 </script>

@@ -124,7 +124,7 @@ PARTS = {
     "shadows": {"shadow": "ink", "blot": "ink"},
     "corners": {"triangles": "archive", "labels": "ink", "current": "spot"},
     "live": {"red": "spot", "edge": "spot_edge", "text": "spot", "on_red": "on_spot"},
-    "shelf": {"spine_paper": "paper", "spine_ink": "ink", "running_band": "archive", "finished_band": "archive"},
+    "shelf": {"running_band": "archive", "finished_band": "archive"},
     "panels": {"border": "archive", "caption_box": "mark", "caption_text": "on_mark"},
     "cv": {"paper": "paper", "border": "archive", "tabs": "archive"},
 }
@@ -314,8 +314,6 @@ def contents_page(nodes, vols, chapters):
     chips = lambda f, opts: "".join(f'<button type="button" class="chip" data-f="{f}" data-v="{k}" aria-pressed="{str(k == "all").lower()}">{v}</button>' for k, v in opts)
     filt = (f'<div class="filters" role="group" aria-label="Filter the projects"><div class="grp"><span class="lbl">status</span>{chips("status", statuses)}</div>'
             f'<div class="grp"><span class="lbl">skill</span>{chips("mix", skills)}</div></div>')
-    # every sleeve on its own, for the page turn that tiles the screen with them (src/turn.html, ?nav=sleeves)
-    (DIST / "sleeves.json").write_text(json.dumps([sleeves[k] for k in sorted(sleeves, key=lambda k: vols[k])], ensure_ascii=False))
     main = (f'<div class="pt"><h1>目次</h1><p>{esc(cfg("pages.contents_intro"))}</p></div>{filt}' + "".join(secs))
     script = r"""<script>
 /* click: pull the record all the way out, then open its volume; the browser carries record and sleeve across */
@@ -326,10 +324,12 @@ document.querySelectorAll(".lp-card").forEach(card => card.addEventListener("cli
   card.querySelector(".sl").style.viewTransitionName = "sleeve";
   if (reduce) return;
   e.preventDefault();
-  const r = card.querySelector(".disc").getBoundingClientRect();
-  try { sessionStorage.vtfrom = JSON.stringify([r.left + r.width * 0.8, r.top + r.height / 2]); } catch (_) {}
-  card.classList.add("pulling");                                       // a short pull that comes to rest, then the turn
-  setTimeout(() => { location.href = card.href; }, 420);   // out, clear of the sleeve, a beat at rest, then the turn
+  const pull = () => { card.classList.add("pulling"); setTimeout(() => { location.href = card.href; }, 420); };  // out, clear, a beat at rest, then the turn
+  /* first the shelf breaks into dots round the chosen card, then the record comes out */
+  const s = card.querySelector(".lp").getBoundingClientRect();
+  card.classList.add("chosen");
+  toneDots(toneVeil(), s.left + s.width / 2, s.top + s.height / 2, 640);
+  setTimeout(pull, 600);
 }));
 /* fetch a volume as soon as a card is pointed at, so the turn doesn't wait on the network */
 const got = new Set();
@@ -338,7 +338,10 @@ document.querySelectorAll(".lp-card").forEach(card => ["pointerenter", "focus", 
   const l = document.createElement("link"); l.rel = "prefetch"; l.href = card.href; document.head.append(l);
 }, { passive: true })));
 /* back from a volume: hand the record back to its own sleeve */
-addEventListener("pageshow", () => document.querySelectorAll(".pulling").forEach(c => c.classList.remove("pulling")));
+addEventListener("pageshow", () => {
+  document.querySelectorAll(".pulling, .chosen").forEach(c => c.classList.remove("pulling", "chosen"));
+  document.querySelectorAll(".tone-veil").forEach(v => v.remove());
+});
 const want = { status: "all", mix: "all" };
 document.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () => {
   want[c.dataset.f] = c.dataset.v;

@@ -678,21 +678,6 @@ function flyTo(target) {
   leg(queue.shift());
 }
 const goHome = () => flyTo(HOME);
-/* the page turn (src/turn.html, ?nav=ball): leaving, the ball flies towards the part you chose (u, a direction on
-   screen) and swells; coming home, it starts out there, swollen, and flies back to Kai Shun */
-window.ballSpot = () => ({ x: cx, y: cy, r: R });
-window.ballDive = u => {
-  closePick();
-  queue = []; leg(madd(centre, mtv(rot, [u[0] * 0.88, u[1] * 0.88, 0])));
-  if (trip) trip.dur = 600;
-  tR *= 1.6;
-};
-window.ballArrive = u => {
-  if (!R) resize();
-  centre = mtv(rot, [u[0] * 0.88, u[1] * 0.88, 0]); R = tR * 1.6;
-  queue = []; leg(HOME); if (trip) trip.dur = 800;
-  return { x: tx, y: ty, r: tR };
-};
 
 /* ---------- pointer and keys ---------- */
 let drag = null;

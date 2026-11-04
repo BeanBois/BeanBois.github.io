@@ -90,7 +90,7 @@ colours:
   #   shadows:     { shadow: ink, blot: ink }
   #   corners:     { triangles: archive, labels: ink, current: spot }
   #   live:        { red: spot, edge: spot_edge, text: spot, on_red: on_spot }
-  #   shelf:       { spine_paper: paper, spine_ink: ink, running_band: archive, finished_band: archive }
+  #   shelf:       { running_band: archive, finished_band: archive }
   #   panels:      { border: archive, caption_box: mark, caption_text: on_mark }
   #   cv:          { paper: paper, border: archive, tabs: archive }
   # The page itself is paper, ink and muted. Example, under light:

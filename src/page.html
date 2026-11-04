@@ -96,31 +96,18 @@ body { position: relative; min-height: 100vh; }
   animation-duration: .8s; animation-timing-function: cubic-bezier(.5, 0, .15, 1); }
 html.vt-back::view-transition-group(sleeve) { z-index: 2; }   /* going back, the record slides in behind its sleeve */
 html.vt-back::view-transition-group(rec) { z-index: 1; }
-/* The background, three ways (preview switch: ?bg=ripple, ?bg=tone or ?bg=dim, kept for the session).
-   --vx/--vy: where the record left its sleeve (forward) or the card it goes home to (back). */
-@property --dot { syntax: "<length>"; inherits: false; initial-value: 0px; }
-@property --hole { syntax: "<length>"; inherits: false; initial-value: 0px; }
-@keyframes vt-open { from { clip-path: circle(0 at var(--vx, 50%) var(--vy, 50%)); } to { clip-path: circle(150vmax at var(--vx, 50%) var(--vy, 50%)); } }
-@keyframes vt-close { from { clip-path: circle(150vmax at var(--vx, 50%) var(--vy, 50%)); } to { clip-path: circle(0 at var(--vx, 50%) var(--vy, 50%)); } }
-@keyframes vt-tone { 0% { --hole: 0px; --dot: 7px; } 45% { --dot: 7px; } 100% { --hole: 160vmax; --dot: 0px; } }
-@keyframes vt-out { to { opacity: 0; filter: brightness(.6); } }
-@keyframes vt-in { from { opacity: 0; } }
-/* ripple: the new page opens out of the record like a ring on water; going back it closes into the card */
-html.bg-ripple::view-transition-old(root) { animation: none; }
-html.bg-ripple::view-transition-new(root) { animation-name: vt-open; }
-html.bg-ripple.vt-back::view-transition-new(root) { animation: none; }
-html.bg-ripple.vt-back::view-transition-old(root) { animation-name: vt-close; animation-duration: .8s; z-index: 1; }
-/* tone: the old page breaks into screentone dots from the record outwards, and the dots shrink away */
-html.bg-tone::view-transition-new(root) { animation: none; }
-html.bg-tone::view-transition-old(root) { z-index: 1; animation-name: vt-tone;
-  mask-image: radial-gradient(circle, #000 calc(var(--dot) - .5px), transparent var(--dot)),
-              radial-gradient(circle at var(--vx, 50%) var(--vy, 50%), transparent var(--hole), #000 calc(var(--hole) + 25vmax));
-  mask-size: 9px 9px, 100% 100%; mask-repeat: repeat, no-repeat; }
-/* dim: the room goes dark while the record crosses, and the new page comes up out of it */
-html.bg-dim::view-transition { background: var(--ink); }
-html.bg-dim::view-transition-old(root) { animation: vt-out .4s ease-in both; }
-html.bg-dim::view-transition-new(root) { animation: vt-in .45s .35s ease-out both; }
-@media (prefers-color-scheme: dark) { html.bg-dim::view-transition { background: #000; } }
+/* Behind the record, in screentone: paper-coloured dots, one per cell, grow over a page from a point outwards
+   (toneDots below). Forward: once a record is chosen the shelf breaks up round its card (the card left standing),
+   then the record comes out and turns over plain paper. Back: the volume breaks up from its record, the record and
+   sleeve go home over paper, and the dots shrink away from the card to give the shelf back. */
+.tone-veil { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 20; pointer-events: none; }
+html .lp-card.chosen { z-index: 21; }   /* above the veil, over the hover and pull rules below */
+@keyframes vt-hold { to { opacity: 1; } }
+@keyframes vt-gone { 0%, 99% { opacity: 1; } 100% { opacity: 0; } }
+html.vt-back::view-transition-new(root) { animation: vt-hold 1.75s both; }       /* keeps the turn open for the dots */
+html.vt-back::view-transition-old(root) { z-index: 1; animation: vt-gone .62s both; }       /* under the dots once they cover it */
+html.vt-back::view-transition-group(tone), html.vt-back::view-transition-new(tone) { animation: none; }
+html.vt-back::view-transition-group(rec), html.vt-back::view-transition-group(sleeve) { animation-delay: .6s; }
 @media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }
 
 /* folio: page number and the next page, like the foot of a printed page */
@@ -297,17 +284,35 @@ html:has(.lp-grid) { overflow-x: clip; }   /* a record pulled out of the last co
 <!--TURN-->
 <link rel="expect" href="#end" blocking="render">
 <script>
-/* preview switch for the background of the page turn: ?bg=ripple|tone|dim, remembered for the session */
-(() => {
-  let bg = "ripple";
-  try { const q = new URLSearchParams(location.search).get("bg"); if (q) sessionStorage.vtbg = q; bg = sessionStorage.vtbg || bg; } catch (_) {}
-  document.documentElement.classList.add("bg-" + bg);
-})();
-const vtAt = (x, y) => { const s = document.documentElement.style; s.setProperty("--vx", x + "px"); s.setProperty("--vy", y + "px"); };
-/* arriving at a volume from the shelf: the background opens from where the record left its sleeve */
-addEventListener("pagereveal", e => {
-  if (!e.viewTransition) return;
-  try { const p = JSON.parse(sessionStorage.vtfrom || "null"); if (p) vtAt(p[0], p[1]); sessionStorage.removeItem("vtfrom"); } catch (_) {}
+/* the screentone: a canvas over the page; each dot starts when the front from (ox, oy) reaches it and fills its cell a
+   band later (grow), or starts full and shrinks to nothing the same way (!grow) */
+const toneVeil = () => {
+  const cv = document.createElement("canvas"), d = Math.min(devicePixelRatio || 1, 2);
+  cv.className = "tone-veil"; cv.setAttribute("aria-hidden", "true"); cv.width = innerWidth * d; cv.height = innerHeight * d;
+  document.body.append(cv); return cv;
+};
+const toneDots = (cv, ox, oy, ms, grow = true) => new Promise(done => {
+  const W = innerWidth, H = innerHeight, g = cv.getContext("2d"), d = cv.width / W;
+  g.setTransform(d, 0, 0, d, 0, 0); g.fillStyle = getComputedStyle(document.body).backgroundColor;
+  const C = 11, R = C * 0.72, band = Math.max(W, H) * 0.32;
+  const far = Math.max(Math.hypot(ox, oy), Math.hypot(W - ox, oy), Math.hypot(ox, H - oy), Math.hypot(W - ox, H - oy)) + band;
+  const t0 = performance.now(), ease = t => t < .5 ? 2 * t * t : 1 - (2 - 2 * t) ** 2 / 2;
+  const frame = now => {
+    const t = Math.min(1, (now - t0) / ms), f = ease(t) * far;
+    g.clearRect(0, 0, W, H); g.beginPath();
+    for (let y = C / 2; y < H + C; y += C) for (let x = C / 2; x < W + C; x += C) {
+      const k = Math.min(1, Math.max(0, (f - Math.hypot(x - ox, y - oy)) / band)), r = R * (grow ? k : 1 - k);
+      if (r > 0.2) { g.moveTo(x + r, y); g.arc(x, y, r, 0, 6.2832); }
+    }
+    g.fill();
+    t < 1 ? requestAnimationFrame(frame) : done();
+  };
+  requestAnimationFrame(frame);
+});
+/* leaving a volume: remember where its record is, so going back the volume breaks up from there */
+addEventListener("pageswap", () => {
+  const r = document.querySelector(".deck .rec-wrap")?.getBoundingClientRect();
+  try { if (r) sessionStorage.vtrec = JSON.stringify([r.left + r.width / 2, r.top + r.height / 2]); } catch (_) {}
 });
 /* back on the shelf from a volume: that volume's record and sleeve go home to their card */
 addEventListener("pagereveal", e => {
@@ -316,7 +321,11 @@ addEventListener("pagereveal", e => {
   const card = m && document.querySelector(`[data-vt="${m[1]}"]`);
   if (!card) return;
   const r = card.querySelector(".lp").getBoundingClientRect();
-  vtAt(r.left + r.width / 2, r.top + r.height / 2);
+  let o = [innerWidth / 2, innerHeight / 2]; try { o = JSON.parse(sessionStorage.vtrec || "null") || o; sessionStorage.removeItem("vtrec"); } catch (_) {}
+  const cv = toneVeil(); cv.style.viewTransitionName = "tone";    // empty at first paint, so the turn starts on the volume
+  toneDots(cv, o[0], o[1], 620).then(() => new Promise(w => setTimeout(w, 420)))
+    .then(() => toneDots(cv, r.left + r.width / 2, r.top + r.height / 2, 700, false));
+  e.viewTransition.finished.finally(() => cv.remove());
   card.querySelector(".disc").style.viewTransitionName = "rec";
   card.querySelector(".sl").style.viewTransitionName = "sleeve";
   document.documentElement.classList.add("vt-back");

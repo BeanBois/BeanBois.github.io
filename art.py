@@ -1,5 +1,5 @@
-"""The volumes' art: covers and panel pictures, drawn as SVG in the site's colour tokens. build.py calls cover(),
-cover_wallet() and panel(); a chapter script names its pictures by their keys in ART (or Wallet's own)."""
+"""The volumes' art: sleeves, records and panel pictures, drawn as SVG in the site's colour tokens. build.py calls
+sleeve(), record() and panel(); a chapter script names its pictures by their keys in ART (or Wallet's own)."""
 import hashlib, html, math
 
 esc = lambda s: html.escape(str(s or ""), quote=True)
@@ -50,34 +50,6 @@ def ledger_rows(x, y, w, n, gap):
         out.append(f'<rect x="{x + w - w*(0.16 + 0.2*seed("led", i)):.0f}" y="{yy}" width="{w*(0.16 + 0.2*seed("led", i)):.0f}" height="5" style="{INK}"/>')
     out.append(f'<rect x="{x}" y="{y + n*gap - 4}" width="{w}" height="3" style="{INK}"/><rect x="{x}" y="{y + n*gap + 2}" width="{w}" height="3" style="{INK}"/>')
     return "".join(out)
-
-
-def cover_wallet(n, vol, kana, obi, name, shown="第1話 収録"):
-    W, H = 512, 728
-    live = n.get("status") == "active"
-    obi_fill, obi_text = (SPOT, ONSPOT) if live else (INK, PAPER)
-    tag = n["tagline"]
-    cut = tag.rfind(" ", 0, 48)
-    tag1, tag2 = (tag[:cut], tag[cut + 1:]) if len(tag) > 48 else (tag, "")
-    screen = ledger_rows(196, 330, 128, 9, 24)
-    return f'''<svg class="cover" viewBox="0 0 {W} {H}" role="img" aria-label="Cover of volume {vol}, {esc(n['title'])}: statements slide into a phone that keeps its ledger to itself.">
-<rect width="{W}" height="{H}" style="{PAPER}"/>
-{tone(0, 200, W, 590, 13, 4.6)}
-<rect width="{W}" height="44" style="{INK}"/>
-<text x="20" y="30" style="{PAPER};font:400 17px var(--font-display);letter-spacing:.04em">{esc(name)}</text>
-<text x="{W - 20}" y="30" text-anchor="end" style="{PAPER};font:500 13px var(--font-mono);letter-spacing:.12em">VOL. {vol}</text>
-<text x="22" y="150" textLength="{W - 96}" lengthAdjust="spacingAndGlyphs" style="{INK};font:400 100px var(--font-display)">{esc(n['title']).upper()}</text>
-<text x="{W - 34}" y="196" style="{INK};font:700 30px var(--font-body);writing-mode:vertical-rl">{esc(kana)}</text>
-{sheet(118, 178, 150, 196, -16)}{sheet(214, 162, 150, 196, 7)}{sheet(166, 196, 150, 196, -3)}
-{phone(150, 262, 212, 400, -6, screen)}
-<g transform="rotate(-6 256 462)"><path d="M372 420 h58 m-16 -16 l16 16 l-16 16" style="fill:none;stroke:var(--ink);stroke-width:7;stroke-linecap:square"/>
-<path d="M388 398 l44 44 m0 -44 l-44 44" style="fill:none;stroke:var(--paper);stroke-width:13"/><path d="M388 398 l44 44 m0 -44 l-44 44" style="fill:none;stroke:var(--ink);stroke-width:6"/></g>
-<rect y="{H - 150}" width="{W}" height="150" style="{obi_fill}"/>
-<text x="24" y="{H - 98}" style="{obi_text};font:400 31px var(--font-display)">{esc(obi)}</text>
-<text x="24" y="{H - 64}" style="{obi_text};font:400 14px var(--font-body)">{esc(tag1)}</text>
-<text x="24" y="{H - 44}" style="{obi_text};font:400 14px var(--font-body)">{esc(tag2)}</text>
-<text x="{W - 22}" y="{H - 18}" text-anchor="end" style="{obi_text};font:700 14px var(--font-body)">{shown}</text>
-</svg>'''
 
 
 def wallet_panel(kind):
@@ -138,7 +110,7 @@ WALLET_PANELS = ("phone", "sen", "ledger", "wall", "month", "live")
 
 # ---------- every other volume's art ----------
 # Each picture is drawn on a 450 x 300 stage; panel() fits the stage to the panel's width and fills the rest with
-# screentone, and cover() puts the volume's chosen picture on its cover. Ink and paper only, one red accent at most.
+# screentone, and sleeve() puts the volume's chosen picture on its sleeve. Ink and paper only, one red accent at most.
 MUTED = "fill:var(--muted)"
 
 
@@ -516,40 +488,6 @@ def fit_title(title, room):
             if not best or size > best[0]:
                 best = (size, lines)
     return best
-
-
-def cover(n, vol, ch, name):
-    """Any volume's cover but Wallet's: the band, the title, the volume's picture on screentone, and the obi."""
-    W, H = 512, 728
-    live = n.get("status") == "active"
-    obi_fill, obi_text = (SPOT, ONSPOT) if live else (INK, PAPER)
-    room = W - 22 - 64
-    size, lines = fit_title(n["title"], room)
-    title = "".join(f'<text x="22" y="{58 + size * 0.95 * (i + 1):.0f}" textLength="{min(room, 0.86 * size * len(l)):.0f}" lengthAdjust="spacingAndGlyphs" '
-                    f'style="{INK};font:400 {size:.0f}px var(--font-display)">{esc(l)}</text>' for i, l in enumerate(lines))
-    top = 58 + size * 0.95 * len(lines) + 30
-    words, tag = n["tagline"].split(), [""]
-    for w in words:
-        if len(tag[-1]) + len(w) > 50 and len(tag) < 2:
-            tag.append("")
-        tag[-1] = (tag[-1] + " " + w).strip()
-    eps = ch["episodes"]
-    shown = f"第{eps[0]['n']}話 収録" if len(eps) == 1 else f"第{eps[0]['n']}–{eps[-1]['n']}話 収録"
-    kana = ch["kana"]
-    return f'''<svg class="cover" viewBox="0 0 {W} {H}" role="img" aria-label="Cover of volume {vol}, {esc(n['title'])}.">
-<rect width="{W}" height="{H}" style="{PAPER}"/>
-{tone(0, top, W, H - 150, 13, 4.6)}
-<rect width="{W}" height="44" style="{INK}"/>
-<text x="20" y="30" style="{PAPER};font:400 17px var(--font-display);letter-spacing:.04em">{esc(name)}</text>
-<text x="{W - 20}" y="30" text-anchor="end" style="{PAPER};font:500 13px var(--font-mono);letter-spacing:.12em">VOL. {vol}</text>
-{title}
-<g transform="translate(31 {max(top, 252):.0f})"><rect x="-6" y="-6" width="462" height="312" style="{PAPER};stroke:var(--ink);stroke-width:5"/>{ART[ch["cover"]]()}</g>
-<text x="{W - 34}" y="70" style="{INK};font:700 28px var(--font-body);writing-mode:vertical-rl">{esc(kana)}</text>
-<rect y="{H - 150}" width="{W}" height="150" style="{obi_fill}"/>
-<text x="24" y="{H - 98}" textLength="{min(W - 48, len(ch['obi']) * 17):.0f}" lengthAdjust="spacingAndGlyphs" style="{obi_text};font:400 31px var(--font-display)">{esc(ch["obi"])}</text>
-{"".join(f'<text x="24" y="{H - 64 + i * 20}" style="{obi_text};font:400 14px var(--font-body)">{esc(l)}</text>' for i, l in enumerate(tag))}
-<text x="{W - 22}" y="{H - 18}" text-anchor="end" style="{obi_text};font:700 14px var(--font-body)">{shown}</text>
-</svg>'''
 
 
 # ---------- the record and its sleeve (目次 and every volume page) ----------
