@@ -1,0 +1,17 @@
+# Volume for bank/projects/terminel.md. Panel text from that entry; captions editorial.
+entry: terminel
+kana: 端末
+obi: We finally succeeded in adding code.
+cover: tui
+episodes:
+  - n: 1
+    title: A terminal in the browser
+    panels:
+      - span: 4
+        art: tui
+        caption: The idea
+        text: A web terminal for data analysis. Write and save analyses in a Remix front end, send the Python to a server that runs it, and get back text and matplotlib plots.
+      - span: 2
+        art: timeout
+        caption: The hard part
+        text: Running untrusted Python in a serverless function. The server's last commits are fix5, fix6.

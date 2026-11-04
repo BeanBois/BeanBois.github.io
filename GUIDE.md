@@ -147,13 +147,18 @@ For `music.playlists`. For `pages.highlights`, use the volume's id: most are the
 |---|---|
 | `9loop` | 9Loop |
 | `aki-predictor` | Acute kidney injury predictor |
+| `archer-bot` | Archer bot |
 | `atlas` | atlas |
 | `blockhub` | BlockHub |
 | `car-designer` | CarDesigner |
 | `chess-ai` | chessAI |
+| `clucker` | Clucker |
 | `data-terminal` | Data terminal |
+| `dgl-coursework` | Graph deep learning coursework |
 | `expense-tracker` | expense-tracker |
 | `fps-rl-agent` | RL agent for an FPS game |
+| `german-learning-hub` | German learning hub |
+| `ic-hack-25` | IC Hack 25 game |
 | `icl-hyperbolic` | Instant Policy++ |
 | `irecognise` | iRecognise |
 | `kkp-wallet` | Wallet |
@@ -161,19 +166,25 @@ For `music.playlists`. For `pages.highlights`, use the volume's id: most are the
 | `mybudixc` | myBudiXc |
 | `neuromorphic` | Neuromorphic computing (independent study) |
 | `ollama-home-lab` | Ollama home lab |
+| `personal-website` | This website |
 | `plate-recognition` | Malaysian licence plate recognition |
+| `poke-exhibition` | Beepo's Poke-Exhibition |
 | `polyarb` | polyarb |
 | `re-news` | RE-News |
 | `robocup` | RoboCup@Home (King's) |
+| `robot-learning-coursework` | Robot learning coursework |
 | `sales-signatures` | Sales signatures |
 | `srgan` | SRGAN from scratch |
+| `task-tracker` | Task tracker |
 | `tencent-autoscaler` | Time-of-day GPU autoscaler |
+| `tencent-conversation-service` | Gameplay conversation query service |
 | `tencent-hardening` | The hardening audit |
 | `tencent-maintainability` | Keeping it maintainable |
 | `tencent-models` | Deploying models |
-| `tencent-conversation-service` | Gameplay conversation query service |
 | `tencent-multitenancy` | Multi-tenant model deployment |
+| `terminel` | terminel |
 | `tradingjoe` | TradingJoe |
 | `transformer-from-scratch` | Attention Is All You Need, from scratch |
+| `wordle-ai` | Wordle AI |
 
 A new project in the bank gets its id from its file name.

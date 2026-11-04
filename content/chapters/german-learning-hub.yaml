@@ -1,0 +1,13 @@
+# Volume for bank/projects/german-learning-hub.md. Panel text from that entry; captions editorial.
+entry: german-learning-hub
+kana: 独語
+obi: Grammar, then conversation.
+cover: book
+episodes:
+  - n: 1
+    title: Learning German
+    panels:
+      - span: 6
+        art: book
+        caption: The hub
+        text: A small site for learning German, with the grammar rules on the page and a Python chatbot to practise with.

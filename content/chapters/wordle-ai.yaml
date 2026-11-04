@@ -1,0 +1,13 @@
+# Volume for bank/projects/wordle-ai.md. Panel text from that entry; captions editorial.
+entry: wordle-ai
+kana: 単語
+obi: Three ways to guess five letters.
+cover: chars
+episodes:
+  - n: 1
+    title: Five letters
+    panels:
+      - span: 6
+        art: chars
+        caption: Three players
+        text: A Wordle game and the agents to play it, written over four days. A dictionary agent that filters candidates by the feedback, an LSTM agent, and a reinforcement-learning agent.

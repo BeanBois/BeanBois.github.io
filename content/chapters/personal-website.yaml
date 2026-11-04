@@ -1,0 +1,34 @@
+# Volume for bank/projects/personal-website.md, with poke-exhibition as its prologue. Panel text from those entries; captions editorial.
+entry: personal-website
+members: [poke-exhibition]
+kana: 本誌
+obi: You are reading it.
+cover: book
+episodes:
+  - n: 0
+    entry: poke-exhibition
+    title: The site before this one
+    panels:
+      - span: 6
+        art: rooms
+        caption: Poke-Exhibition
+        text: My first personal website, from 2023 into 2024, played like a Pokémon game.
+  - n: 1
+    title: A manga series with a record on it
+    panels:
+      - span: 4
+        art: book
+        caption: The series
+        text: Every project is a volume of a manga series, with a cover, a contents shelf, an author page and a colophon. The record on the cover turns at the tempo of whatever I'm playing on Spotify.
+      - span: 2
+        art: clock
+        caption: Now playing
+        text: A Cloudflare Worker reads Spotify and finds each song's tempo from a trust-ordered chain of sources. The record follows a song change within about five seconds.
+      - span: 3
+        art: guards
+        caption: One source of truth
+        text: A knowledge bank of Markdown entries feeds the site and the CVs, through an export that refuses to run if anything private would leak.
+      - span: 3
+        art: commits
+        caption: Ship it
+        text: A push deploys, design drafts deploy as previews, and the CVs are printed to one-page PDFs at every deploy.

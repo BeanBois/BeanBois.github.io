@@ -1,0 +1,13 @@
+# Volume for bank/research/dgl-coursework.md. Panel text from that entry; captions editorial.
+entry: dgl-coursework
+kana: 曲率
+obi: Before the hyperbolic thesis, the curvature of graphs.
+cover: poincare
+episodes:
+  - n: 1
+    title: Graphs
+    panels:
+      - span: 6
+        art: poincare
+        caption: The coursework
+        text: Imperial MSc coursework, February 2025. Graph classification, heterogeneous node classification and graph topology, with an implementation of graph Ricci curvature. The background for the hyperbolic-geometry thesis that followed.

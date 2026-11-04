@@ -1,9 +1,18 @@
 # Volume for bank/projects/transformer-from-scratch.md. Panel text from that entry; captions editorial.
 entry: transformer-from-scratch
+members: [archer-bot]   # Kai Shun, 2026-11-04: inherited by this one
 kana: 注意
 obi: Trained on fourteen seasons of Archer.
 cover: subtitles
 episodes:
+  - n: 0
+    entry: archer-bot
+    title: The first try
+    panels:
+      - span: 6
+        art: subtitles
+        caption: Archer bot
+        text: October 2023, a first chatbot trained on Archer. A data getter, a processor, two model versions and a trainer. The idea came back in 2026, from the paper up.
   - n: 1
     title: The paper, rebuilt
     panels:

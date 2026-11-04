@@ -1,0 +1,13 @@
+# Volume for bank/projects/task-tracker.md. Panel text from that entry; captions editorial.
+entry: task-tracker
+kana: 任務
+obi: Late tasks send email.
+cover: set
+episodes:
+  - n: 1
+    title: Checklists
+    panels:
+      - span: 6
+        art: set
+        caption: The app
+        text: A PHP web app built in a day. Token-based login and logout-everywhere, admin roles that activate users, checklists with progress and review, cleanup of expired tokens, and email when a task runs late.

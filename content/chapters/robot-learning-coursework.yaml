@@ -1,0 +1,13 @@
+# Volume for bank/research/robot-learning-coursework.md. Panel text from that entry; captions editorial.
+entry: robot-learning-coursework
+kana: 学習
+obi: A robot learning to move.
+cover: robot
+episodes:
+  - n: 1
+    title: Learning to move
+    panels:
+      - span: 6
+        art: robot
+        caption: The coursework
+        text: Imperial MSc coursework, February 2025. A simulated robot with its own graphics and a learning loop, in four parts.

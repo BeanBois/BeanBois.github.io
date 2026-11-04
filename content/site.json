@@ -305,6 +305,59 @@
    "verified": "2026-11-04"
   },
   {
+   "id": "clucker",
+   "title": "Clucker",
+   "role": null,
+   "tagline": "A small Twitter-like site in Django, the second-year group-work warm-up",
+   "period": "2021-10 – 2021-11",
+   "status": "shipped",
+   "kind": "study",
+   "track": "academic",
+   "group": null,
+   "size": "small",
+   "mix": {
+    "backend": 0.7,
+    "product": 0.3
+   },
+   "stack": [
+    "Python",
+    "Django",
+    "GitHub Actions"
+   ],
+   "repo": null,
+   "what": "The King's Software Engineering Group learning project: a Django micro-blogging site with login-protected feeds and user pages, tests with fixtures and coverage, and a GitHub Actions workflow. 42 commits from 2021-10-08 to 11-22.",
+   "bullets": [],
+   "story": "",
+   "playlist": null,
+   "verified": null
+  },
+  {
+   "id": "dgl-coursework",
+   "title": "Graph deep learning coursework",
+   "role": null,
+   "tagline": "Graph classification, heterogeneous node classification and graph curvature",
+   "period": "2025-02",
+   "status": "shipped",
+   "kind": "study",
+   "track": "academic",
+   "group": null,
+   "size": "small",
+   "mix": {
+    "ml": 1.0
+   },
+   "stack": [
+    "Python",
+    "PyTorch",
+    "Jupyter"
+   ],
+   "repo": "https://github.com/BeanBois/dgl-cw1",
+   "what": "Imperial MSc coursework (February 2025, 4 commits): three notebooks on graph classification, heterogeneous node classification and graph topology, with an implementation of graph Ricci curvature. Background for the hyperbolic-geometry thesis that followed.",
+   "bullets": [],
+   "story": "",
+   "playlist": null,
+   "verified": null
+  },
+  {
    "id": "icl-hyperbolic",
    "title": "Instant Policy++",
    "role": null,
@@ -407,6 +460,54 @@
    "story": "The experiment ran in Intel's Lava framework on a laptop and a Raspberry Pi, not on Loihi hardware. The plan was four Raspberry Pis as \"surveillance cameras\" under different simulated weather (day, dimmed night, blurred rain), learning on-device and sharing knowledge, with a fifth joining later to show federated learning speeding it up. Lava runs its parallelism as threads, the Pi was killed for running out of memory, and the study became an honest write-up of why. A follow-on idea from the same weeks, iControl, planned four simulated legged robots (Isaac Lab ANYmal, repo iRobot_Sim) each driven by a Pi running an SNN, sharing walking knowledge but not body-specific knowledge.",
    "playlist": null,
    "verified": "2026-11-04"
+  },
+  {
+   "id": "robot-learning-coursework",
+   "title": "Robot learning coursework",
+   "role": null,
+   "tagline": "A simulated robot learning to move, in four parts",
+   "period": "2025-02",
+   "status": "shipped",
+   "kind": "study",
+   "track": "academic",
+   "group": null,
+   "size": "small",
+   "mix": {
+    "ml": 1.0
+   },
+   "stack": [
+    "Python"
+   ],
+   "repo": null,
+   "what": "Imperial MSc coursework (70067, 2025-02-05 to 02-07, 7 commits): a robot environment with graphics and a learning loop, in four parts.",
+   "bullets": [],
+   "story": "",
+   "playlist": null,
+   "verified": null
+  },
+  {
+   "id": "archer-bot",
+   "title": "Archer bot",
+   "role": null,
+   "tagline": "A first try at a chatbot trained on Archer",
+   "period": "2023-10",
+   "status": "archived",
+   "kind": "model-from-scratch",
+   "track": "side",
+   "group": "transformer-from-scratch",
+   "size": "small",
+   "mix": {
+    "ml": 1.0
+   },
+   "stack": [
+    "Python"
+   ],
+   "repo": null,
+   "what": "One commit on 2023-10-21: data getter, processor, two model versions and a trainer. The same idea came back in 2026 as [Attention Is All You Need, from scratch](transformer-from-scratch.md), trained on all fourteen seasons of Archer subtitles.",
+   "bullets": [],
+   "story": "",
+   "playlist": null,
+   "verified": null
   },
   {
    "id": "atlas",
@@ -636,6 +737,67 @@
    "verified": "2026-11-04"
   },
   {
+   "id": "german-learning-hub",
+   "title": "German learning hub",
+   "role": null,
+   "tagline": "A web page of German grammar rules with a practice chatbot",
+   "period": "2023-12 – 2024-02",
+   "status": "archived",
+   "kind": "tool",
+   "track": "side",
+   "group": null,
+   "size": "small",
+   "mix": {
+    "product": 0.6,
+    "ml": 0.4
+   },
+   "stack": [
+    "JavaScript",
+    "HTML",
+    "CSS",
+    "Python"
+   ],
+   "repo": null,
+   "what": "A small site for learning German: grammar rules on the client, a Python chatbot server, with the GloVe paper among its notes. 2 commits: started 2023-12-30, \"first beta up\" 2024-02-16.",
+   "bullets": [],
+   "story": "",
+   "playlist": null,
+   "verified": null
+  },
+  {
+   "id": "ic-hack-25",
+   "title": "IC Hack 25 game",
+   "role": null,
+   "tagline": "A hackathon game where an LLM writes a fire-evacuation scenario as you play, and reads your personality from your choices",
+   "period": "2025-02-01 – 2025-02-02",
+   "status": "shipped",
+   "kind": "product",
+   "track": "side",
+   "group": null,
+   "size": "small",
+   "mix": {
+    "ml": 0.5,
+    "product": 0.3,
+    "backend": 0.2
+   },
+   "stack": [
+    "Python",
+    "LLMs",
+    "RAG",
+    "vector database",
+    "pygame-style 2D graphics",
+    "serial (Arduino)"
+   ],
+   "repo": "https://github.com/BeanBois/IC_HACK25",
+   "what": "Imperial's student hackathon, February 2025, a team of six. A 2D game drops the player into an office fire alarm; an LLM generates each act from scripted beats (a friend at the start, someone calling for help, getting separated, a plan that stops working), the player says what they do, and the answers are scored into a Big Five personality sheet printed as a PDF. A serial link drove hardware effects.",
+   "bullets": [
+    "Built an LLM-driven game in a 2-day team hackathon: prompts that force a scripted sequence of events, RAG over the player's past answers, and a Big Five personality report generated from their choices."
+   ],
+   "story": "",
+   "playlist": null,
+   "verified": null
+  },
+  {
    "id": "irecognise",
    "title": "iRecognise",
    "role": null,
@@ -764,6 +926,45 @@
    "verified": "2026-11-04"
   },
   {
+   "id": "personal-website",
+   "title": "This website",
+   "role": null,
+   "tagline": "A portfolio built as a manga series around a spinning record that plays what I'm listening to",
+   "period": "2026-10 – present",
+   "status": "active",
+   "kind": "product",
+   "track": "side",
+   "group": null,
+   "size": "big",
+   "mix": {
+    "product": 0.5,
+    "backend": 0.25,
+    "infra": 0.25
+   },
+   "stack": [
+    "Python",
+    "HTML",
+    "CSS",
+    "JavaScript",
+    "SVG",
+    "GitHub Actions",
+    "Cloudflare Workers",
+    "Spotify API",
+    "headless Chrome"
+   ],
+   "repo": "https://github.com/BeanBois/BeanBois.github.io",
+   "what": "beanbois.github.io: every project as a volume of a manga series (cover, contents shelf, volumes, author page, colophon), with a vinyl record on the cover that turns at the tempo of whatever Kai Shun is playing on Spotify. Facts come from this bank only, through a leak-scanned export; the site itself is a static build.",
+   "bullets": [
+    "Designed and built a static portfolio site in a manga-series structure, with a record cover laid out by shape contrast, per-part light and dark palettes from one settings file, and a type scale on a 4/8 px grid.",
+    "Wrote a Cloudflare Worker that reads Spotify's now-playing and finds the tempo from a trust-ordered chain of sources (his own list, ReccoBeats, Deezer by ISRC, a strict Deezer search), so the record follows song changes within about 5 seconds.",
+    "Kept one source of truth: a knowledge bank of Markdown entries feeds the CVs and the site through an export that refuses to run if anything private or any internal employer name would leak; a closing check lints the bank and catches drift between bank and CVs.",
+    "Deploys on push with GitHub Actions; design drafts on `design/*` branches deploy as previews; CVs are printed to one-page PDFs with headless Chrome at every deploy."
+   ],
+   "story": "Built in a week (2026-10-20 to 10-23) with a staged process: requirements, research and design with competing prototypes (a 2D then 3D Poincaré-ball layout, then the record), implementation, monitoring, tests. A 2023–24 predecessor, a Pokémon-styled site, is [Poke-Exhibition](poke-exhibition.md).",
+   "playlist": null,
+   "verified": null
+  },
+  {
    "id": "plate-recognition",
    "title": "Malaysian licence plate recognition",
    "role": null,
@@ -796,6 +997,33 @@
    "story": "",
    "playlist": null,
    "verified": "2026-11-04"
+  },
+  {
+   "id": "poke-exhibition",
+   "title": "Beepo's Poke-Exhibition",
+   "role": null,
+   "tagline": "My first personal website, played like a Pokémon game",
+   "period": "2023-09 – 2024-02",
+   "status": "archived",
+   "kind": "product",
+   "track": "side",
+   "group": "personal-website",
+   "size": "small",
+   "mix": {
+    "product": 1.0
+   },
+   "stack": [
+    "JavaScript",
+    "HTML",
+    "CSS",
+    "Python"
+   ],
+   "repo": null,
+   "what": "An interactive personal website using a Pokémon-game interface, started around September 2023 (README). 29 commits from 2023-10-23 to 2024-02-20 in the private repo BeanBois/personal_website, about 170 KB of JavaScript.",
+   "bullets": [],
+   "story": "",
+   "playlist": null,
+   "verified": null
   },
   {
    "id": "polyarb",
@@ -924,6 +1152,66 @@
    "verified": "2026-11-04"
   },
   {
+   "id": "task-tracker",
+   "title": "Task tracker",
+   "role": null,
+   "tagline": "A task and checklist tracker with accounts, admin roles and delay alerts",
+   "period": "2025-12",
+   "status": "shipped",
+   "kind": "product",
+   "track": "side",
+   "group": null,
+   "size": "small",
+   "mix": {
+    "backend": 0.7,
+    "product": 0.3
+   },
+   "stack": [
+    "PHP",
+    "JavaScript",
+    "HTML",
+    "CSS"
+   ],
+   "repo": null,
+   "what": "A PHP web app pushed in one day (2025-12-15, 3 commits, README \"Done by Teoh Kai Shun\"): token-based login, registration and logout-everywhere, admin roles that activate users, checklists with progress and review, scheduled cleanup of expired tokens, and email notifications for delayed tasks.",
+   "bullets": [],
+   "story": "",
+   "playlist": null,
+   "verified": null
+  },
+  {
+   "id": "terminel",
+   "title": "terminel",
+   "role": null,
+   "tagline": "A data-analysis terminal in the browser, with a Python shell server behind it",
+   "period": "2023-09 – 2023-10",
+   "status": "archived",
+   "kind": "tool",
+   "track": "side",
+   "group": null,
+   "size": "big",
+   "mix": {
+    "backend": 0.5,
+    "product": 0.3,
+    "infra": 0.2
+   },
+   "stack": [
+    "TypeScript",
+    "Remix",
+    "Python",
+    "Prisma",
+    "Vercel"
+   ],
+   "repo": null,
+   "what": "A web terminal for data analysis: a Remix (TypeScript) front end where you write and save analyses, sending Python to a separate shell server hosted on Vercel (with Prisma for storage) that runs it and returns output, including matplotlib plots. Two repos: terminel (56 commits, 2023-09-10 to 10-18) and terminel_python_server (72 commits, 2023-10-18 to 10-22).",
+   "bullets": [
+    "Built a browser terminal for data analysis in Remix and TypeScript, backed by a Python execution server on Vercel that returns text and matplotlib plots."
+   ],
+   "story": "The TODO file opens with \"TLDR we finally succeeded in adding code\", and the server's last commits are a run of \"fix5\", \"fix6\": running untrusted Python in a serverless function was the hard part.",
+   "playlist": null,
+   "verified": null
+  },
+  {
    "id": "tradingjoe",
    "title": "TradingJoe",
    "role": null,
@@ -989,6 +1277,31 @@
    "story": "The training data is fourteen seasons of Archer subtitles. Lead with that on the website.",
    "playlist": null,
    "verified": "2026-11-04"
+  },
+  {
+   "id": "wordle-ai",
+   "title": "Wordle AI",
+   "role": null,
+   "tagline": "Three ways to play Wordle: a dictionary filter, an LSTM and an RL agent",
+   "period": "2024-10-13 – 2024-10-16",
+   "status": "archived",
+   "kind": "model-from-scratch",
+   "track": "side",
+   "group": null,
+   "size": "small",
+   "mix": {
+    "ml": 1.0
+   },
+   "stack": [
+    "Python",
+    "PyTorch"
+   ],
+   "repo": null,
+   "what": "A Wordle game and agents to play it, written over four days (5 commits): a simple agent, a dictionary agent that filters candidates by feedback, an LSTM agent and a reinforcement-learning agent.",
+   "bullets": [],
+   "story": "",
+   "playlist": null,
+   "verified": null
   }
  ],
  "groups": {
@@ -1114,6 +1427,6 @@
  ],
  "counts": {
   "entries": 53,
-  "public": 31
+  "public": 42
  }
 }

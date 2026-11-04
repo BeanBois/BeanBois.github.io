@@ -1,0 +1,25 @@
+# Volume for bank/projects/ic-hack-25.md. Panel text from that entry; captions editorial.
+entry: ic-hack-25
+kana: 火災
+obi: The fire alarm writes itself.
+cover: ghost
+episodes:
+  - n: 1
+    title: Forty-eight hours
+    panels:
+      - span: 4
+        art: ghost
+        caption: The game
+        text: Imperial's student hackathon, February 2025, in a team of six. A 2D game drops you into an office fire alarm, and an LLM writes each act from scripted beats as you play.
+      - span: 2
+        art: sources
+        caption: Remembering you
+        text: RAG over your past answers keeps the story consistent.
+      - span: 3
+        art: views
+        caption: The reading
+        text: Your choices are scored into a Big Five personality sheet, printed as a PDF.
+      - span: 3
+        art: commits
+        caption: My part
+        text: 42 of the team's 97 commits, the most of anyone. The graphics and sprites, the fire and the maze, wiring the engine to them, and the serial link to the hardware.
