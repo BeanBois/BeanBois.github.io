@@ -1,7 +1,7 @@
 # Volume for bank/research/kurf.md. Panel text from that entry; captions editorial.
 entry: kurf
 kana: キング
-obi: Robots, in simulation first.
+obi: Explore, or exploit?
 cover: arm
 episodes:
   - n: 1
@@ -9,9 +9,9 @@ episodes:
     panels:
       - span: 4
         art: arm
-        caption: The sim
-        text: Robotic manipulation simulations in CoppeliaSim and PyRep, with reinforcement-learning agents in PyTorch and TensorFlow.
+        caption: The question
+        text: King's undergraduate research fellowship, summer 2022. How much should a reinforcement-learning agent explore, and when should it exploit what it already knows? Asked on robotic manipulation tasks in CoppeliaSim and PyRep.
       - span: 2
         art: ablate
-        caption: The runs
-        text: Training, evaluation and ablations across agent architectures.
+        caption: My part
+        text: Mostly the analysis, of how the agents' exploration played out in training and evaluation. The simulator ran on Google Colab, back when Colab could still host one.

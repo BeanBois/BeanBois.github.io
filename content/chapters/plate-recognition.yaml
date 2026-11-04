@@ -5,13 +5,21 @@ obi: Find the plate, then read it.
 cover: plate
 episodes:
   - n: 1
-    title: Two networks
+    title: Three days
     panels:
       - span: 3
         art: plate
         caption: Find
-        text: YOLOv8 finds the plate.
+        text: A take-home in three days. YOLOv8, fine-tuned, finds the plate. Precision 0.96, recall 0.80 on a 28-image hand-labelled Malaysian test set.
       - span: 3
         art: chars
         caption: Read
-        text: A custom CNN reads each character. 94% character-level accuracy on 2,000+ images I collected, in varied lighting.
+        text: Three off-the-shelf OCR engines read it, and the best read is picked by confidence and plate format.
+      - span: 4
+        art: scan
+        caption: Scarce data
+        text: 168 Malaysian plates, 400+ foreign ones, 60 hand-picked hard negatives (road signs, billboards, bumpers), and heavy augmentation for light, weather and angle.
+      - span: 2
+        art: grey
+        caption: The weak stage
+        text: Character accuracy 0.26, because the OCR wasn't fine-tuned. A plate-tuned CRNN is the next step.

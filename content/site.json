@@ -43,7 +43,7 @@
    ],
    "story": "",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "robocup",
@@ -74,7 +74,7 @@
    ],
    "story": "",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "tencent-autoscaler",
@@ -342,7 +342,7 @@
    "id": "kurf",
    "title": "KURF research programme (King's)",
    "role": null,
-   "tagline": "Robot simulation and reinforcement learning",
+   "tagline": "How much should an RL agent explore, and when should it exploit what it knows?",
    "period": "2022",
    "status": "shipped",
    "kind": "research",
@@ -357,17 +357,19 @@
     "CoppeliaSim",
     "PyRep",
     "PyTorch",
-    "TensorFlow"
+    "TensorFlow",
+    "RLlib",
+    "Google Colab"
    ],
    "repo": null,
-   "what": "",
+   "what": "King's Undergraduate Research Fellowship (KURF), summer 2022: research on the trade-off between exploration and exploitation in reinforcement learning, on robotic manipulation tasks in simulation. My part was mostly the analysis.",
    "bullets": [
-    "Built robotic manipulation simulations in CoppeliaSim/PyRep and integrated RL agents (PyTorch, TensorFlow).",
-    "Ran training, evaluation and ablations across agent architectures."
+    "Researched the exploration–exploitation trade-off in reinforcement learning on simulated robotic manipulation tasks (CoppeliaSim/PyRep), mostly analysing how agents' exploration strategies played out in training and evaluation.",
+    "Ran the robotic simulation software and RL agents (PyTorch, TensorFlow, RLlib) on Google Colab, back when Colab could still host a simulator; it no longer can."
    ],
    "story": "",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "neuromorphic",
@@ -522,13 +524,13 @@
     "PyTorch"
    ],
    "repo": "https://github.com/BeanBois/chessAI",
-   "what": "",
+   "what": "A learning exercise over two days in March 2026, paused since: AlphaZero's recipe rebuilt from scratch for chess. No playing-strength result was measured.",
    "bullets": [
     "Implemented an AlphaZero-style chess agent from scratch: CNN board encoder, Monte-Carlo tree search, replay buffer, parallel self-play and an evaluator, then optimised self-play for the GPU."
    ],
    "story": "",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "data-terminal",
@@ -625,7 +627,7 @@
    ],
    "story": "The agent found a real strategy, just not the one he wanted. Bots aim slowly and play cautiously when they hear gunfire, so the agent learnt to keep moving and fire now and then to run the clock down: 39 wins out of 100. The report's critique names what went wrong: hard-coded mouse moves that limited exploration, a visual system with no \"where am I being shot from\" cue, no sound, a naive RNN whose policy loss sat at 0, 5 days of training on one instance, and latency between seeing an enemy and shooting. Next steps he wrote down: LSTM, curriculum (bomb-defuse scenarios first), self-play as in DeepMind's Quake III work. A project site with gameplay videos lives at beanbois.github.io/CSGO_AI.",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "irecognise",
@@ -787,7 +789,7 @@
    ],
    "story": "",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "polyarb",
@@ -901,10 +903,11 @@
    "stack": [
     "Python",
     "PyTorch",
-    "DirectML"
+    "DirectML",
+    "Google Colab"
    ],
    "repo": "https://github.com/BeanBois/SRGAN",
-   "what": "",
+   "what": "A learning exercise (November–December 2025): the SRGAN paper reproduced from scratch, trained on the home-lab GPU (Windows, through DirectML) and on Google Colab.",
    "bullets": [
     "Implemented SRGAN from scratch in PyTorch (ResNet generator, VGG perceptual loss, adversarial training) and trained it on DIV2K at 4× upscaling, with an SRCNN baseline and a pre-GAN warm-up, reaching 29.3 dB PSNR and 0.82 SSIM on validation.",
     "Worked around DirectML gaps for Windows GPU training with custom replacements for unsupported operations (the training script picks DirectML, then CUDA, then CPU).",
@@ -912,7 +915,7 @@
    ],
    "story": "",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "tradingjoe",
@@ -973,13 +976,13 @@
     "PyTorch"
    ],
    "repo": "https://github.com/BeanBois/All-You-Need-Is-Attention",
-   "what": "",
+   "what": "A learning exercise over three days in February 2026: the original Transformer rebuilt from the paper, then trained to predict the next line of dialogue from the one before, on fourteen seasons of Archer subtitles.",
    "bullets": [
-    "Reimplemented the original Transformer (encoder, decoder, attention) from the paper in PyTorch, with training and evaluation scripts, and trained it on a subtitle corpus."
+    "Reimplemented the original Transformer (encoder, decoder, attention) from the paper in PyTorch, with training and evaluation scripts, and trained it for next-line prediction on a subtitle corpus (GPT-2 tokenizer, AdamW; training loss from 7.5 to 4.4 over 200 epochs)."
    ],
    "story": "The training data is fourteen seasons of Archer subtitles. Lead with that on the website.",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   }
  ],
  "groups": {

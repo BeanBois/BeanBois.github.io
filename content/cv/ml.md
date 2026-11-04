@@ -33,7 +33,7 @@ ML Engineer at Tencent, building the platform that deploys and scales 1,000+ GPU
 **RE-News**, cited issue ranking for Malaysia · 2026
 - Per-source encoders compress news, economic and opinion data into one citable signal schema; an LLM fuses only signals, so every claim resolves to evidence. Runs on a local qwen3:32b by default.
 
-**From scratch**: SRGAN (4×, 29.3 dB PSNR / 0.82 SSIM on DIV2K) · AlphaZero-style chess (MCTS, parallel GPU self-play) · the original Transformer · licence-plate OCR (YOLOv8 + CNN, 94% char accuracy) · A3C-style FPS agent across 3 machines (~60% faster training)
+**From scratch**: SRGAN (4×, 29.3 dB PSNR / 0.82 SSIM on DIV2K) · AlphaZero-style chess (MCTS, parallel GPU self-play) · the original Transformer · licence-plate reader (YOLOv8, F1 0.87) · a DDPG + HER agent playing CS:GO across 3 machines
 
 ## Education
 **Imperial College London**, MSc Computing (AI & ML) · 2024 – 2025

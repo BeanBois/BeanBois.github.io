@@ -18,4 +18,4 @@ episodes:
       - span: 3
         art: gpu
         caption: The GPU
-        text: Training on a Windows GPU through DirectML, with custom replacements for the operations it doesn't support.
+        text: A learning exercise, trained on my home-lab GPU through DirectML, with custom replacements for the operations it doesn't support, and on Google Colab.

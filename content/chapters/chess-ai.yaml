@@ -19,3 +19,4 @@ episodes:
         art: selfplay
         caption: Practice
         text: Parallel self-play, then optimised for the GPU.
+    next: A learning exercise, paused before its strength was ever measured.

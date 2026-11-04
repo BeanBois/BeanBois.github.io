@@ -14,5 +14,5 @@ episodes:
       - span: 3
         art: subtitles
         caption: The data
-        text: The training data is fourteen seasons of Archer subtitles.
+        text: A learning exercise. Given one line of Archer, predict the next, trained on fourteen seasons of subtitles. Training loss fell from 7.5 to 4.4 over 200 epochs.
     next: BERT from scratch.

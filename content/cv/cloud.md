@@ -25,8 +25,8 @@ ML Engineer at Tencent and main author of its model-serving platform: deployment
 **RE-News**, data pipeline with a switchable model backend · 2026
 - Pipeline of per-source encoders into PostgreSQL; each stage's model backend (local Ollama or Claude API) is a config switch.
 
-**Distributed RL training** · 2023
-- Spread A3C-style asynchronous training across 3 machines, cutting wall-clock time by about 60%.
+**Distributed RL agent**, BSc final-year project, King's · 2023
+- An RL agent (DDPG + HER, asymmetric actor-critic) that plays CS:GO through the live client, its game, vision (YOLOv5) and learning split across 3 machines over sockets; 39/100 wins against the built-in bots.
 
 ## Education
 **Imperial College London**, MSc Computing (AI & ML) · 2024 – 2025
