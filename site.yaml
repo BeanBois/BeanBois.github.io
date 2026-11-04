@@ -86,6 +86,8 @@ colours:
   #   record:      { grooves: tone, edge: ink, label_rim: ink }
   #   rim_player:  { track_text: music, level_bars: music }
   #   tonearm:     { arm: music }
+  #   points:      { fallback: ink }      the stars on the record take the main colour of the cover playing;
+  #                                       this is their colour when there's no cover, or it's all grey
   #   sleeve:      { paper: paper, border: ink, text: ink }
   #   shadows:     { shadow: ink, blot: ink }
   #   corners:     { triangles: archive, labels: ink, current: spot }

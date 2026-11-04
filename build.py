@@ -120,6 +120,7 @@ PARTS = {
     "record": {"grooves": "tone", "edge": "ink", "label_rim": "ink"},
     "rim_player": {"track_text": "music", "level_bars": "music"},
     "tonearm": {"arm": "music"},
+    "points": {"fallback": "ink"},
     "sleeve": {"paper": "paper", "border": "ink", "text": "ink"},
     "shadows": {"shadow": "ink", "blot": "ink"},
     "corners": {"triangles": "archive", "labels": "ink", "current": "spot"},

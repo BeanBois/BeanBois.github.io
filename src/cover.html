@@ -317,13 +317,71 @@ const rec = { phase: 0, speed: music && music.is_playing && !reduce ? RPM * Math
               vis: 1, on: ME, target: ME, art: null, revealAt: -1e9, cache: new Map() };
 const songAt = now => !music ? 0 : Math.min(music.duration_ms, music.progress_ms + (music.is_playing ? now - music.at : 0)) / 1000;
 
+/* ---------- the stars' colour: the main colour of the cover on the record ---------- */
+// Every coloured pixel of the cover votes for its hue (greys, black and white don't vote); the biggest hue wins,
+// averaged with its neighbours, then lightened or darkened until it stands out on the paper. A cover with
+// hardly any colour, or no cover at all, leaves the stars in colours.points.fallback.
+const one = Object.assign(document.createElement("canvas"), { width: 1, height: 1 }).getContext("2d", { willReadFrequently: true });
+function rgbOf(css) { one.clearRect(0, 0, 1, 1); one.fillStyle = "#000"; one.fillStyle = css; one.fillRect(0, 0, 1, 1); return [...one.getImageData(0, 0, 1, 1).data.slice(0, 3)]; }
+const luma = rgb => { const [r, g, b] = rgb.map(c => (c /= 255) <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+const contrast = (a, b) => { const x = luma(a), y = luma(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+function toHSL([r, g, b]) {
+  r /= 255; g /= 255; b /= 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
+  if (!d) return [0, 0, l];
+  const s = d / (1 - Math.abs(2 * l - 1));
+  const h = mx === r ? ((g - b) / d + 6) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return [h * 60, s, l];
+}
+function fromHSL(h, s, l) {
+  const a = s * Math.min(l, 1 - l), f = n => { const k = (n + h / 30) % 12; return Math.round(255 * (l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)))); };
+  return [f(0), f(8), f(4)];
+}
+let paperRGB = [255, 255, 255], fallbackRGB = [0, 0, 0];
+function coverTint(src, N) {
+  const px = src.getContext("2d").getImageData(0, 0, N, N).data, B = 24;
+  const bins = Array.from({ length: B }, () => [0, 0, 0, 0]);   // weight, r, g, b
+  let seen = 0, voted = 0;
+  for (let i = 0; i < px.length; i += 12) {                     // every third pixel is plenty
+    const r = px[i], g = px[i + 1], b = px[i + 2], mx = Math.max(r, g, b), sat = mx ? (mx - Math.min(r, g, b)) / mx : 0;
+    seen++;
+    if (sat < 0.22 || mx < 40 || (sat < 0.3 && mx > 235)) continue;
+    voted++;
+    const bin = bins[Math.floor(toHSL([r, g, b])[0] / (360 / B)) % B], w = 0.6 + sat;
+    bin[0] += w; bin[1] += r * w; bin[2] += g * w; bin[3] += b * w;
+  }
+  if (voted < seen * 0.04) return null;
+  let best = 0, score = -1;
+  for (let k = 0; k < B; k++) { const v = bins[k][0] + 0.5 * (bins[(k + B - 1) % B][0] + bins[(k + 1) % B][0]); if (v > score) { score = v; best = k; } }
+  const sum = [0, 0, 0, 0];
+  for (const k of [best - 1, best, best + 1]) { const bin = bins[(k + B) % B], w = k === best ? 1 : 0.5; for (let j = 0; j < 4; j++) sum[j] += bin[j] * w; }
+  let [h, s, l] = toHSL([sum[1] / sum[0], sum[2] / sum[0], sum[3] / sum[0]]);
+  s = Math.max(s, 0.5);
+  const darkPaper = luma(paperRGB) < 0.2;
+  for (let i = 0; i < 50 && contrast(fromHSL(h, s, l), paperRGB) < (darkPaper ? 5 : 3.2); i++) l = Math.max(0.08, Math.min(0.9, l + (darkPaper ? 0.02 : -0.02)));
+  return fromHSL(h, s, l);
+}
+// the tint eases from the last record's colour to the new one's as the cover changes
+const tint = { from: null, to: null, at: -1e9, jump: true, css: "", rgb: [0, 0, 0] };   // jump: arrive (or change theme) without easing
+function tintAt(now) {
+  const want = (music && rec.art && rec.art.tint) || null;
+  if (want !== tint.to) { tint.from = tint.rgb.slice(); tint.to = want; tint.at = tint.jump ? -1e9 : now; }
+  tint.jump = false;
+  const a = tint.from || fallbackRGB, b = tint.to || fallbackRGB;
+  const k = reduce ? 1 : Math.min(1, (now - tint.at) / 1200), e = k * k * (3 - 2 * k);
+  tint.rgb = a.map((c, i) => Math.round(c + (b[i] - c) * e));
+  const css = `rgb(${tint.rgb.join(" ")})`;
+  if (css !== tint.css) { tint.css = css; document.documentElement.style.setProperty("--points-now", css); }
+}
+const tintA = a => `rgb(${tint.rgb.join(" ")} / ${a})`;
+
 /* ---------- colours and fonts from tokens ---------- */
 let col = {}, fonts = {}, toneFill = null, blotFill = null;
 const cv = document.getElementById("ball");
 const ctx = cv.getContext("2d");
 function readColours() {
   const cs = getComputedStyle(document.documentElement);
-  for (const t of ["--paper", "--ink", "--tone", "--soft", "--muted", "--music", "--archive", "--live-red", "--live-edge", "--record-grooves", "--record-edge", "--record-label-rim", "--rim-player-track-text", "--rim-player-level-bars", "--tonearm-arm", "--shadows-blot"]) col[t] = cs.getPropertyValue(t).trim();
+  for (const t of ["--paper", "--ink", "--tone", "--soft", "--muted", "--music", "--archive", "--live-red", "--live-edge", "--record-grooves", "--record-edge", "--record-label-rim", "--rim-player-track-text", "--rim-player-level-bars", "--tonearm-arm", "--shadows-blot", "--points-fallback"]) col[t] = cs.getPropertyValue(t).trim();
   for (const t of ["--font-display", "--font-mono"]) fonts[t] = cs.getPropertyValue(t).trim();
   const p = document.createElement("canvas"); p.width = p.height = 5;
   const pc = p.getContext("2d");
@@ -333,6 +391,8 @@ function readColours() {
   pc.fillStyle = col["--paper"]; pc.fillRect(0, 0, 5, 5);
   pc.fillStyle = col["--shadows-blot"]; pc.beginPath(); pc.arc(2.5, 2.5, 1.1, 0, Math.PI * 2); pc.fill();
   blotFill = ctx.createPattern(p, "repeat");
+  paperRGB = rgbOf(col["--paper"]); fallbackRGB = rgbOf(col["--points-fallback"]);
+  tint.from = tint.to = null; tint.jump = true;
   if (music) { rec.cache.clear(); rec.art = artFor(music); }
   draw();
 }
@@ -398,18 +458,52 @@ function shapePath(shape, x, y, r) {
   else if (shape === "academic") { ctx.moveTo(x, y - r * 1.15); ctx.lineTo(x + r * 1.15, y); ctx.lineTo(x, y + r * 1.15); ctx.lineTo(x - r * 1.15, y); ctx.closePath(); }
   else ctx.arc(x, y, r, 0, Math.PI * 2);
 }
-function drawNode(n, x, y, r, time) {
-  const st = (STATUS[n.status] || STATUS.archived).style;
+// Every project is a star in the cover's colour: its core keeps the shape (track) and fill (status) from the
+// legend, and behind it four diffraction spikes and a glow twinkle, each star at its own pace, and flare on the
+// beat. Running projects shine brightest; archived ones are dead stars, an outline with no light.
+const SHINE = { solid: 1, outline: 0.7, tone: 0.5, dashed: 0.35, faint: 0 };
+const seedOf = n => ((n.z[0] * 91.7 + n.z[1] * 47.3 + n.z[2] * 13.1) % 1 + 1) % 1;
+let beat = 0;     // 1 on the beat, falling away before the next
+function drawShine(x, y, r, k, seed, time, room) {
+  const tw = reduce ? 0.7 : 0.5 + 0.5 * Math.sin(time * (1.1 + 1.9 * seed) + seed * 40) * Math.sin(time * (0.37 + 0.5 * seed) + seed * 9);
+  const flare = Math.min(1.4, k * (0.3 + 0.7 * tw) + 0.5 * beat * k), u = Math.max(r, 2.6);   // u: far-side dots still sparkle
+  ctx.save();
+  if (luma(paperRGB) < 0.2) ctx.globalCompositeOperation = "lighter";   // on dark paper, starlight adds up
+  if (room > r * 3) {                                     // the glow (not inside a name tag)
+    const gr = u * (2.4 + 2 * flare), g = ctx.createRadialGradient(x, y, 0, x, y, gr);
+    g.addColorStop(0, tintA(0.4 * flare)); g.addColorStop(0.35, tintA(0.14 * flare)); g.addColorStop(1, tintA(0));
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, gr, 0, Math.PI * 2); ctx.fill();
+  }
+  // four spikes as one shape: long points, a narrow waist, so they taper like starlight
+  const spikes = (L, w, a) => {
+    if (L <= r * 1.05) return;
+    ctx.beginPath();
+    for (let i = 0; i < 4; i++) {
+      const t = a + i * Math.PI / 2, m = t + Math.PI / 4;
+      ctx.lineTo(x + Math.cos(t) * L, y + Math.sin(t) * L);
+      ctx.lineTo(x + Math.cos(m) * w, y + Math.sin(m) * w);
+    }
+    ctx.closePath(); ctx.fill();
+  };
+  ctx.fillStyle = tintA(Math.min(1, 0.45 + 0.55 * flare));
+  spikes(Math.min(room, u * (2 + 3.4 * flare)), Math.max(0.7, u * 0.2), -Math.PI / 2);
+  ctx.fillStyle = tintA(Math.min(1, 0.25 + 0.45 * flare));
+  spikes(Math.min(room * 0.7, u * (1.2 + 1.6 * flare)), Math.max(0.6, u * 0.16), -Math.PI / 4);
+  ctx.restore();
+}
+function drawNode(n, x, y, r, time, room = Infinity) {
+  const st = (STATUS[n.status] || STATUS.archived).style, star = tint.css;
+  if (SHINE[st]) drawShine(x, y, r, SHINE[st], seedOf(n), time, room);
   ctx.lineWidth = Math.max(1, r * 0.17);
   shapePath(n.track, x, y, r);
-  if (st === "solid") { ctx.fillStyle = col["--ink"]; ctx.fill(); }
-  else if (st === "tone") { ctx.fillStyle = toneFill; ctx.fill(); ctx.strokeStyle = col["--ink"]; ctx.stroke(); }
+  if (st === "solid") { ctx.fillStyle = star; ctx.fill(); }
+  else if (st === "tone") { ctx.fillStyle = toneFill; ctx.fill(); ctx.strokeStyle = star; ctx.stroke(); }
   else if (st === "faint") { ctx.fillStyle = col["--paper"]; ctx.fill(); ctx.strokeStyle = col["--tone"]; ctx.stroke(); }
   else {
     ctx.fillStyle = col["--paper"]; ctx.fill();
     if (st === "dashed") ctx.setLineDash([3, 3]);
-    ctx.strokeStyle = col["--ink"]; ctx.stroke(); ctx.setLineDash([]);
-    if (st === "outline") { ctx.fillStyle = col["--ink"]; ctx.beginPath(); ctx.arc(x, y, r * 0.36, 0, Math.PI * 2); ctx.fill(); }
+    ctx.strokeStyle = star; ctx.stroke(); ctx.setLineDash([]);
+    if (st === "outline") { ctx.fillStyle = star; ctx.beginPath(); ctx.arc(x, y, r * 0.36, 0, Math.PI * 2); ctx.fill(); }
   }
   if (st === "solid") {
     const lr = r * 0.38 * (reduce ? 1 : 0.8 + 0.3 * Math.sin(time * 3.2 + n.z[0] * 10));
@@ -462,7 +556,7 @@ function drawTag(c, { v, s }, time) {
   ctx.globalAlpha = Math.max(0.55, fade(v));
   ctx.fillStyle = col["--paper"]; ctx.strokeStyle = col["--ink"]; ctx.lineWidth = sel === n ? 2.5 : on ? 2 : 1.3;
   ctx.beginPath(); ctx.roundRect(x, y, w, h, 11); ctx.fill(); ctx.stroke();
-  drawNode(n, x + 13, s.y, 4.5, time);
+  drawNode(n, x + 13, s.y, 4.5, time, 10);   // its spikes stay inside the tag
   ctx.fillStyle = col["--ink"]; ctx.textAlign = "left"; ctx.textBaseline = "middle";
   ctx.fillText(short(n.title), x + 24, s.y + 1);
   if (k > 1) {
@@ -479,6 +573,8 @@ let t0 = performance.now();
 function draw(now = performance.now()) {
   if (!W || !toneFill) return;
   const time = (now - t0) / 1000;
+  tintAt(now);
+  beat = music && music.is_playing && music.bpm && !reduce && rec.on === rec.target ? Math.exp(-((songAt(now) * music.bpm / 60) % 1) * 5) * rec.vis : 0;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.fillStyle = col["--paper"]; ctx.fillRect(0, 0, W, H);
   if (wide()) { drawBlot(); placeSleeve(); }
@@ -794,8 +890,9 @@ function artFor(m) {
     if (img && img.complete && img.naturalWidth) cg.drawImage(img, 0, 0, N, N); else standInCover(cg, N, m.key);
     try { out.label = halftoneLabel(cover, N, m.is_playing); }
     catch { standInCover(cg, N, m.key); out.label = halftoneLabel(cover, N, m.is_playing); }   // an unreadable image: fall back
+    out.tint = coverTint(cover, N);   // a new array each time, so the stars ease to it when the real cover arrives
   };
-  const out = { cover, label: null };
+  const out = { cover, label: null, tint: null };
   paint();
   if (img && !img.complete) img.onload = paint;
   rec.cache.set(key, out);
@@ -965,7 +1062,7 @@ const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "
 const md = s => esc(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/\*(.+?)\*/g, "<em>$1</em>").replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\[([^\]]+)\]\([^)]*\)/g, "$1");
 const paras = s => s.split(/\n\s*\n/).map(p => `<p>${md(p.replace(/\n/g, " "))}</p>`).join("");
 function glyph(n) {
-  const st = (STATUS[n.status] || STATUS.archived).style, ink = "var(--ink)", paper = "var(--paper)";
+  const st = (STATUS[n.status] || STATUS.archived).style, ink = "var(--points-now, var(--points-fallback))", paper = "var(--paper)";
   const shape = n.track === "work" ? `<rect x="1.5" y="1.5" width="9" height="9"` : n.track === "academic" ? `<polygon points="6,0.6 11.4,6 6,11.4 0.6,6"` : `<circle cx="6" cy="6" r="5"`;
   const attrs = {
     solid: `fill="${ink}"`, tone: `fill="url(#tp)" stroke="${ink}" stroke-width="1.5"`, outline: `fill="${paper}" stroke="${ink}" stroke-width="1.8"`,
