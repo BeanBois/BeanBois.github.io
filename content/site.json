@@ -397,6 +397,7 @@
    "repo": null,
    "what": "A formal independent-study module at Imperial (MSc year, Feb–Mar 2025), one the department warns students off for how demanding it is, with Dr Eiman Kanjo: \"Neuromorphic Computing for Decentralised Federated and Constrained Edge AI devices\". A 21-page review of neuromorphic hardware (Intel Loihi 1 and 2, IBM TrueNorth, SpiNNaker 2), software (Lava) and learning rules (STDP, surrogate gradients, three-factor learning), then an experiment: can spiking networks learn on-device on cheap hardware, and share what they learn by federated learning? The experiment's code is [iRecognise](../projects/irecognise.md).",
    "bullets": [
+    "Argued in the review that decentralised federated learning's limits on edge devices are inherent to classical computing, and made the case for neuromorphic hardware's in-memory, sparse, event-driven computation as the fit, before testing it.",
     "Reviewed neuromorphic computing for constrained edge devices: the properties that matter (event-driven, sparse, in-memory, on-device learning), the hardware (Loihi 2, TrueNorth, SpiNNaker 2), Intel's Lava framework, and how federated learning could run without a central server.",
     "Built a winner-take-all spiking network in Lava for face-mask classification: images turned to Poisson spike trains over 100 Hilbert-ordered bins, 10 excitatory modules of 200 neurons in two competing mega-modules, 2 inhibitory modules of 400, and reward-modulated STDP synapses to the output.",
     "Designed decentralised federated learning between devices: each one broadcasts its averaged weight changes every 100 updates over HTTP, and the others listen and merge them into their own model.",
@@ -616,8 +617,9 @@
     "CS:GO Game State Integration"
    ],
    "repo": "https://github.com/BeanBois/CSGO_AI",
-   "what": "BSc final year project at King's College London (6CCS3PRJ, supervised by Prof. Agi Kurucz, report April 2023): \"An AI Agent that plays FPS games\". An agent learns to play Counter-Strike: Global Offensive bomb rounds against the game's own bots, through the real game client, with the aim of playing well *and* playing like a human.",
+   "what": "BSc final year project at King's College London (6CCS3PRJ, supervised by Prof. Agi Kurucz, report April 2023), self-proposed: \"An AI Agent that plays FPS games\". An agent learns to play Counter-Strike: Global Offensive bomb rounds against the game's own bots, through the real game client, with the aim of playing well *and* playing like a human.",
    "bullets": [
+    "Proposed my own final-year project and research framing: reduced CS:GO's post-plant round to a robotic control problem (positioning plus a risk trade-off) so that goal-conditioned RL methods from robotics would carry over, and argued from prior work why RL fits better than imitation learning.",
     "Framed CS:GO as a reinforcement-learning problem and built an asymmetric actor-critic agent with DDPG and Hindsight Experience Replay in PyTorch: the critic trains on the fully observed game state, the actor plays from what a player can see.",
     "Replaced a hand-shaped reward with HER and a sparse win/lose reward (+1 / −1) over the game's two win conditions, avoiding reward engineering.",
     "Built the environment as an OpenAI Gym-style interface over the live game, split across 3 laptops talking over sockets: an Agent (learning), a Player (turns encoded actions into mouse and keyboard input, runs YOLOv5 enemy detection) and a Spectator (streams full game state through CS:GO Game State Integration).",

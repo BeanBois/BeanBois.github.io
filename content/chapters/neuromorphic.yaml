@@ -20,6 +20,25 @@ episodes:
         caption: The question
         text: Can spiking networks learn on-device on cheap hardware, and share what they learn without a central server?
   - n: 2
+    title: The argument
+    panels:
+      - span: 3
+        art: federated
+        caption: What breaks
+        text: Federated learning on edge devices scales badly. Every client stores its data, downloads a large model and trains it, and a central server runs the show. The ideal is peer-to-peer, sparse and asynchronous.
+      - span: 3
+        art: chip
+        caption: Why it breaks
+        text: The review argues those limits are built into classical computing, which keeps memory apart from compute and needs somewhere for data to be centralised.
+      - span: 4
+        art: spikes
+        caption: The case
+        text: Neuromorphic hardware computes where it stores, talks in sparse binary spikes and keeps no lasting memory of its inputs. That should make it frugal with energy, private (raw data can't be rebuilt from spikes that have gone) and tolerant of faults.
+      - span: 2
+        art: book
+        caption: The ground
+        text: Nine properties, the hardware from neuron models and memristors to Loihi, TrueNorth and SpiNNaker 2, the software problem, and the learning rules from STDP to reservoir computing.
+  - n: 3
     entry: irecognise
     title: iRecognise
     panels:

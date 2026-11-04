@@ -1,21 +1,52 @@
-# Volume for bank/projects/fps-rl-agent.md. Panel text from that entry; captions editorial.
+# Volume for bank/projects/fps-rl-agent.md (the BSc report, April 2023). Panel text from that entry; captions editorial.
 entry: fps-rl-agent
 kana: 強化学習
-obi: Three machines, one policy.
+obi: It found a strategy. Just not mine.
 cover: fps
 episodes:
   - n: 1
-    title: Learning to play
+    title: A robot arm with a rifle
+    panels:
+      - span: 6
+        art: fps
+        caption: My own question
+        text: A final-year project I proposed myself at King's, supervised by Prof. Agi Kurucz. Can an agent learn to play Counter-Strike well, through the real game client, and play like a human rather than like the game's bots?
+      - span: 3
+        art: arm
+        caption: The reduction
+        text: A 1v1 post-plant round is two problems at once, positioning and a risk trade-off (avoid the enemy, or duel). Framed that way it is a robotic control task in 3D space, so goal-conditioned methods from robotics should carry over.
+      - span: 3
+        art: versus
+        caption: Why not imitation
+        text: The closest prior work imitated humans, partly because it assumed there was no live game-state API. Imitation only reacts, with no planning and little exploration. Game State Integration showed the API was there.
+  - n: 2
+    title: Three machines, one agent
     panels:
       - span: 4
-        art: fps
-        caption: The agent
-        text: An RNN actor-critic agent in PyTorch for a partially observable 3D first-person environment with continuous actions.
-      - span: 2
         art: machines
-        caption: The speed-up
-        text: Distributed training across 3 machines with asynchronous, A3C-style updates cut wall-clock training time by about 60%.
-      - span: 6
+        caption: The split
+        text: Three laptops over sockets. The Agent learns, the Player turns actions into mouse and keyboard and runs YOLOv5 enemy detection, and the Spectator streams the full game state.
+      - span: 2
+        art: chip
+        caption: Two views
+        text: An asymmetric actor-critic, from sim-to-real robotics. The critic sees everything; the actor sees only what a player could.
+      - span: 3
         art: ablate
-        caption: The judging
-        text: Evaluated by numbers (reward, episode length, policy entropy) and by watching (emergent behaviours).
+        caption: No reward shaping
+        text: DDPG with Hindsight Experience Replay and a sparse reward, +1 for a win and −1 for a loss, over the game's two win conditions.
+      - span: 3
+        art: fps
+        caption: Seeing
+        text: YOLOv5 for enemy detection, about 60 fps on the player machine against 16 for the first approach.
+  - n: 3
+    title: 39 out of 100
+    panels:
+      - span: 4
+        art: ghost
+        caption: The exploit
+        text: Over 100 rounds against the built-in bots it won 39. It had learnt that bots aim slowly and turn cautious under fire, so it kept moving and fired now and then to run the clock down.
+      - span: 2
+        art: retract
+        caption: The critique
+        text: Hard-coded mouse moves limited exploration, there was no sound and no "shot from where" cue, and five days of training on one game instance wasn't enough.
+    next: An LSTM, a curriculum starting from bomb-defuse scenarios, and self-play.
