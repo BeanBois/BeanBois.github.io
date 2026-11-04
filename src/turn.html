@@ -1,0 +1,124 @@
+<style>
+/* The page turn between the four parts (cover, brief, projects, colophon), shared by src/cover.html and
+   src/page.html: the wave. Each part has a fixed place in a Poincaré disk (the cover at the centre, the others out
+   towards the rim); the new page opens in a hyperbolic circle round where you clicked, or from the side the old page
+   lies on Back. The shelf <-> volume turn (the record) is separate and untouched. Browsers without cross-page
+   transitions, and reduced motion, just open the page. */
+@view-transition { navigation: auto; }
+@media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }
+html.vt-head .deck .rec-wrap, html.vt-head .vsleeve { view-transition-name: none !important; }
+html.vt-head::view-transition { background: var(--paper) !important; }
+html.vt-head::view-transition-old(root), html.vt-head::view-transition-new(root) {
+  animation: none !important; mix-blend-mode: normal !important; clip-path: none; -webkit-mask: none !important; mask: none !important; }
+.vt-wave { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; view-transition-name: vt-wave; }
+html.vt-head::view-transition-group(vt-wave) { z-index: 2; animation: none !important; }
+html.vt-head::view-transition-new(vt-wave) { animation: none !important; }
+</style>
+<script>
+(() => {
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const root = document.documentElement;
+
+  /* where each part lives in the disk (x right, y down); a volume lives with the projects */
+  const SPOT = { home: [0, 0], brief: [-0.6, 0], projects: [0.6, 0], colophon: [0, 0.6] };
+  const where = url => {
+    let u; try { u = new URL(url, location.href); } catch (_) { return null; }
+    if (u.origin !== location.origin) return null;
+    const f = u.pathname.split("/").pop();
+    return f === "" || f === "index.html" ? "home" : f === "author.html" ? "brief" : f === "contents.html" ? "projects"
+      : f === "colophon.html" ? "colophon" : /^vol-[\w-]+\.html$/.test(f) ? "vol" : null;
+  };
+  const isHead = (a, b) => !!a && !!b && a !== b && !(a === "projects" && b === "vol") && !(a === "vol" && b === "projects");
+  const spot = k => SPOT[k === "vol" ? "projects" : k];
+
+  /* complex numbers as [re, im], and the disk's translations */
+  const add = (a, b) => [a[0] + b[0], a[1] + b[1]], sc = (a, k) => [a[0] * k, a[1] * k], cj = a => [a[0], -a[1]];
+  const mul = (a, b) => [a[0] * b[0] - a[1] * b[1], a[0] * b[1] + a[1] * b[0]];
+  const div = (a, b) => { const d = b[0] * b[0] + b[1] * b[1]; return [(a[0] * b[0] + a[1] * b[1]) / d, (a[1] * b[0] - a[0] * b[1]) / d]; };
+  const ab = a => Math.hypot(a[0], a[1]);
+  const T = (a, z) => div(add(z, a), add([1, 0], mul(cj(a), z)));          // the translation taking 0 to a
+  const Tm = (a, z) => T(sc(a, -1), z);
+  const unitv = a => { const m = ab(a); return m < 1e-9 ? [1, 0] : sc(a, 1 / m); };
+  const dirTo = (A, B) => unitv(Tm(spot(A), spot(B)));                       // which way B lies, seen from A
+  const anim = (frames, pseudo, ms) => root.animate(frames, { duration: ms, easing: "linear", fill: "both", pseudoElement: `::view-transition-${pseudo}(root)` });
+
+  /* wave: the new page opens in a hyperbolic circle round where you clicked. Its hyperbolic radius grows evenly, so on
+     screen it starts quick and slows towards the rim; a few faint rings trail it at even hyperbolic spacing, bunching
+     at the edge, and lean towards the centre of the disk, as circles there do. */
+  function wave(A, B, cv) {
+    const W = innerWidth, H = innerHeight, RD = Math.hypot(W, H) / 2 * 1.6, ms = 1100;   // the disk is bigger than the screen, so a corner isn't at its very rim
+    let z0 = null;
+    try { const c = JSON.parse(sessionStorage.vtwave || "null"); sessionStorage.removeItem("vtwave"); if (c) z0 = [(c[0] - W / 2) / RD, (c[1] - H / 2) / RD]; } catch (_) {}
+    if (!z0) z0 = sc(dirTo(B, A), 0.45);                   // Back: from the side the old page lies
+    const corners = [[-W / 2, -H / 2], [W / 2, -H / 2], [-W / 2, H / 2], [W / 2, H / 2]].map(q => sc(q, 1 / RD));
+    const rmax = Math.max(...corners.map(q => 2 * Math.atanh(Math.min(0.9999, ab(Tm(z0, q)))))) + 0.15;
+    const z2 = ab(z0) ** 2;
+    const circle = rho => { const t = Math.tanh(rho / 2), d = 1 - z2 * t * t;   // the hyperbolic circle as a Euclidean one
+      return { c: [W / 2 + z0[0] * (1 - t * t) / d * RD, H / 2 + z0[1] * (1 - t * t) / d * RD], r: t * (1 - z2) / d * RD }; };
+    const N = 28, fn = [];
+    for (let i = 0; i <= N; i++) { const k = i / N, { c, r } = circle(rmax * k);
+      fn.push({ offset: k, clipPath: `circle(${r.toFixed(1)}px at ${c[0].toFixed(1)}px ${c[1].toFixed(1)}px)` }); }
+    // the page is lifted a touch by the wave and settles flat: tilted away from where it began, a hair large
+    const u = unitv(z0), tilt = 2.2;
+    fn.forEach((f, i) => { const k = i / N, g = Math.pow(1 - k, 2);
+      f.transform = `perspective(1400px) rotate3d(${(-u[1]).toFixed(3)}, ${u[0].toFixed(3)}, 0, ${(tilt * g).toFixed(3)}deg) scale(${(1 + 0.018 * g).toFixed(4)})`; });
+    anim(fn, "new", ms);
+    anim([{ opacity: 1, transform: "scale(1)" }, { offset: 0.6, opacity: 1 }, { opacity: 0.85, transform: "scale(.992)" }], "old", ms);
+    if (!cv) return;
+    // the crests: each ring is a soft raised band, lit on the side towards the disk's centre and shaded outside.
+    // The light and the shade are this theme's paper and ink, whichever is lighter and darker.
+    const css = getComputedStyle(root), rgb = h => { h = h.replace("#", ""); if (h.length === 3) h = [...h].map(x => x + x).join(""); const n = parseInt(h, 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
+    const lum = c => 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+    const pa = rgb(css.getPropertyValue("--paper").trim()), ik = rgb(css.getPropertyValue("--ink").trim());
+    const darkMode = lum(pa) < lum(ik), lite = darkMode ? ik : pa, dark = darkMode ? pa.map(v => v * 0.25) : ik;   // in dark mode the shade is the paper, deeper
+    const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a.toFixed(3)})`;
+    const dpr = Math.min(devicePixelRatio || 1, 2), ctx = cv.getContext("2d"), t0 = performance.now(), HW = 0.22;
+    const frame = now => {
+      const k = Math.min(1, (now - t0) / ms), rho = rmax * k, fade = 1 - k * k;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+      for (let j = 0; j < 4; j++) {                       // the front, then three smaller crests behind it
+        const rr = rho - j * 0.55; if (rr <= HW) break;
+        const amp = (j ? 0.55 / j : 1) * fade, a = circle(rr - HW), b = circle(rr + HW);
+        const g = ctx.createRadialGradient(a.c[0], a.c[1], a.r, b.c[0], b.c[1], b.r);
+        g.addColorStop(0, rgba(lite, 0)); g.addColorStop(0.3, rgba(lite, (darkMode ? 0.16 : 0.55) * amp));
+        g.addColorStop(0.5, rgba(lite, 0)); g.addColorStop(0.72, rgba(dark, (darkMode ? 0.5 : 0.16) * amp)); g.addColorStop(1, rgba(dark, 0));
+        ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+      }
+      if (k < 1) requestAnimationFrame(frame); else ctx.clearRect(0, 0, W, H);
+    };
+    requestAnimationFrame(frame);
+  }
+
+  /* leaving: remember where the click was, so the wave starts there */
+  document.addEventListener("click", e => {
+    if (reduce || e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const a = e.target.closest && e.target.closest("a[href]");
+    if (!a || a.target || a.hasAttribute("download") || !("onpagereveal" in window)) return;
+    const A = where(location.href), B = where(a.href);
+    if (!isHead(A, B)) return;
+    try { sessionStorage.vtwave = JSON.stringify([e.clientX, e.clientY]); } catch (_) {}
+  });
+  addEventListener("pageswap", e => {
+    const to = e.activation && e.activation.entry && e.activation.entry.url;
+    if (e.viewTransition && to && isHead(where(location.href), where(to))) root.classList.add("vt-head");
+  });
+  addEventListener("pageshow", e => {
+    if (!e.persisted) return;
+    root.classList.remove("vt-head");
+  });
+
+  /* arriving */
+  addEventListener("pagereveal", e => {
+    const vt = e.viewTransition, from = window.navigation && navigation.activation && navigation.activation.from && navigation.activation.from.url;
+    if (!vt || reduce || !from) return;
+    const A = where(from), B = where(location.href);
+    if (!isHead(A, B)) return;
+    root.classList.add("vt-head");
+    vt.finished.finally(() => root.classList.remove("vt-head"));
+    const cv = document.createElement("canvas"); cv.className = "vt-wave"; cv.setAttribute("aria-hidden", "true");
+    const d = Math.min(devicePixelRatio || 1, 2); cv.width = Math.round(innerWidth * d); cv.height = Math.round(innerHeight * d);
+    document.body.append(cv); vt.finished.finally(() => cv.remove());
+    vt.ready.then(() => wave(A, B, cv));
+  });
+})();
+</script>

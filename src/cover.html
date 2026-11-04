@@ -74,13 +74,6 @@ dl.meta dd { margin: 0; min-width: 0; }
 .sec li::before { content: "■"; position: absolute; left: 0; top: 1px; font-size: 9px; }
 .story { font-size: 16px; border-left: 3px solid var(--ink); padding-left: 14px; }
 .story p:last-child { margin-bottom: 0; }
-.calc { font: 12px/1.7 var(--font-mono); font-variant-numeric: tabular-nums; border: 2px solid var(--ink); padding: 10px 12px; overflow-x: auto; }
-.calc .mixrow { display: grid; grid-template-columns: 64px 40px minmax(0, 1fr); gap: 8px; align-items: center; }
-.calc .bar { height: 8px; border: 1.5px solid var(--ink); }
-.calc .bar i { display: block; height: 100%; background: var(--ink); }
-.calc .eq { margin-top: 8px; white-space: pre; }
-.calc .eq b { font-weight: 600; }
-.calc .eq .c { color: var(--muted); }
 .kids { display: grid; gap: 2px; }
 .kids button { display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; gap: 10px; align-items: start; text-align: left; font: inherit; color: var(--ink); background: none; border: 0; padding: 6px 4px; cursor: pointer; }
 .kids button:hover { background: var(--soft); }
@@ -98,12 +91,6 @@ dl.meta dd { margin: 0; min-width: 0; }
 .btn[disabled] { cursor: not-allowed; color: var(--muted); border-color: var(--tone); }
 .select { user-select: all; }
 .note { color: var(--muted); font-size: 12px; margin-top: 6px; }
-.events { list-style: none; margin: 0; padding: 0; font: 12px var(--font-mono); display: grid; gap: 2px; }
-.events button { font: inherit; text-align: left; background: none; border: 0; padding: 3px 4px; color: var(--ink); cursor: pointer; width: 100%; }
-.events button:hover { background: var(--soft); }
-.events .ep { font: 400 12px var(--font-display); margin-right: 6px; }
-.events time { color: var(--muted); margin-right: 6px; font-variant-numeric: tabular-nums; }
-.events .svc { color: var(--live-text); margin-right: 6px; font-weight: 600; }
 
 .mast { position: fixed; z-index: 2; left: max(20px, calc(env(safe-area-inset-left, 0px) + 12px)); top: calc(env(safe-area-inset-top, 0px) + 18px); display: grid; gap: 2px; pointer-events: none; }
 .mast a { pointer-events: auto; font: 400 20px var(--font-display); color: var(--ink); text-decoration: none; letter-spacing: 0.02em; }
@@ -136,7 +123,7 @@ dl.meta dd { margin: 0; min-width: 0; }
   .rail:has(.say:not([hidden])) .mast, .rail:has(.say:not([hidden])) .intro { display: none; }   /* who I am: home only */
   .rail .intro { display: block; }
   .rail .intro p { margin: 0 0 14px; max-width: 40ch; }
-  .rail .intro .lede { font-size: 17px; }
+  .rail .intro .lede { font-size: 16px; line-height: 1.6; }
   .rail .intro .hint { font: 12px/1.7 var(--font-mono); color: var(--muted); }
   .rail .say { position: static; overflow: visible; border: 0; border-radius: 0; padding: 0; }
   .rail .say::before { content: "{{cover.sleeve_heading}}"; display: block; font: 500 10px var(--font-mono); letter-spacing: 0.2em; color: var(--muted); margin-bottom: 6px; }
@@ -170,9 +157,28 @@ dl.meta dd { margin: 0; min-width: 0; }
 .meter { display: block; width: 160px; height: 18px; margin-top: 6px; }
 .np .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--live-red); box-shadow: 0 0 0 2px var(--live-edge); margin-right: 6px; vertical-align: 1px; }
 .np button { font: inherit; color: var(--muted); background: none; border: 0; border-bottom: 1px dashed var(--tone); padding: 0; margin-left: 8px; cursor: pointer; }
+/* the back of the book: teaser, blurb, the two ways on, barcode */
+.rail .intro .bhead { font: 400 clamp(20px, 1.9vw, 25px)/1.15 var(--font-display); margin: 0 0 12px; max-width: 20ch; text-wrap: balance; }
+.doors { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 4px 0 16px; max-width: 44ch; }
+.doors a { display: grid; gap: 1px; align-content: start; padding: 7px 11px 8px; border: 2.5px solid var(--ink); color: var(--ink); text-decoration: none; background: var(--sleeve-paper); }
+.doors a b { font: 400 16px/1.2 var(--font-display); }
+.doors a small { font: 12px var(--font-mono); color: var(--muted); }
+.doors a:hover, .doors a:focus-visible { background: var(--ink); color: var(--paper); }
+.doors a:hover small, .doors a:focus-visible small { color: var(--paper); }
+@media (min-width: 900px) and (max-height: 820px) {   /* short screens: the blurb still fits its sleeve */
+  .doors a small { display: none; }
+  .rail .intro .lede { font-size: 15px; line-height: 1.5; }
+  .rail .intro .bhead { font-size: 20px; }
+}
+.imprint { display: inline-flex; align-items: flex-end; gap: 10px; margin-top: auto; color: var(--ink); text-decoration: none; font: 11px var(--font-mono); }
+.imprint .bars { width: 92px; height: 34px; padding: 4px; background: var(--sleeve-paper); }
+.imprint span { color: var(--muted); }
+.imprint:hover span { color: var(--ink); text-decoration: underline; text-decoration-color: var(--live-red); }
 .chap { display: inline-block; margin-top: 14px; font: 400 15px var(--font-display); color: var(--paper); background: var(--ink); padding: 6px 14px 5px; text-decoration: none; }
 .chap:hover { background: var(--live-red); box-shadow: 0 0 0 2px var(--live-edge); }
 </style>
+<!--TURN-->
+<link rel="expect" href="#end" blocking="render">
 </head>
 <body>
 
@@ -194,9 +200,9 @@ dl.meta dd { margin: 0; min-width: 0; }
 <section class="deck" aria-label="Now playing"><p class="np" id="np" aria-live="polite"></p><canvas class="meter" id="meter" aria-hidden="true"></canvas></section>
 </div>
 <nav class="mastnav" aria-label="Volume">
-  <a href="contents.html"><b>目次</b><span>contents</span><small id="navvols">{{cover.directory.contents}}</small></a>
-  <a href="author.html"><b>作者</b><span>author &amp; CV</span><small>{{cover.directory.author}}</small></a>
-  <a href="colophon.html"><b>奥付</b><span>colophon</span><small>{{cover.directory.colophon}}</small></a>
+  <a href="contents.html"><b>目次</b><span>{{nav.projects}}</span><small id="navvols"></small></a>
+  <a href="author.html"><b>作者</b><span>{{nav.brief}}</span><small>{{cover.directory.brief}}</small></a>
+  <a href="colophon.html"><b>奥付</b><span>{{nav.colophon}}</span><small>{{cover.directory.colophon}}</small></a>
 </nav>
 <nav class="sr" aria-label="All projects" id="srlist"></nav>
 <div class="pick" id="pick" role="dialog" aria-label="Projects here" hidden></div>
@@ -958,7 +964,6 @@ const body = document.getElementById("saybody");
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const md = s => esc(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/\*(.+?)\*/g, "<em>$1</em>").replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\[([^\]]+)\]\([^)]*\)/g, "$1");
 const paras = s => s.split(/\n\s*\n/).map(p => `<p>${md(p.replace(/\n/g, " "))}</p>`).join("");
-const f2 = x => (x < 0 ? "−" : " ") + Math.abs(x).toFixed(2);
 function glyph(n) {
   const st = (STATUS[n.status] || STATUS.archived).style, ink = "var(--ink)", paper = "var(--paper)";
   const shape = n.track === "work" ? `<rect x="1.5" y="1.5" width="9" height="9"` : n.track === "academic" ? `<polygon points="6,0.6 11.4,6 6,11.4 0.6,6"` : `<circle cx="6" cy="6" r="5"`;
@@ -972,31 +977,17 @@ function glyph(n) {
 const nearest = (n, k) => nodes.filter(m => m !== n).map(m => ({ m, d: dH(n.z, m.z) })).sort((a, b) => a.d - b.d).slice(0, k);
 const list = items => `<div class="kids">${items.map(({ m, d }) => `<button type="button" data-go="${m.id}">${glyph(m)}<span><b>${esc(m.title)}</b><small>${esc(m.tagline)}</small></span>${d != null ? `<span class="d">d=${d.toFixed(2)}</span>` : ""}</button>`).join("")}</div>`;
 
-function calcBlock(n) {
-  const c = n.calc, terms = Object.entries(n.mix).sort((a, b) => b[1] - a[1]);
-  const bars = terms.map(([k, w]) => `<div class="mixrow"><span>${k}</span><span>${w.toFixed(2)}</span><span class="bar"><i style="width:${w * 100}%"></i></span></div>`).join("");
-  const sum = terms.map(([k, w]) => `${w.toFixed(2)}·u<sub>${k}</sub>`).join(" + ");
-  const dist = 2 * Math.atanh(len(n.z));
-  return `<div class="calc">${bars}<div class="eq">p   = ${sum}
-    = (${f2(c.p[0])}, ${f2(c.p[1])}, ${f2(c.p[2])})
-|p| = <b>${c.L.toFixed(3)}</b>   <span class="c">1 = one skill only; lower = more mixed</span>
-r   = ${DEPTH}·|p| = <b>${c.r.toFixed(3)}</b>${c.twins ? `
-    + spread ${c.spread.toFixed(3)}   <span class="c">${c.twins} other${c.twins > 1 ? "s" : ""} share this mix</span>` : ""}
-d   = 2·atanh(|x|) = <b>${dist.toFixed(2)}</b>   <span class="c">hyperbolic distance from Kai Shun</span></div></div>
-<p class="note">u<sub>k</sub> are the four anchors, the corners of a tetrahedron on the ball's boundary. ${n.verified ? "" : "The mix is a draft for Kai Shun to correct."}</p>`;
-}
-
 function render() {
   const n = sel;
   if (n === ME) {
     const p = D.profile;
-    const chapters = [...D.log].sort((a, b) => a[0].localeCompare(b[0])).map((l, i) => [...l, i + 1]).reverse().slice(0, 6);
     body.innerHTML = `
       <div class="path"><span>the centre</span></div>
       <h2>${esc(p.name)}</h2>
       <p class="tag">${esc(p.oneliner)}</p>
       <div class="story">${paras(p.summary || "")}</div>
-      <div class="sec"><h4>how to read the ball</h4>
+      ${doors()}
+      <div class="sec"><h4>how to read the record</h4>
         <p>I'm the centre. Four skills sit at the corners: <b>ML</b>, <b>Backend</b>, <b>Infra</b>, <b>Product</b>. Each project is placed by its mix of them: single-skill projects sit deep under one corner, mixed ones between corners and nearer me. Drag to spin it, flick to throw it, click any point.</p>
         <div class="legend">
           ${glyph({ track: "work", status: "shipped" })}<span>work</span>
@@ -1006,21 +997,7 @@ function render() {
           ${glyph({ track: "academic", status: "shipped" })}<span>academic</span>
           ${glyph({ track: "side", status: "idea" })}<span>pending</span>
         </div>
-      </div>
-      <div class="sec"><h4>contact</h4><div class="contact">
-        <div class="row"><span class="select" id="email">${esc(p.email)}</span><button type="button" class="btn" id="copy">copy</button></div>
-        <a href="${esc(p.github)}" target="_blank" rel="noopener">github.com/BeanBois</a>
-        <a href="${esc(p.linkedin)}" target="_blank" rel="noopener">linkedin.com/in/kai-shun-teoh</a>
-      </div></div>
-      <div class="sec"><h4>get cv</h4><div class="row">
-        <a class="btn" href="author.html#cv-ml">ML</a><a class="btn" href="author.html#cv-cloud">Cloud</a><a class="btn" href="author.html#cv-backend">Backend</a>
-      </div><p class="note">Opens the CV on the author page.${D.text.cvPdfNote ? " " + esc(D.text.cvPdfNote) + "." : ""}</p></div>
-      <div class="sec"><h4>latest</h4><ol class="events">${chapters.map(([d, id, msg, ep]) => `<li><button type="button" data-go="${id}"><span class="ep">第${ep}話</span><time>${d}</time><span class="svc">${esc(byId.get(id).title)}</span>${esc(msg)}</button></li>`).join("")}</ol></div>`;
-    const copy = document.getElementById("copy");
-    copy.onclick = () => {
-      const fallback = () => { const r = document.createRange(); r.selectNodeContents(document.getElementById("email")); getSelection().removeAllRanges(); getSelection().addRange(r); };
-      try { navigator.clipboard.writeText(p.email).then(() => { copy.textContent = "copied"; }, fallback); } catch { fallback(); }
-    };
+      </div>`;
   } else if (n.members) {
     const h = n.header;
     body.innerHTML = `
@@ -1036,15 +1013,8 @@ function render() {
       <div class="stamps"><span class="stamp" style="${st.style === "solid" ? "border-color:var(--live-edge);" : ""}color:${st.style === "solid" ? "var(--live-text)" : st.style === "faint" ? "var(--muted)" : "var(--ink)"}">${st.label}</span>${n.verified ? "" : `<span class="stamp draft">draft</span>`}</div>
       <h2>${esc(n.title)}</h2>
       <p class="tag">${esc(n.role ? n.role + " · " + n.tagline : n.tagline)}</p>
-      ${n.story ? `<div class="story">${paras(n.story)}</div>` : ""}
-      ${D.chapters[n.id] ? `<a class="chap" href="${D.chapters[n.id].href}">Read Vol. ${D.chapters[n.id].vol}, 第${D.chapters[n.id].ep}話 →</a>` : ""}
-      ${n.what ? `<div class="sec"><h4>spec</h4>${paras(n.what)}</div>` : ""}
-      ${n.bullets.length ? `<div class="sec"><h4>output</h4><ul>${n.bullets.map(b => `<li>${md(b)}</li>`).join("")}</ul></div>` : ""}
-      <div class="sec"><h4>position</h4>${calcBlock(n)}</div>
-      ${n.stack.length || n.repo ? `<div class="sec"><h4>stack</h4><dl class="meta">
-        ${n.stack.length ? `<dt>uses</dt><dd><div class="chips">${n.stack.map(s => `<span class="chip">${esc(s)}</span>`).join("")}</div></dd>` : ""}
-        ${n.repo ? `<dt>repo</dt><dd><a href="${esc(n.repo)}" target="_blank" rel="noopener" style="color:var(--ink);text-decoration-color:var(--live-red);text-decoration-thickness:2px">${esc(n.repo.replace("https://github.com/", ""))}</a></dd>` : ""}
-      </dl></div>` : ""}
+      ${n.what ? `<div class="story">${paras(n.what)}</div>` : ""}
+      ${D.chapters[n.id] ? `<a class="chap" href="${D.chapters[n.id].href}#ep${D.chapters[n.id].ep}">${esc(D.text.readMore.replace("{vol}", D.chapters[n.id].vol))}, 第${D.chapters[n.id].ep}話 →</a>` : ""}
       <div class="sec"><h4>nearest</h4>${list(nearest(n, 4))}</div>`;
   }
   sayEl.scrollTop = 0;
@@ -1124,12 +1094,19 @@ function drawMeter(now) {
 }
 (function meterLoop(now) { drawMeter(now); requestAnimationFrame(meterLoop); })(performance.now());
 
-document.getElementById("navvols").textContent = D.text.directoryContents.replace("{count}", D.nodes.length);
-document.getElementById("intro").innerHTML = `<p class="lede">${esc(D.profile.oneliner)}</p>
-  <p class="hint">${esc(D.text.intro)}</p>`;
+document.getElementById("navvols").textContent = D.text.directoryProjects;
+/* home: the back of the book. A teaser line, the blurb, the two ways on, how to use the record, and the barcode */
+const doors = () => `<div class="doors">
+    <a href="author.html"><b>${esc(D.text.doorBrief)} →</b><small>${esc(D.text.doorBriefNote)}</small></a>
+    <a href="contents.html"><b>${esc(D.text.doorProjects)} →</b><small>${esc(D.text.doorProjectsNote)}</small></a></div>`;
+document.getElementById("intro").innerHTML = `<p class="bhead">${esc(D.text.blurbHead)}</p>
+  <p class="lede">${esc(D.text.blurb)}</p>${doors()}
+  <p class="hint">${esc(D.text.intro)}</p>
+  <a class="imprint" href="colophon.html">${D.barcode}<span>${esc(D.text.updated)}</span></a>`;
 readColours();
 requestAnimationFrame(loop);
 </script>
 
+<i id="end" hidden></i>
 </body>
 </html>

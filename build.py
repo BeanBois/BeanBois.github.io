@@ -5,14 +5,16 @@ python3 build.py --watch     also serves dist/ on http://127.0.0.1:8765 and rebu
 Reads site.yaml (words, colours, music: the file to edit), content/ (exported from the private bank by
 portfolio/tools/export_site.py; never edit it by hand) and src/.
 Writes:
-  index.html        the cover: the record (the projects' ball), the masthead and now playing
-  contents.html     目次: every public project as a volume spine on a shelf
-  vol-<id>.html     one per file in content/chapters/: a volume's cover, spine and story. A volume is one entry, or
+Four parts, each for a different reader:
+  index.html        the hook. The cover: the record (the projects' ball), now playing, and a blurb written like
+                    the back of a book that sends you on to the brief or the projects
+  author.html       the brief (作者紹介): thirty seconds on who, the highlights, the years, contact, the CV per lens
+  contents.html     the projects, in depth (目次): every volume as a record in its sleeve
+  vol-<id>.html     one per file in content/chapters/: a volume's sleeve, its record playing, and its story. A volume is one entry, or
                     several folded together (a chapter script's `members:`), led by an entry or by a job
-  author.html       作者紹介: about, the years, contact, the CV per lens
   <name>-cv-<lens>.pdf   each CV as an A4 PDF, printed by headless Chrome (the deploy has it; locally it's skipped
                          with a note if Chrome isn't found)
-  colophon.html     奥付: how this printing was made
+  colophon.html     the footnote (奥付): when the site was last updated and how this printing was made
 """
 import html, json, math, os, re, shutil, subprocess, sys, tempfile
 from datetime import date
@@ -20,7 +22,7 @@ from pathlib import Path
 
 import yaml
 
-from art import cover, cover_wallet, panel, seed
+from art import panel, record, seed, sleeve
 
 HERE = Path(__file__).parent
 CONTENT, SRC, DIST = HERE / "content", HERE / "src", HERE / "dist"
@@ -79,73 +81,6 @@ def status_glyph(status):
     return f'<svg viewBox="0 0 12 12" aria-hidden="true">{body}</svg>'
 
 
-def spine_art(n):
-    """The band of art on a spine. The pattern says what kind of project it is; the id sets its details.
-    Placeholder art: each one gets designed by hand, volume by volume."""
-    kind, sid, W, H = n.get("kind"), n["id"], 52, 54
-    a, b = seed(sid, 1), seed(sid, 2)
-    g = []
-    if kind == "job":  # a lattice, like racks
-        s = 7 + a * 4
-        for i in range(-1, int(W / s) + 2):
-            for j in range(-1, int(H / s) + 2):
-                if seed(sid, i * 31 + j) > 0.35:
-                    g.append(f'<rect x="{i*s + b*s:.1f}" y="{j*s:.1f}" width="{s*0.62:.1f}" height="{s*0.62:.1f}"/>')
-        return "".join(g), "fill"
-    if kind == "research":  # rings about a point
-        cx, cy = W * (0.2 + 0.6 * a), H * (0.2 + 0.6 * b)
-        g = [f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="{r}"/>' for r in range(3, 70, 5)]
-        return "".join(g), "stroke"
-    if kind == "product":  # halftone dots growing down the band
-        s = 5 + a * 2
-        for i in range(int(W / s) + 1):
-            for j in range(int(H / s) + 1):
-                r = s * 0.48 * min(1, max(0.08, (j * s) / H + (b - 0.5) * 0.6))
-                g.append(f'<circle cx="{i*s + (j % 2) * s/2:.1f}" cy="{j*s:.1f}" r="{r:.2f}"/>')
-        return "".join(g), "fill"
-    if kind == "model-from-scratch":  # crosshatch
-        s, t = 5 + a * 3, 20 + b * 50
-        g = [f'<line x1="{x}" y1="-10" x2="{x + t}" y2="{H + 10}"/><line x1="{x + t}" y1="-10" x2="{x}" y2="{H + 10}"/>' for x in range(-60, 80, int(s))]
-        return "".join(g), "stroke"
-    if kind == "trading":  # a price line, zig-zagging
-        for row in range(3):
-            pts, y = [], 12 + row * 15
-            for k in range(9):
-                pts.append(f"{k * 6.5:.1f},{y + (seed(sid, row * 10 + k) - 0.5) * 12:.1f}")
-            g.append(f'<polyline points="{" ".join(pts)}"/>')
-        return "".join(g), "stroke"
-    if kind == "venture":  # rays from a corner
-        g = [f'<line x1="0" y1="{H}" x2="{80 * math.cos(t):.1f}" y2="{H - 80 * math.sin(t):.1f}"/>' for t in [i * math.pi / 2 / 12 + a * 0.1 for i in range(13)]]
-        return "".join(g), "stroke"
-    if kind == "study":
-        g = [f'<line x1="0" y1="{y}" x2="{W}" y2="{y}"/>' for y in range(4, H, 6)]
-        return "".join(g), "stroke"
-    # tool and anything else: diagonal rules
-    s = 5 + a * 4
-    g = [f'<line x1="{x}" y1="0" x2="{x + H}" y2="{H}"/>' for x in range(-60, 60, int(s))]
-    return "".join(g), "stroke"
-
-
-def spine_h(n):
-    return 262 + seed(n["id"], 9) * 18 if n.get("size") == "big" else 222 + seed(n["id"], 9) * 40
-
-
-def spine(n, vol, href=None, extra=""):
-    big = n.get("size") == "big"
-    h = spine_h(n)
-    art, mode = spine_art(n)
-    paint = 'fill="currentColor"' if mode == "fill" else 'fill="none" stroke="currentColor" stroke-width="1.4"'
-    live = " live" if n.get("status") == "active" else ""
-    inner = (f'<span class="ser">KS</span><span class="vol">{vol}</span><span class="ttl">{esc(n["title"])}</span>'
-             f'<svg class="art" viewBox="0 0 52 54" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g {paint}>{art}</g></svg>'
-             f'<span class="obi{live}">{status_glyph(n.get("status"))}</span>')
-    label = f'Vol. {vol}: {n["title"]}, {STATUS.get(n.get("status"), "")}'
-    cls = "spine big" if big else "spine"
-    if href:
-        return f'<a class="{cls}" href="{href}" style="--h:{h:.0f}px" aria-label="{esc(label)}, read it" title="{esc(n["title"])}" {extra}>{inner}</a>'
-    return f'<button type="button" class="{cls}" style="--h:{h:.0f}px" aria-label="{esc(label)}" aria-expanded="false" title="{esc(n["title"])}" {extra}>{inner}</button>'
-
-
 # What the music proxy will return (stage 3: a small worker holding Kai Shun's Spotify token). Until then the
 # cover plays this sample, and a prototype-only switch shows the offline state.
 MUSIC_API = "https://kaishun-now-playing.beanbois.workers.dev"   # the now-playing worker (worker/); empty: the cover plays SAMPLE_MUSIC
@@ -156,7 +91,7 @@ SAMPLE_MUSIC = {"sample": True, "is_playing": True, "title": "Sample track", "ar
 # ---------- site.yaml ----------
 def load_config():
     cfg = yaml.safe_load((HERE / "site.yaml").read_text()) or {}
-    for key in ("you", "cover", "pages", "colophon", "colours"):
+    for key in ("you", "nav", "cover", "pages", "colophon", "colours"):
         if not isinstance(cfg.get(key), dict):
             raise SystemExit(f"site.yaml: the '{key}' section is missing or not a list of settings")
     cfg.setdefault("music", {})
@@ -189,7 +124,7 @@ PARTS = {
     "shadows": {"shadow": "ink", "blot": "ink"},
     "corners": {"triangles": "archive", "labels": "ink", "current": "spot"},
     "live": {"red": "spot", "edge": "spot_edge", "text": "spot", "on_red": "on_spot"},
-    "shelf": {"spine_paper": "paper", "spine_ink": "ink", "running_band": "archive", "finished_band": "archive"},
+    "shelf": {"running_band": "archive", "finished_band": "archive"},
     "panels": {"border": "archive", "caption_box": "mark", "caption_text": "on_mark"},
     "cv": {"paper": "paper", "border": "archive", "tabs": "archive"},
 }
@@ -256,6 +191,11 @@ def music_settings(node_ids):
 TEMPLATE = (SRC / "page.html").read_text()
 PAGES = []  # (file, short name, kana), in reading order; filled in main
 PDFS = set()  # the lenses whose CV was printed to PDF this build
+UPDATED = []  # the date of the last commit: when the site last changed (filled in main)
+
+
+def git(*a):
+    return subprocess.run(["git", *a], cwd=HERE, capture_output=True, text=True).stdout.strip()
 
 
 def nav(current, part):
@@ -263,8 +203,13 @@ def nav(current, part):
     cur = lambda f: ' aria-current="page"' if f == current else ""
     corner = lambda pos, f, k, e: f'<div class="c {pos}"><a href="{f}"{cur(f)}><i aria-hidden="true"></i><b>{k}</b>{e}</a></div>'
     return (f'<div class="c tl"><a class="home" href="{HOME}"><i aria-hidden="true"></i>{esc(cfg("you.name"))}</a><span class="part">{part}</span></div>'
-            + corner("tr", "contents.html", "目次", "contents") + corner("bl", "author.html", "作者", "author &amp; CV")
-            + corner("br", "colophon.html", "奥付", "colophon"))
+            + corner("tr", "contents.html", "目次", esc(cfg("nav.projects"))) + corner("bl", "author.html", "作者", esc(cfg("nav.brief")))
+            + corner("br", "colophon.html", "奥付", esc(cfg("nav.colophon"))))
+
+
+def turn_html():
+    """The page turn shared by the cover and every page (src/turn.html), told where the music worker is."""
+    return (SRC / "turn.html").read_text().replace("__MUSIC_API__", MUSIC_API or "")
 
 
 def page(file, title, part, main, script=""):
@@ -275,8 +220,10 @@ def page(file, title, part, main, script=""):
     out = TEMPLATE
     if PREVIEW:
         part += f' <span class="stamp draft">preview: {esc(PREVIEW)}</span>'
-    for k, v in {"title": title, "part": part, "nav": nav(file, part), "main": main, "folio": str(i + 1), "next": nxt_html, "script": script, "home": HOME}.items():
+    updated = f'<a class="upd" href="colophon.html">{esc(cfg("pages.updated").replace("{date}", UPDATED[0]))}</a>'
+    for k, v in {"title": title, "part": part, "nav": nav(file, part), "main": main, "folio": str(i + 1), "next": nxt_html, "script": script, "home": HOME, "updated": updated}.items():
         out = out.replace("{{" + k + "}}", v)
+    out = out.replace("<!--TURN-->", turn_html())
     (DIST / file).write_text(fill(out.replace("/*__COLOURS__*/", colours_css())))
 
 
@@ -341,71 +288,120 @@ def blot(cls="blot"):
 
 
 def contents_page(nodes, vols, chapters):
-    shelves, pulls = [], {}
+    """The projects, in depth: every volume as a record in its sleeve, a grid per shelf. Hovering pulls the record half
+    out; clicking pulls it all the way and the volume page opens with the record carried over (see the transition
+    in src/page.html)."""
+    secs, sleeves = [], {}
     for track, kana, name in SHELVES:
         items = sorted([n for n in nodes if n.get("track", "side") == track], key=lambda n: vols[n["id"]])
         if not items:
             continue
-        books = []
+        cards = []
         for n in items:
+            ch, vid = chapters.get(n["id"]), n["id"]
+            if not ch:
+                continue
             mix = " ".join(k for k, w in n["mix"].items() if w >= 0.3)
-            extra = f'data-id="{n["id"]}" data-status="{n.get("status")}" data-mix="{mix}"'
-            href = f'vol-{n["id"]}.html' if n["id"] in chapters else None
-            books.append(f'<div class="slot{" big" if n.get("size") == "big" else ""}" style="--sh:{spine_h(n):.0f}px">{spine(n, vols[n["id"]], href, extra)}</div>')
-            pulls[n["id"]] = {"title": n["title"], "vol": vols[n["id"]], "tagline": n["tagline"], "role": n.get("role"), "period": n["period"],
-                              "status": STATUS.get(n.get("status"), ""), "live": n.get("status") == "active", "big": n.get("size") == "big",
-                              "what": n["what"], "bullets": [inline_md(b) for b in n["bullets"]], "stack": n["stack"], "repo": n.get("repo"),
-                              "draft": not n.get("verified")}
-        shelves.append(f'<section aria-labelledby="sh-{track}"><div class="shelfname"><h2 id="sh-{track}"><span class="jp">{kana}</span> {name}</h2><span>{len(items)} volumes</span></div>'
-                       f'<div class="shelf">{"".join(books)}</div></section>')
-    statuses = [("all", "all")] + [(k, v) for k, v in [("active", "running"), ("shipped", "completed"), ("paused", "paused"), ("archived", "archived"), ("idea", "pending")]]
+            live = n.get("status") == "active"
+            cards.append(f'<a class="lp-card{" live" if live else ""}" href="vol-{vid}.html" data-vt="{vid}" data-status="{n.get("status")}" data-mix="{mix}">'
+                         f'<div class="lp"><div class="disc">{record(n, vols[vid], ch)}</div><div class="obj sl">{sleeves.setdefault(vid, sleeve(n, vols[vid], ch, cfg("you.name")))}</div></div>'
+                         f'<div class="cap"><span class="mono muted">Vol. {vols[vid]} · {esc(n["period"])}{" · " if live else ""}<span class="livetxt">{"running" if live else ""}</span></span>'
+                         f'<b>{esc(n["title"])}</b><small>{esc(n.get("tagline") or "")}</small></div></a>')
+        secs.append(f'<section aria-labelledby="sh-{track}" id="sh-{track}"><h2 class="gh" id="sh-{track}-h"><span class="jp">{kana}</span> {name} '
+                    f'<span class="mono muted">{len(items)}</span></h2><div class="lp-grid">{"".join(cards)}</div></section>')
+    statuses = [("all", "all"), ("active", "running"), ("shipped", "completed"), ("paused", "paused"), ("archived", "archived"), ("idea", "pending")]
     skills = [("all", "all"), ("ml", "ML"), ("backend", "Backend"), ("infra", "Infra"), ("product", "Product")]
-    filt = (f'<div class="filters" role="group" aria-label="Filter the shelf"><div class="grp"><span class="lbl">status</span>'
-            + "".join(f'<button type="button" class="chip" data-f="status" data-v="{k}" aria-pressed="{str(k == "all").lower()}">{v}</button>' for k, v in statuses)
-            + '</div><div class="grp"><span class="lbl">skill</span>'
-            + "".join(f'<button type="button" class="chip" data-f="mix" data-v="{k}" aria-pressed="{str(k == "all").lower()}">{v}</button>' for k, v in skills)
-            + "</div></div>")
-    rail = (f'<div class="pt"><h1>目次</h1><p>{esc(cfg("pages.contents_intro"))}</p></div>{filt}'
-            '<div class="obj sleeve" id="pull" hidden><div class="pull" id="pullbody" aria-live="polite"></div></div>')
-    main = split(blot() + "".join(shelves), rail)
-    script = "<script>\nconst SLEEVE = " + json.dumps(cfg("cover.sleeve_heading")) + ";\nconst P = " + json.dumps(pulls, ensure_ascii=False) + r""";
-const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-let open = null;
-function show(btn) {
-  const id = btn.dataset.id, n = P[id], pull = document.getElementById("pull"), body = document.getElementById("pullbody");
-  document.querySelectorAll('.spine[aria-expanded="true"]').forEach(b => b.setAttribute("aria-expanded", "false"));
-  if (open === id) { pull.hidden = true; open = null; return; }
-  open = id; btn.setAttribute("aria-expanded", "true");
-  body.scrollTop = 0;
-  body.innerHTML = `<div><div class="meta">${esc(SLEEVE)} · Vol. ${n.vol} · ${esc(n.period)}</div>
-    <h3>${esc(n.title)}</h3><p class="tag">${esc(n.role ? n.role + " · " + n.tagline : n.tagline)}</p>
-    ${n.what ? `<p>${esc(n.what)}</p>` : ""}
-    ${n.bullets.length ? `<ul>${n.bullets.map(b => `<li>${b}</li>`).join("")}</ul>` : ""}
-    ${n.stack.length ? `<div class="chips" style="margin-top:12px">${n.stack.map(s => `<span>${esc(s)}</span>`).join("")}</div>` : ""}
-    ${n.big ? `<p class="meta" style="margin-top:12px">This is a big one; its chapter isn't written yet.</p>` : ""}</div>
-    <div class="side"><button type="button" class="x" aria-label="Put it back">×</button>
-      <span class="stamp${n.live ? " live" : ""}">${esc(n.status)}</span>${n.draft ? `<span class="stamp draft">draft</span>` : ""}
-      <a href="./#${id}">find it on the ball →</a>${n.repo ? `<a href="${esc(n.repo)}" target="_blank" rel="noopener">repo →</a>` : ""}</div>`;
-  pull.hidden = false;
-  body.querySelector(".x").onclick = () => show(btn);
-  if (matchMedia("(max-width: 860px)").matches) pull.scrollIntoView({ block: "nearest", behavior: "smooth" });
-}
-document.querySelectorAll("button.spine").forEach(b => b.addEventListener("click", () => show(b)));
+    chips = lambda f, opts: "".join(f'<button type="button" class="chip" data-f="{f}" data-v="{k}" aria-pressed="{str(k == "all").lower()}">{v}</button>' for k, v in opts)
+    filt = (f'<div class="filters" role="group" aria-label="Filter the projects"><div class="grp"><span class="lbl">status</span>{chips("status", statuses)}</div>'
+            f'<div class="grp"><span class="lbl">skill</span>{chips("mix", skills)}</div></div>')
+    main = (f'<div class="pt"><h1>目次</h1><p>{esc(cfg("pages.contents_intro"))}</p></div>{filt}' + "".join(secs))
+    script = r"""<script>
+/* click: pull the record all the way out, then open its volume; the browser carries record and sleeve across */
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+document.querySelectorAll(".lp-card").forEach(card => card.addEventListener("click", e => {
+  if (e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
+  card.querySelector(".disc").style.viewTransitionName = "rec";
+  card.querySelector(".sl").style.viewTransitionName = "sleeve";
+  if (reduce) return;
+  e.preventDefault();
+  const pull = () => { card.classList.add("pulling"); setTimeout(() => { location.href = card.href; }, 420); };  // out, clear, a beat at rest, then the turn
+  /* first the shelf breaks into dots round the chosen card, then the record comes out */
+  const s = card.querySelector(".lp").getBoundingClientRect();
+  card.classList.add("chosen");
+  toneDots(toneVeil(), s.left + s.width / 2, s.top + s.height / 2, 640);
+  setTimeout(pull, 600);
+}));
+/* fetch a volume as soon as a card is pointed at, so the turn doesn't wait on the network */
+const got = new Set();
+document.querySelectorAll(".lp-card").forEach(card => ["pointerenter", "focus", "touchstart"].forEach(ev => card.addEventListener(ev, () => {
+  if (got.has(card.href)) return; got.add(card.href);
+  const l = document.createElement("link"); l.rel = "prefetch"; l.href = card.href; document.head.append(l);
+}, { passive: true })));
+/* back from a volume: hand the record back to its own sleeve */
+addEventListener("pageshow", () => {
+  document.querySelectorAll(".pulling, .chosen").forEach(c => c.classList.remove("pulling", "chosen"));
+  document.querySelectorAll(".tone-veil").forEach(v => v.remove());
+});
 const want = { status: "all", mix: "all" };
 document.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () => {
   want[c.dataset.f] = c.dataset.v;
   document.querySelectorAll(`.chip[data-f="${c.dataset.f}"]`).forEach(o => o.setAttribute("aria-pressed", String(o === c)));
-  document.querySelectorAll(".spine").forEach(s => {
+  document.querySelectorAll(".lp-card").forEach(s => {
     const st = s.dataset.status === "learning" ? "idea" : s.dataset.status;
-    const ok = (want.status === "all" || st === want.status) && (want.mix === "all" || s.dataset.mix.split(" ").includes(want.mix));
-    s.classList.toggle("dim", !ok);
+    s.classList.toggle("dim", !((want.status === "all" || st === want.status) && (want.mix === "all" || s.dataset.mix.split(" ").includes(want.mix))));
   });
 }));
 </script>"""
-    page("contents.html", "目次 · Teoh Kai Shun", "目次 contents", main, script)
+    page("contents.html", "目次 · Teoh Kai Shun", f'目次 {esc(cfg("nav.projects"))}', main, script)
 
 
-def volume_page(n, vol, ch, log, byid):
+VOLUME_JS = r"""<script>
+/* The record plays. When it lands (after the transition from the shelf, or on a plain load) it spins at 33⅓ for a
+   few seconds and slows to a stop; after that it turns as you scroll. The tonearm drops onto the outer groove and
+   follows how far through the volume you've read, and lifts at the end. Reduced motion: no spin, the arm just sits. */
+(() => {
+  /* on a phone the rail comes after the story, so the turntable moves up beside the sleeve (before the first paint) */
+  if (matchMedia("(max-width: 860px)").matches) document.querySelector(".vtop").append(document.querySelector(".deck"));
+  const svg = document.querySelector(".deck .record"), spin = svg.querySelector(".spin"), arm = document.getElementById("arm");
+  const IN = +svg.dataset.in, OUT = +svg.dataset.out, PX = 300, PY = -200, L = 312;   // pivot and arm length, in the record's units
+  const D = Math.hypot(PX, PY), BASE = Math.atan2(-PY, -PX) * 180 / Math.PI;
+  const armAt = r => BASE - Math.acos((D * D + L * L - r * r) / (2 * D * L)) * 180 / Math.PI;
+  const PARK = armAt(296) - 22, reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let angle = 0, omega = 0, hold = 0, armA = PARK, armTo = PARK, dropped = false, lastY = scrollY, last = 0, raf = 0;
+  const progress = () => { const max = document.documentElement.scrollHeight - innerHeight; return max > 0 ? Math.min(1, scrollY / max) : 0; };
+  const target = () => !dropped ? PARK : progress() > 0.985 ? PARK : armAt(OUT - 4 - progress() * (OUT - IN - 8));
+  const draw = () => { spin.setAttribute("transform", `rotate(${angle.toFixed(2)})`); arm.setAttribute("transform", `translate(${PX} ${PY}) rotate(${armA.toFixed(2)})`); };
+  function tick(now) {
+    const dt = Math.min(0.05, (now - (last || now)) / 1000); last = now;
+    angle = (angle + omega * dt) % 360;
+    if (hold > 0) hold -= dt; else omega *= Math.exp(-dt / 0.9);       // 33⅓ for a while, then friction
+    armA += (armTo - armA) * (1 - Math.exp(-dt * 5));
+    draw();
+    if (Math.abs(omega) > 0.5 || Math.abs(armTo - armA) > 0.05) raf = requestAnimationFrame(tick); else { raf = 0; last = 0; }
+  }
+  const kick = () => { if (!raf) raf = requestAnimationFrame(tick); };
+  function play() {
+    dropped = true;
+    if (reduce) { armA = armTo = target(); draw(); return; }
+    omega = 200; hold = 2.6; kick();                                    // 33⅓ rpm is 200 degrees a second
+    setTimeout(() => { armTo = target(); kick(); }, 350);                // the platter first, then the needle
+  }
+  addEventListener("scroll", () => {
+    const dy = scrollY - lastY; lastY = scrollY;
+    if (!dropped) return;
+    armTo = target();
+    if (reduce) { armA = armTo; draw(); return; }
+    angle += dy * 0.35; kick();
+  }, { passive: true });
+  draw();
+  if ("onpagereveal" in window) addEventListener("pagereveal", e => (e.viewTransition ? e.viewTransition.finished : Promise.resolve()).then(play, play), { once: true });
+  else setTimeout(play, 150);
+})();
+</script>"""
+
+
+def volume_page(n, vol, ch, log, byid, prev=None, nxt=None):
+    """A project in depth. prev and nxt are the volumes either side on the shelf, as (book, number)."""
     eps = []
     for k, ep in enumerate(ch["episodes"]):
         last = k == len(ch["episodes"]) - 1
@@ -419,23 +415,46 @@ def volume_page(n, vol, ch, log, byid):
 {f'<div class="next"><span class="lbl jp">次回予告</span><span>Next time: {esc(ep["next"])}</span></div>' if ep.get("next") else ""}''')
     events = "".join(f"<li><time>{d}</time>{esc(msg)}</li>" for d, i, msg in sorted(log, reverse=True) if i in n["members"])
     repo = f'<a href="{esc(n["repo"])}" target="_blank" rel="noopener">{esc(n["repo"].split("github.com/")[-1])}</a>' if n.get("repo") else "private"
+    toc = "".join(f'<li><a href="#ep{ep["n"]}"><span class="jp">第{ep["n"]}話</span> {esc(ep["title"])}</a></li>' for ep in ch["episodes"])
+    link = lambda b, arrow: f'<a href="vol-{b[0]["id"]}.html">' + (f'← Vol. {b[1]} · {esc(b[0]["title"])}' if arrow == "←" else f'Vol. {b[1]} · {esc(b[0]["title"])} →') + "</a>"
+    side = "".join(f"<li>{link(b, a)}</li>" for b, a in ((prev, "←"), (nxt, "→")) if b)
+    volnav = ('<nav class="volnav" aria-label="Other volumes">'
+              + (f'<a class="vn-prev" href="vol-{prev[0]["id"]}.html"><span>← Vol. {prev[1]}</span><b>{esc(prev[0]["title"])}</b></a>' if prev else "<span></span>")
+              + '<a class="vn-all" href="contents.html"><span class="jp">目次</span></a>'
+              + (f'<a class="vn-next" href="vol-{nxt[0]["id"]}.html"><span>Vol. {nxt[1]} →</span><b>{esc(nxt[0]["title"])}</b></a>' if nxt else "<span></span>")
+              + "</nav>")
     blurb = (f'<div class="blurb"><h2>あらすじ · the story so far</h2><p>{inline_md(n["what"] or n["tagline"])}</p>'
              f'<dl><dt>period</dt><dd>{esc(n["period"])}</dd><dt>status</dt><dd>{STATUS.get(n.get("status"))}</dd><dt>repo</dt><dd>{repo}</dd></dl></div>')
     rail = (blurb
             + f'<div class="back"><div><h3>stack</h3><div class="chips">{"".join(f"<span>{esc(s)}</span>" for s in n["stack"])}</div></div>'
             + (f'<div><h3>log</h3><ol>{events}</ol></div>' if events else "")
-            + f'<div><h3>elsewhere</h3><ul><li><a href="./#{n["id"]}">find it on the record →</a></li><li><a href="contents.html">back to the shelf →</a></li></ul>'
+            + (f'<div><h3>in this volume</h3><ol>{toc}</ol></div>' if len(ch["episodes"]) > 1 else "")
+            + f'<div><h3>elsewhere</h3><ul>{side}<li><a href="contents.html">all the projects →</a></li><li><a href="./#{n["id"]}">find it on the record →</a></li></ul>'
             + ("" if n.get("verified") else f'<p class="muted" style="font-size:13px;margin-top:10px">{esc(cfg("pages.draft_note"))}</p>') + '</div></div>')
-    first, final = ch["episodes"][0]["n"], ch["episodes"][-1]["n"]
-    shown = f"第{first}話 収録" if first == final else f"第{first}–{final}話 収録"
-    main = split(f'<div class="book"><div class="obj">{spine(n, vol)}</div><div class="obj">{cover_wallet(n, vol, ch["kana"], ch["obi"], cfg("you.name"), shown) if ch.get("cover") == "wallet" else cover(n, vol, ch, cfg("you.name"))}</div></div>' + "".join(eps), rail, rail_first=False)
-    page(f'vol-{n["id"]}.html', f'{n["title"]} · Vol. {vol}', f'Vol. {vol} · {esc(n["title"])}', main)
+    deck = (f'<div class="deck"><div class="rec-wrap">{record(n, vol, ch)}</div>'
+            '<svg class="arm" viewBox="-250 -250 600 500" aria-hidden="true"><g id="arm" transform="translate(300 -200) rotate(95)">'
+            '<circle r="24" style="fill:var(--paper);stroke:var(--tonearm-arm);stroke-width:5"/><rect x="-62" y="-13" width="30" height="26" style="fill:var(--tonearm-arm)"/>'
+            '<path d="M0 0 H294" style="stroke:var(--tonearm-arm);stroke-width:7;stroke-linecap:round"/>'
+            '<rect x="290" y="-15" width="44" height="30" rx="3" style="fill:var(--tonearm-arm)"/><circle cx="312" r="5" style="fill:var(--paper)"/>'
+            '<circle r="7" style="fill:var(--tonearm-arm)"/></g></svg></div>')   # the stylus is the paper dot at the arm's length, 312
+    main = split(f'<div class="vtop"><div class="vsleeve obj">{sleeve(n, vol, ch, cfg("you.name"))}</div></div>' + "".join(eps) + volnav, deck + rail, rail_first=False)
+    page(f'vol-{n["id"]}.html', f'{n["title"]} · Vol. {vol}', f'Vol. {vol} · {esc(n["title"])}', main, VOLUME_JS)
 
 
-def author_page(data, groups, pdfs):
+def author_page(data, books, vols, pdfs):
+    """The brief: what a busy reader needs in thirty seconds. Who, the highlights (site.yaml picks them), the years,
+    contact and the CV, as PDFs beside it and in full below."""
     p = data["profile"]
     yrs = "".join(f"<li><time>{esc(re.sub(r' – present', '–', y['period']))}</time><span>{esc(y['what'])}</span></li>" for y in data["years"])
-    tabs, sheets = [], []
+    hl = []
+    for vid in CFG["pages"].get("highlights") or []:
+        if vid not in books:
+            raise SystemExit(f"site.yaml: pages.highlights has '{vid}', which is not a volume (GUIDE.md lists the ids)")
+        b, live = books[vid], books[vid].get("status") == "active"
+        hl.append(f'<li><a href="vol-{vid}.html"><span class="no">Vol. {vols[vid]}</span><b>{esc(b["title"])}</b>'
+                  f'<span class="tag">{esc(b.get("tagline") or "")}</span>'
+                  f'<span class="meta">{esc(b["period"])} · <span class="{"live" if live else ""}">{STATUS.get(b.get("status"), "")}</span></span></a></li>')
+    tabs, sheets, gets = [], [], []
     for i, (lens, label) in enumerate(LENSES):
         f = CONTENT / "cv" / f"{lens}.md"
         if not f.exists():
@@ -444,35 +463,59 @@ def author_page(data, groups, pdfs):
         body = re.sub(r"(</h1>\n)<p>", r'\1<p class="head">', body, count=1)
         if lens in pdfs:
             body = f'<a class="btn pdf" href="{pdf_name(lens)}" download>{esc(cfg("pages.cv_pdf_link"))}</a>' + body
+        gets.append(f'<a class="btn" href="{pdf_name(lens)}" download>{label} · PDF</a>' if lens in pdfs else f'<a class="btn" href="#cv-{lens}" data-lens="{lens}">{label}</a>')
         tabs.append(f'<button type="button" role="tab" id="tab-{lens}" aria-controls="cv-{lens}" aria-selected="{str(i == 0).lower()}">{label}</button>')
         sheets.append(f'<article class="cv obj" role="tabpanel" id="cv-{lens}" aria-labelledby="tab-{lens}"{"" if i == 0 else " hidden"}>{body}</article>')
-    rail = f'''<div class="pt"><h1>作者紹介</h1><p>{esc(cfg("pages.author_intro"))}</p></div>
+    rail = f"""<div class="pt"><h1>作者紹介</h1><p>{esc(cfg("pages.author_intro"))}</p></div>
 <div class="flap">
   <div class="seal" aria-hidden="true">KS</div>
   <div><h2 style="margin:0 0 4px;font-size:28px">{esc(p["name"])}</h2><p class="mono muted" style="margin:0;font-size:12px">{esc(cfg("you.role_short"))}</p></div>
   <div class="comment"><span class="mono muted" style="font-size:11px">{esc(cfg("pages.author_comment_label"))}</span><br>{esc(cfg("you.one_liner"))}</div>
-  <div><h3>年譜 · the years</h3><ol class="years">{yrs}</ol></div>
+  <div><h3>{esc(cfg("pages.cv_get"))}</h3><div class="row">{"".join(gets)}</div></div>
   <div><h3>contact</h3><div class="contact">
     <div class="row"><span class="select" id="email">{esc(p["email"])}</span><button type="button" class="btn" id="copy">copy</button></div>
     <a href="{esc(p["github"])}" target="_blank" rel="noopener">github.com/BeanBois</a>
     <a href="{esc(p["linkedin"])}" target="_blank" rel="noopener">linkedin.com/in/kai-shun-teoh</a></div></div>
-</div>'''
-    main = split(f'<section aria-label="CV"><div class="tabs" role="tablist" aria-label="CV lens">{"".join(tabs)}</div>{"".join(sheets)}</section>', rail)
+  <div><h3>{esc(cfg("pages.years_heading"))}</h3><ol class="years">{yrs}</ol></div>
+</div>"""
+    brief = (f'<section class="brief" aria-labelledby="b-sum"><h2 class="kicker" id="b-sum">{esc(cfg("pages.brief_summary"))}</h2><p class="sum">{inline_md(p.get("summary") or "")}</p></section>'
+             # the projects and the CV share one place, as two tabs
+             + '<section class="brief"><div class="btabs" role="tablist" aria-label="The brief">'
+             + f'<button type="button" role="tab" id="bt-hl" aria-controls="bp-hl" aria-selected="true">{esc(cfg("pages.highlights_heading"))}</button>'
+             + f'<button type="button" role="tab" id="bt-cv" aria-controls="bp-cv" aria-selected="false">{esc(cfg("pages.cv_heading"))}</button></div>'
+             + f'<div role="tabpanel" id="bp-hl" aria-labelledby="bt-hl"><ol class="hl">{"".join(hl)}</ol></div>'
+             + f'<div role="tabpanel" id="bp-cv" aria-labelledby="bt-cv" hidden><div class="tabs" role="tablist" aria-label="CV lens">{"".join(tabs)}</div>{"".join(sheets)}</div></section>')
+    main = split(brief, rail)
     script = """<script>
-const tabs = [...document.querySelectorAll('[role="tab"]')];
-function pick(id) {
-  tabs.forEach(t => { const on = t.id === "tab-" + id; t.setAttribute("aria-selected", String(on)); document.getElementById(t.getAttribute("aria-controls")).hidden = !on; });
-}
-tabs.forEach(t => t.addEventListener("click", () => pick(t.id.slice(4))));
-const h = location.hash.replace("#cv-", "");
-if (tabs.some(t => t.id === "tab-" + h)) pick(h);
+/* two tab sets: the brief's (highlights | the CV) and, inside the CV, the lens (ML | Cloud | Backend) */
+const set = sel => {
+  const tabs = [...document.querySelectorAll(sel)];
+  const pick = id => tabs.forEach(t => { const on = t.id === id; t.setAttribute("aria-selected", String(on)); t.tabIndex = on ? 0 : -1; document.getElementById(t.getAttribute("aria-controls")).hidden = !on; });
+  tabs.forEach((t, i) => {
+    t.addEventListener("click", () => pick(t.id));
+    t.addEventListener("keydown", e => {   // arrow keys move between tabs
+      const d = { ArrowRight: 1, ArrowLeft: -1 }[e.key]; if (!d) return;
+      const n = tabs[(i + d + tabs.length) % tabs.length]; pick(n.id); n.focus();
+    });
+  });
+  pick(tabs.find(t => t.getAttribute("aria-selected") === "true").id);
+  return pick;
+};
+const brief = set(".btabs [role=tab]"), lens = set(".tabs [role=tab]");
+const showCv = l => { brief("bt-cv"); if (l) lens("tab-" + l); };
+document.querySelectorAll("[data-lens]").forEach(a => a.addEventListener("click", () => showCv(a.dataset.lens)));
+const h = location.hash;   // author.html#cv opens the CV; #cv-ml opens it on that lens
+// after the browser's own jump to the anchor, so the tabs are in view rather than the sheet's top
+const land = () => addEventListener("load", () => setTimeout(() => document.querySelector(".btabs").scrollIntoView({ block: "start" }), 0));
+if (h === "#cv") { showCv(); land(); }
+else if (h.startsWith("#cv-") && document.getElementById("tab-" + h.slice(4))) { showCv(h.slice(4)); land(); }
 const copy = document.getElementById("copy"), email = document.getElementById("email");
 copy.onclick = () => {
   const fallback = () => { const r = document.createRange(); r.selectNodeContents(email); getSelection().removeAllRanges(); getSelection().addRange(r); };
   try { navigator.clipboard.writeText(email.textContent).then(() => { copy.textContent = "copied"; }, fallback); } catch { fallback(); }
 };
 </script>"""
-    page("author.html", "作者紹介 · Teoh Kai Shun", "作者紹介 about the author", main, script)
+    page("author.html", "作者紹介 · Teoh Kai Shun", f'作者紹介 {esc(cfg("nav.brief"))}', main, script)
 
 
 # ---------- the CVs as PDFs ----------
@@ -552,16 +595,16 @@ def ordinal(n):
     return f"{n}{'th' if 10 <= n % 100 <= 20 else {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')}"
 
 
-def colophon_page(n_entries, n_public, n_vols):
-    git = lambda *a: subprocess.run(["git", *a], cwd=HERE, capture_output=True, text=True).stdout.strip()
+def colophon_page(n_entries, n_public, n_vols, log, titles):
+    """The footnote: when the site last changed, what changed in the projects lately, and how it's made."""
     count, short = git("rev-list", "--count", "HEAD") or "0", git("rev-parse", "--short", "HEAD") or "uncommitted"
     pages = "".join(f'<li><a href="{HOME if f == "index.html" else f}">{esc(k)} · {esc(e)}</a> <span class="muted mono" style="font-size:12px">p. {i + 1}</span></li>' for i, (f, e, k) in enumerate(PAGES))
     box = f'''<div class="okuzuke obj"><div class="seal-c" aria-hidden="true"><b>第{count}刷</b><small>printing</small></div>
 <h2>奥付</h2><p class="sub">Colophon. Japanese books end with this page: who made the book, and when it was printed.</p>
+<p class="upd-big"><span class="mono muted">{esc(cfg("colophon.updated"))}</span><b>{UPDATED[0]}</b></p>
 <dl>
 <dt>書名<small>title</small></dt><dd>{esc(cfg("colophon.title"))}</dd>
 <dt>著者<small>author</small></dt><dd>Teoh Kai Shun</dd>
-<dt>発行<small>printed</small></dt><dd>{date.today().isoformat()}</dd>
 <dt>刷<small>printing</small></dt><dd>第{count}刷, the {ordinal(count)} commit to the repo (<code>{esc(short)}</code>)</dd>
 <dt>製本<small>binding</small></dt><dd>Every page is built from one private folder of Markdown, {n_entries} entries, {n_public} of them public. A page can't say something the folder doesn't.
   <div class="pipe"><span>bank/*.md</span><i>→</i><span>check + export</span><i>→</i><span>build.py</span><i>→</i><span>{len(PAGES)} pages</span><i>→</i><span>GitHub Pages</span></div></dd>
@@ -570,18 +613,41 @@ def colophon_page(n_entries, n_public, n_vols):
 <dt>音<small>sound</small></dt><dd>{esc(cfg("colophon.sound"))}</dd>
 <dt>状態<small>state</small></dt><dd>{esc(cfg("colophon.state"))}</dd>
 </dl></div>'''
-    main = split(box, f'<div class="back"><div><h3>収録 · in this printing</h3><ul class="pages">{pages}</ul></div></div>')
-    page("colophon.html", "奥付 · Teoh Kai Shun", "奥付 colophon", main)
+    recent = ""
+    for d, i, msg in sorted(log, reverse=True)[:8]:
+        title, vid = titles.get(i, (i, None))
+        name = f'<a href="vol-{vid}.html">{esc(title)}</a>' if vid else esc(title)
+        recent += f"<li><time>{d}</time>{name}: {esc(msg)}</li>"
+    main = split(box, f'<div class="back">{f"<div><h3>更新履歴 · lately</h3><ol>{recent}</ol></div>" if recent else ""}'
+                      f'<div><h3>収録 · in this printing</h3><ul class="pages">{pages}</ul></div></div>')
+    page("colophon.html", "奥付 · Teoh Kai Shun", f'奥付 {esc(cfg("nav.colophon"))}', main)
+
+
+def barcode(text):
+    """The back cover's barcode, drawn from the date the site last changed: a different printing, different bars."""
+    import hashlib
+    bits = "".join(f"{b:08b}" for b in hashlib.sha256(text.encode()).digest()[:12])
+    x, bars = 6, []
+    for i in range(0, len(bits), 3):
+        w = 1 + int(bits[i:i + 2], 2) % 3
+        if bits[i + 2:i + 3] == "1" or i % 9 == 0:
+            bars.append(f'<rect x="{x}" y="0" width="{w}" height="{30 if i % 24 else 34}"/>')
+        x += w + 1
+    return f'<svg class="bars" viewBox="0 0 {x + 6} 34" aria-hidden="true"><g fill="currentColor">{"".join(bars)}</g></svg>'
 
 
 def cover_page(data, vols, chapters, home):
-    t = (SRC / "cover.html").read_text()
+    t = (SRC / "cover.html").read_text().replace("<!--TURN-->", turn_html())
     ep = lambda i, ch: next((e["n"] for e in ch["episodes"] if e.get("entry") == i), ch["episodes"][0]["n"])
     data = dict(data, chapters={i: {"href": f"vol-{v}.html", "vol": vols[v], "ep": ep(i, chapters[v])} for i, v in home.items()},
                 vols={n["id"]: vols[home.get(n["id"], n["id"])] for n in data["nodes"]}, musicApi=MUSIC_API or None,
                 profile=dict(data["profile"], oneliner=cfg("you.one_liner")), playlistIds=music_settings({n["id"] for n in data["nodes"]}),
-                text={"intro": cfg("cover.intro"), "hint": cfg("cover.hint"), "labelRim": cfg("cover.label_rim"),
-                      "directoryContents": cfg("cover.directory.contents"), "cvPdfNote": cfg("pages.cv_pdf_note") if PDFS else ""},
+                text={"intro": cfg("cover.intro"), "labelRim": cfg("cover.label_rim"), "blurbHead": cfg("cover.blurb_head"), "blurb": cfg("cover.blurb"),
+                      "doorBrief": cfg("cover.door_brief"), "doorBriefNote": cfg("cover.door_brief_note"),
+                      "doorProjects": cfg("cover.door_projects"), "doorProjectsNote": cfg("cover.door_projects_note").replace("{count}", str(len(vols))),
+                      "directoryProjects": cfg("cover.directory.projects").replace("{count}", str(len(vols))),
+                      "updated": cfg("cover.updated").replace("{date}", UPDATED[0]), "readMore": cfg("cover.read_more")},
+                barcode=barcode(UPDATED[0]),
                 music=SAMPLE_MUSIC if not MUSIC_API else {"is_playing": False, "title": None},
                 playlists={})   # per-project playlists: not yet (see README)
     music_js = """<script>
@@ -678,20 +744,24 @@ def main():
     byid = {n["id"]: n for n in nodes}
     books = {n["id"]: n for n in shelf}
     PAGES.clear()
-    PAGES.extend([("index.html", "表紙", "cover"), ("contents.html", "目次", "contents")]
+    PAGES.extend([("index.html", "表紙", "cover"), ("author.html", "作者紹介", cfg("nav.brief")), ("contents.html", "目次", cfg("nav.projects"))]
                  + [(f"vol-{i}.html", f"Vol. {vols[i]}", books[i]["title"]) for i in sorted(chapters, key=vols.get)]
-                 + [("author.html", "作者紹介", "about the author"), ("colophon.html", "奥付", "colophon")])
+                 + [("colophon.html", "奥付", cfg("nav.colophon"))])
+    UPDATED[:] = [git("log", "-1", "--format=%cs") or date.today().isoformat()]
     shutil.rmtree(DIST, ignore_errors=True)
     DIST.mkdir()
     (DIST / ".nojekyll").write_text("")
     PDFS.clear(); PDFS.update(cv_pdfs())
     cover_page(data, vols, chapters, home)
     contents_page(shelf, vols, chapters)
-    for i, ch in chapters.items():
-        volume_page(books[i], vols[i], ch, data["log"], byid)
-    groups = {k: dict(v, id=k) for k, v in data["groups"].items()}
-    author_page(data, groups, PDFS)
-    colophon_page(data["counts"]["entries"], data["counts"]["public"], len(shelf))
+    order = sorted(chapters, key=vols.get)
+    for k, i in enumerate(order):
+        prev = order[k - 1] if k > 0 else None
+        nxt = order[k + 1] if k + 1 < len(order) else None
+        volume_page(books[i], vols[i], chapters[i], data["log"], byid, prev and (books[prev], vols[prev]), nxt and (books[nxt], vols[nxt]))
+    author_page(data, books, vols, PDFS)
+    titles = {i: (byid[i]["title"], home.get(i) or (i if i in chapters else None)) for i in byid}   # entry -> its title and its volume
+    colophon_page(data["counts"]["entries"], data["counts"]["public"], len(shelf), data["log"], titles)
     subset_fonts()
     print(f"{len(PAGES)} pages, {len(shelf)} volumes, {len(chapters)} written -> dist/")
 

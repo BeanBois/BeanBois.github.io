@@ -2,6 +2,17 @@
 
 The site is https://beanbois.github.io. This guide is everything you need to change it, see the change on your Mac, and publish it.
 
+## The four parts
+
+Each part is for a different reader, and the corners of every page lead between them.
+
+| Part | Page | For | What's on it |
+|---|---|---|---|
+| The hook | the cover (`index.html`) | anyone arriving | the record, and a blurb written like the back of a book (`cover.blurb_head`, `cover.blurb`), with two doors: the brief and the projects. Clicking a project shows only its blurb and a link to its volume. |
+| The brief | 作者紹介 (`author.html`) | someone with thirty seconds, e.g. a recruiter | your summary, the highlights (`pages.highlights` picks which volumes, in order), the years, contact, the CV PDFs, and the CV in full below |
+| The projects | 目次 (`contents.html`) and a volume each | someone who wants depth | every volume as a record in its sleeve. Click one: the record comes out and the volume opens with it (Chrome, Edge and Safari animate this; other browsers just open the page). On the volume the record spins, then turns as you scroll, and the tonearm shows how far you've read. Every volume links to the ones either side. |
+| The footnote | 奥付 (`colophon.html`) | the curious | when the site last changed (the date of the last commit), what changed lately, and how it's made. Every page's foot also says "last updated" and links here. |
+
 ## What lives where
 
 | To change | Edit | Then |
@@ -130,7 +141,7 @@ When you like it: `git checkout main && git merge design/new-colours && git push
 
 ## Project ids
 
-For `music.playlists`.
+For `music.playlists`. For `pages.highlights`, use the volume's id: most are the same as the project's, except the volumes that hold several projects: `ai-platform` (the Tencent platform work) and `neuromorphic` (with iRecognise).
 
 | id | project |
 |---|---|
