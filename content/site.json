@@ -430,7 +430,7 @@
     "Next.js",
     "TypeScript"
    ],
-   "repo": "https://github.com/BeanBois/RE-News-",
+   "repo": null,
    "what": "RE-News's predecessor (13 June – 28 July 2026, about 155 versions): a political, economic and social intelligence engine for Malaysia. Per-source encoders turn news, government, economic and public-opinion data into one citable signal shape, and an LLM fuses only those signals into reports whose every claim resolves to evidence. Renamed and narrowed to RE-News on 28 July 2026.",
    "bullets": [
     "Built a working pipeline in a day and real-data ingestion within a week (CPI, OPR, fuel prices, government feeds, social comments), then widened it to six domains with 30 months of history.",
@@ -441,7 +441,7 @@
    ],
    "story": "**Measure, then decide.** The next phase depended on links between sources of different kinds; measured, there were none, so it was deferred on evidence instead of built. The linker turned out to be reason-blind (two signals for the same policy for incompatible reasons counted as agreement), so corroboration became basis-aware. **Knowing when to stop.** A campaign decision-support side (party views, elections, a war-room) was built and then set aside, over the legal and data-protection questions around political profiling and because measurement showed the party-attribution chain was too weak to stand on. What survived became RE-News.",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "blockhub",
@@ -823,7 +823,7 @@
    "title": "RE-News",
    "role": null,
    "tagline": "What is Malaysia worried about right now, ranked and cited",
-   "period": "2026-06 – 2026-07",
+   "period": "2026-07",
    "status": "paused",
    "kind": "product",
    "track": "side",
@@ -843,18 +843,20 @@
     "React",
     "TypeScript"
    ],
-   "repo": "https://github.com/BeanBois/RE-News-",
-   "what": "Scans news, government, economic and public-opinion sources, compresses each into a common citable \"signal\", and has an LLM fuse only those signals into ranked, cited causal chains: \"policy X led to Y, so Z feels W.\" Built as \"atlas\" from June 2026 and renamed RE-News on 2026-07-28, when it was narrowed to a public issue-scan for Malaysia.",
+   "repo": null,
+   "what": "Scans news, government, economic and public-opinion sources, compresses each into a common citable \"signal\", and has an LLM fuse only those signals into ranked, cited causal chains: \"policy X led to Y, so Z feels W.\" Narrowed from [atlas](atlas.md) on 2026-07-28 into a public issue-scan for Malaysia; the significance overhaul followed on 29 July. Paused since.",
    "bullets": [
     "Designed a pipeline of 8 per-source encoders (news, government, CPI/OPR/fuel-price data, public opinion, search trends and others) that compress raw data into one citable signal schema, fed by 17 ingest modules.",
     "Restricted the LLM to a fusion layer over signals, never raw documents; every claim carries evidence references that a verifier resolves before the report is shown.",
     "Made the model backend switchable per stage: a local qwen3:32b on the home-lab GPU by default, Claude as an opt-in.",
-    "Built it to production habits in six weeks: 392 commits, about 70,000 lines of Python and 23,000 of TypeScript, 58 PostgreSQL migrations, 17 API route modules, and 102 test files (about 1,800 passing tests).",
+    "Rebuilt significance ranking after measuring the old score: 85% of its weight was near-constant, so issues are now ranked by breadth, gated and graded by confidence (never multiplied in), badged by trajectory, and intensity is an explicit null because nothing measures it. Spread rose from sd 0.036 to 0.215, and a public `/issues` API passes every score component through so each rank is explainable.",
+    "Fail-closed operations: an embedding circuit breaker (a backfill had reported success while writing 917 zero vectors), a stale-run watchdog, and a fix for a front page that showed zero citations for five days.",
+    "Built atlas and RE-News to production habits in seven weeks: about 390 commits, 70,000 lines of Python and 23,000 of TypeScript, 73 PostgreSQL migrations, and about 2,850 passing tests.",
     "Reports are navigated as a tree (report, chat, guided next steps, branch, back), each node an immutable, auditable record."
    ],
-   "story": "\"Grey is correct\": the system shows nothing rather than an extrapolation. The repo runs on a decision register (D1 to D155) and a \"current state\" census taken from source, because the docs had started to disagree with each other. Ties to the home lab, which the LLM runs on.",
+   "story": "\"Grey is correct\": the system shows nothing rather than an extrapolation. The ranker's own limit is written down, not hidden: the corpus is 94% institutional, so until the social layer is many times larger it mostly ranks news volume, not public importance. The repo runs on a decision register (D1 to D155) and a \"current state\" census taken from source, because the docs had started to disagree with each other. Ties to the home lab, which the LLM runs on.",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "sales-signatures",
