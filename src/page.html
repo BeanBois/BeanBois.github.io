@@ -320,7 +320,13 @@ addEventListener("pagereveal", e => {
   const m = e.viewTransition && (window.navigation?.activation?.from?.url || "").match(/vol-([\w-]+)\.html/);
   const card = m && document.querySelector(`[data-vt="${m[1]}"]`);
   if (!card) return;
-  const r = card.querySelector(".lp").getBoundingClientRect();
+  /* by the 目次 link (not Back) the shelf opens at its top, so most cards are off screen: bring this one to the middle
+     first, or the record and sleeve fly home off the bottom of the screen */
+  let r = card.querySelector(".lp").getBoundingClientRect();
+  if (r.top < 0 || r.bottom > innerHeight) {
+    scrollTo({ top: scrollY + r.top + r.height / 2 - innerHeight / 2, behavior: "instant" });
+    r = card.querySelector(".lp").getBoundingClientRect();
+  }
   let o = [innerWidth / 2, innerHeight / 2]; try { o = JSON.parse(sessionStorage.vtrec || "null") || o; sessionStorage.removeItem("vtrec"); } catch (_) {}
   const cv = toneVeil(); cv.style.viewTransitionName = "tone";    // empty at first paint, so the turn starts on the volume
   toneDots(cv, o[0], o[1], 620).then(() => new Promise(w => setTimeout(w, 420)))
