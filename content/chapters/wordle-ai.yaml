@@ -10,4 +10,4 @@ episodes:
       - span: 6
         art: chars
         caption: Three players
-        text: A Wordle game as a Gym environment and the agents to play it, written over four days. A simple agent that scores letters from rewards, a DQN agent and an LSTM-DQN agent, judged by the average number of guesses. A dictionary agent using information theory was planned next.
+        text: A learning exercise. A Wordle game as a Gym environment and the agents to play it, written over four days. A simple agent that scores letters from rewards, a DQN agent and an LSTM-DQN agent, judged by the average number of guesses. A dictionary agent using information theory was planned next.

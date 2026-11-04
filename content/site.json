@@ -513,7 +513,7 @@
    ],
    "story": "",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "archer-bot",
@@ -644,7 +644,7 @@
    "id": "carbon-coin",
    "title": "carbon-coin",
    "role": null,
-   "tagline": "A one-day hackathon app that ranks companies and products by their carbon and ESG scores",
+   "tagline": "HackKing's 2022 runner-up: a one-day app that ranks companies and products by carbon and ESG score",
    "period": "2022-11",
    "status": "archived",
    "kind": "product",
@@ -661,13 +661,13 @@
     "React"
    ],
    "repo": null,
-   "what": "A hackathon build in one day (19 November 2022), in a team of three: a Remix web app that scores companies by carbon and ESG, with company pages and graphs, products, a leaderboard and a scanner.",
+   "what": "Our HackKing's 2022 entry (19 November 2022), first runner-up, built in one day by a team of three: a Remix web app that scores companies by carbon and ESG, with company pages and graphs, products, a leaderboard and a scanner.",
    "bullets": [
-    "In a one-day hackathon team of three, built a Remix app ranking companies and products by carbon and ESG score; wrote the company listing and the component structure."
+    "First runner-up at HackKing's 2022 (sponsored by BlackRock): in a one-day team of three, built a Remix app ranking companies and products by carbon and ESG score; wrote the company listing and the component structure."
    ],
    "story": "",
    "playlist": null,
-   "verified": null
+   "verified": "2026-11-04"
   },
   {
    "id": "chess-ai",
@@ -799,7 +799,7 @@
    "id": "german-learning-hub",
    "title": "German learning hub",
    "role": null,
-   "tagline": "A web page of German grammar rules with a practice chatbot",
+   "tagline": "Learning German with grammar rules, a practice chatbot and a screen translator",
    "period": "2023-12 – 2024-02",
    "status": "archived",
    "kind": "tool",
@@ -812,12 +812,14 @@
    },
    "stack": [
     "JavaScript",
-    "HTML",
-    "CSS",
-    "Python"
+    "Express",
+    "OpenAI API",
+    "Python",
+    "Tesseract",
+    "Tkinter"
    ],
    "repo": null,
-   "what": "A small site for learning German: grammar rules on the client, a Python chatbot server, with the GloVe paper among its notes. 2 commits: started 2023-12-30, \"first beta up\" 2024-02-16.",
+   "what": "A small toolkit for learning German, for myself: a page of grammar rules, a practice chatbot that talks through a small Express server to OpenAI's API, and a screen translator that screenshots the screen, lets you pick a region, reads it with Tesseract OCR, groups the characters back into lines and shows the translation in a window. A chatbot model of my own (with the GloVe paper in its notes) was started but not built. 2 commits: started 2023-12-30, \"first beta up\" 2024-02-16.",
    "bullets": [],
    "story": "",
    "playlist": null,
@@ -1232,7 +1234,7 @@
     "CSS"
    ],
    "repo": null,
-   "what": "A PHP web app built at someone's request and pushed in one day (2025-12-15, 3 commits, README \"Done by Teoh Kai Shun\"): token-based login, registration and logout-everywhere, admin roles that activate users, checklists with progress and review, scheduled cleanup of expired tokens, and email notifications for delayed tasks.",
+   "what": "A PHP web app built as a favour and pushed in one day (2025-12-15, 3 commits, README \"Done by Teoh Kai Shun\"): token-based login, registration and logout-everywhere, admin roles that activate users, checklists with progress and review, scheduled cleanup of expired tokens, and email notifications for delayed tasks.",
    "bullets": [],
    "story": "",
    "playlist": null,
@@ -1356,7 +1358,7 @@
     "PyTorch"
    ],
    "repo": null,
-   "what": "A Wordle game as a Gym environment and agents to play it, written over four days (5 commits): a simple agent that scores letters from rewards, a DQN agent and an LSTM-DQN agent, both tracking the average number of guesses per 500 games. A dictionary agent using information theory was planned but not written.",
+   "what": "A learning exercise: a Wordle game as a Gym environment and agents to play it, written over four days (5 commits): a simple agent that scores letters from rewards, a DQN agent and an LSTM-DQN agent, both tracking the average number of guesses per 500 games. A dictionary agent using information theory was planned but not written.",
    "bullets": [],
    "story": "",
    "playlist": null,

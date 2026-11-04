@@ -1,7 +1,7 @@
 # Volume for bank/projects/carbon-coin.md. Panel text from that entry; captions editorial.
 entry: carbon-coin
 kana: 炭素
-obi: Companies, ranked by what they burn.
+obi: Runner-up, in a day.
 cover: table
 episodes:
   - n: 1
@@ -9,5 +9,5 @@ episodes:
     panels:
       - span: 6
         art: table
-        caption: The app
-        text: A hackathon build in one day, November 2022, in a team of three. A Remix app scoring companies by carbon and ESG, with company pages and graphs, products, a leaderboard and a scanner. I wrote the company listing and the component structure.
+        caption: Runner-up
+        text: Our HackKing's 2022 entry, first runner-up, built in one day in November 2022 by a team of three. A Remix app scoring companies by carbon and ESG, with company pages and graphs, products, a leaderboard and a scanner. I wrote the company listing and the component structure.
