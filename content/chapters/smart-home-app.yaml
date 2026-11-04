@@ -1,0 +1,13 @@
+# Volume for bank/projects/smart-home-app.md. Panel text from that entry; captions editorial.
+entry: smart-home-app
+kana: スマホーム
+obi: Register it, then watch it.
+cover: devices
+episodes:
+  - n: 1
+    title: Six days
+    panels:
+      - span: 6
+        art: devices
+        caption: v1
+        text: A Flutter app, released as v1 after nine commits in six days. Sign-up and login with password reset, devices registered by type with setup instructions, and a dashboard charting each device's readings, on Supabase behind a swappable database interface.

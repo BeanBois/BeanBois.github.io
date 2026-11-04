@@ -1337,6 +1337,62 @@
    "verified": "2026-11-04"
   },
   {
+   "id": "seall",
+   "title": "Seall",
+   "role": null,
+   "tagline": "One dashboard over several ERP systems, per business and department",
+   "period": "2026-05",
+   "status": "idea",
+   "kind": "venture",
+   "track": "side",
+   "group": null,
+   "size": "small",
+   "mix": {
+    "backend": 0.7,
+    "product": 0.3
+   },
+   "stack": [
+    "FastAPI",
+    "PostgreSQL",
+    "Redis",
+    "Next.js"
+   ],
+   "repo": null,
+   "what": "A design in one README (2026-05-11): connectors for SAP and SAP Business One feed a unified data layer (PostgreSQL, Redis, a FastAPI gateway) behind a Next.js analytics dashboard. No code yet.",
+   "bullets": [],
+   "story": "",
+   "playlist": null,
+   "verified": "2026-11-05"
+  },
+  {
+   "id": "smart-home-app",
+   "title": "Smart home app",
+   "role": null,
+   "tagline": "A Flutter app to register home devices and watch their readings",
+   "period": "2025-10-27 – 2025-11-01",
+   "status": "shipped",
+   "kind": "product",
+   "track": "side",
+   "group": null,
+   "size": "small",
+   "mix": {
+    "product": 0.55,
+    "backend": 0.45
+   },
+   "stack": [
+    "Flutter",
+    "Dart",
+    "Supabase",
+    "fl_chart"
+   ],
+   "repo": null,
+   "what": "A Flutter app (released as v1 on 2025-11-01 after 9 commits in six days): sign-up and login with password reset, registering devices by type with setup instructions, and a dashboard charting each device's readings, on Supabase behind a swappable database interface.",
+   "bullets": [],
+   "story": "",
+   "playlist": null,
+   "verified": "2026-11-05"
+  },
+  {
    "id": "srgan",
    "title": "SRGAN from scratch",
    "role": null,
@@ -1648,6 +1704,6 @@
  ],
  "counts": {
   "entries": 55,
-  "public": 49
+  "public": 51
  }
 }

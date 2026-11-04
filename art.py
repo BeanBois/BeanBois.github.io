@@ -511,6 +511,13 @@ ART = {
                       + ring(100, 250, 22, 5) + ring(170, 250, 22, 5) + ln("M100 250 L130 224 L170 250 M130 224 L150 224 M116 230 H156", 4) + note(420, 280, "dock to dock", "end")),
     "team": lambda: ("".join(person(60 + i * 47, 150, 0.85, SPOT if i == 3 else PAPER) for i in range(8))
                      + r(140, 40, 170, 60, PAPER, 5) + t(225, 78, "screens → flow", 14, "mono", "middle") + ln("M225 100 L201 132", 3, "5 5") + note(225, 250, "a team of eight", "middle")),
+    # --- Seall ---
+    "erp": lambda: ("".join(r(30, 40 + i * 80, 110, 56, PAPER, 5) + t(85, 74 + i * 80, f"ERP {'ABC'[i]}", 15, "mono", "middle") + arrow(145, 68 + i * 80, 200, 150) for i in range(3))
+                    + r(205, 110, 70, 80, INK, 5) + t(240, 156, "one", 15, "mono", "middle", PAPER) + arrow(280, 150, 300, 150)
+                    + r(305, 70, 125, 160, PAPER, 5) + bars(320, 110, 95, 100, [0.4, 0.7, 0.55, 0.9], 6) + note(367, 260, "per department", "middle")),
+    # --- Smart home app ---
+    "devices": lambda: (phone(250, 30, 150, 250, 0) + curve(268, 110, 114, 90, lambda s: 0.5 + 0.35 * math.sin(6 * s) * (1 - s * 0.5), 24, 3)
+                        + "".join(r(40, 40 + i * 78, 130, 56, PAPER, 4) + ring(66, 68 + i * 78, 12, 4, SPOT if i == 1 else PAPER) + t(90, 74 + i * 78, ("lamp", "sensor", "plug")[i], 14) + ln(f"M174 {68 + i * 78} H240", 3, "5 5") for i in range(3))),
     # --- Manunet ---
     "provenance": lambda: (chip(50, 90, 110, 110, "IC") + arrow(185, 145, 245, 145) + stamp(305, 100, "signed", -6, 18) + doc(260, 150, 100, 110, 4, 3, False)
                            + arrow(370, 205, 420, 205) + note(225, 40, "surplus → shortage", "middle")),

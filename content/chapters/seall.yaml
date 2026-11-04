@@ -1,0 +1,13 @@
+# Volume for bank/projects/seall.md. Shown as an idea (Kai Shun, 2026-11-05).
+entry: seall
+kana: ダッシュ
+obi: Many ERPs, one view.
+cover: erp
+episodes:
+  - n: 1
+    title: An idea
+    panels:
+      - span: 6
+        art: erp
+        caption: The idea
+        text: One dashboard over several ERP systems, per business and department. Connectors for SAP and SAP Business One feed a unified data layer (PostgreSQL, Redis, a FastAPI gateway) behind a Next.js analytics dashboard. A design so far, no code yet.
