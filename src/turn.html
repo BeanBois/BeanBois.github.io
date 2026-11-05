@@ -91,17 +91,26 @@ html.vt-head::view-transition-new(vt-wave) { animation: none !important; }
     requestAnimationFrame(frame);
   }
 
-  /* leaving: remember where the click was, so the wave starts there */
+  /* Which page a turn goes from and to. Chrome says (navigation.activation, and pageswap's activation); Safari turns
+     pages too but says neither, so each page also leaves a note on the way out: where it was, and where a click was
+     taking it. A note is only believed for a few seconds, the longest a turn waits for its new page. */
+  const note = () => { try { const n = JSON.parse(sessionStorage.vtfrom || "null"); return n && Date.now() - n.t < 8000 ? n : null; } catch (_) { return null; } };
+  const same = (a, b) => { try { return new URL(a, location.href).pathname === new URL(b, location.href).pathname; } catch (_) { return false; } };
+
+  /* leaving: remember where the click was, so the wave starts there, and where it leads */
   document.addEventListener("click", e => {
     if (reduce || e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     const a = e.target.closest && e.target.closest("a[href]");
-    if (!a || a.target || a.hasAttribute("download") || !("onpagereveal" in window)) return;
+    if (!a || a.target || a.hasAttribute("download")) return;
     const A = where(location.href), B = where(a.href);
     if (!isHead(A, B)) return;
-    try { sessionStorage.vtwave = JSON.stringify([e.clientX, e.clientY]); } catch (_) {}
+    try { sessionStorage.vtwave = JSON.stringify([e.clientX, e.clientY]);
+          sessionStorage.vtfrom = JSON.stringify({ from: location.href, to: a.href, t: Date.now() }); } catch (_) {}
   });
   addEventListener("pageswap", e => {
-    const to = e.activation && e.activation.entry && e.activation.entry.url;
+    const n = note(), to = e.activation && e.activation.entry && e.activation.entry.url
+      || (n && same(n.from, location.href) ? n.to : null);          // Safari: only a click says where it leads, not Back
+    try { sessionStorage.vtfrom = JSON.stringify({ from: location.href, to, t: Date.now() }); } catch (_) {}
     if (e.viewTransition && to && isHead(where(location.href), where(to))) root.classList.add("vt-head");
   });
   addEventListener("pageshow", e => {
@@ -112,8 +121,10 @@ html.vt-head::view-transition-new(vt-wave) { animation: none !important; }
   /* arriving */
   addEventListener("pagereveal", e => {
     if (where(location.href) === "home") try { sessionStorage.removeItem("vtvol"); } catch (_) {}   // a volume's note is for the shelf only (src/page.html)
-    const vt = e.viewTransition, from = window.navigation && navigation.activation && navigation.activation.from && navigation.activation.from.url;
-    if (!vt || reduce || !from) return;
+    const n = note(); try { sessionStorage.removeItem("vtfrom"); } catch (_) {}
+    const act = window.navigation && navigation.activation && navigation.activation.from && navigation.activation.from.url;
+    const vt = e.viewTransition, from = act || (n && (!n.to || same(n.to, location.href)) ? n.from : null);
+    if (!vt || reduce || !from) { try { sessionStorage.removeItem("vtwave"); } catch (_) {} return; }
     const A = where(from), B = where(location.href);
     if (!isHead(A, B)) return;
     root.classList.add("vt-head");
