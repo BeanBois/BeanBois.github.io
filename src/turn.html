@@ -3,7 +3,8 @@
    src/page.html: the wave. Each part has a fixed place in a Poincaré disk (the cover at the centre, the others out
    towards the rim); the new page opens in a hyperbolic circle round where you clicked, or from the side the old page
    lies on Back. The shelf <-> volume turn (the record) is separate and untouched. Browsers without cross-page
-   transitions, and reduced motion, just open the page. */
+   transitions (Firefox) play the wave themselves, in two halves: the old page fades to paper as it's left, and the new
+   one opens out of the paper in the same circle (vt-out, vt-in below). Reduced motion just opens the page. */
 @view-transition { navigation: auto; }
 @media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }
 html.vt-head .deck .rec-wrap, html.vt-head .vsleeve { view-transition-name: none !important; }
@@ -17,11 +18,16 @@ html.vt-head::view-transition-new(vt-wave) { animation: none !important; }
    they stay put on the old page until the wave reaches them (wave below) */
 html.vt-head::view-transition-group(rec), html.vt-head::view-transition-group(sleeve),
 html.vt-head::view-transition-old(rec), html.vt-head::view-transition-old(sleeve) { animation: none !important; }
+/* the two halves, where the browser can't turn pages: the body goes, leaving its paper; the new body starts as nothing */
+html.vt-out body { opacity: 0; transition: opacity .16s ease-in; }
+html.vt-in body { clip-path: circle(0px at 50% 50%); }
+.vt-wave.solo { z-index: 50; }
 </style>
 <script>
 (() => {
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const root = document.documentElement;
+  const native = "CSSViewTransitionRule" in window;   // the browser turns pages itself (Chrome, Edge, Safari); not Firefox
 
   /* where each part lives in the disk (x right, y down); a volume lives with the projects */
   const SPOT = { home: [0, 0], brief: [-0.6, 0], projects: [0.6, 0], colophon: [0, 0.6] };
@@ -49,7 +55,7 @@ html.vt-head::view-transition-old(rec), html.vt-head::view-transition-old(sleeve
   /* wave: the new page opens in a hyperbolic circle round where you clicked. Its hyperbolic radius grows evenly, so on
      screen it starts quick and slows towards the rim; a few faint rings trail it at even hyperbolic spacing, bunching
      at the edge, and lean towards the centre of the disk, as circles there do. */
-  function wave(A, B, cv, st) {
+  function wave(A, B, cv, st, body) {
     const W = innerWidth, H = innerHeight, RD = Math.hypot(W, H) / 2 * 1.6, ms = 1100;   // the disk is bigger than the screen, so a corner isn't at its very rim
     let z0 = null;
     try { const c = JSON.parse(sessionStorage.vtwave || "null"); sessionStorage.removeItem("vtwave"); if (c) z0 = [(c[0] - W / 2) / RD, (c[1] - H / 2) / RD]; } catch (_) {}
@@ -59,21 +65,26 @@ html.vt-head::view-transition-old(rec), html.vt-head::view-transition-old(sleeve
     const z2 = ab(z0) ** 2;
     const circle = rho => { const t = Math.tanh(rho / 2), d = 1 - z2 * t * t;   // the hyperbolic circle as a Euclidean one
       return { c: [W / 2 + z0[0] * (1 - t * t) / d * RD, H / 2 + z0[1] * (1 - t * t) / d * RD], r: t * (1 - z2) / d * RD }; };
-    const N = 28, fn = [];
+    const N = 28, fn = [], o = body ? body.getBoundingClientRect() : { left: 0, top: 0 };   // a body's circle is placed in the body
     for (let i = 0; i <= N; i++) { const k = i / N, { c, r } = circle(rmax * k);
-      fn.push({ offset: k, clipPath: `circle(${r.toFixed(1)}px at ${c[0].toFixed(1)}px ${c[1].toFixed(1)}px)` }); }
-    // the page is lifted a touch by the wave and settles flat: tilted away from where it began, a hair large
-    const u = unitv(z0), tilt = 2.2;
-    fn.forEach((f, i) => { const k = i / N, g = Math.pow(1 - k, 2);
-      f.transform = `perspective(1400px) rotate3d(${(-u[1]).toFixed(3)}, ${u[0].toFixed(3)}, 0, ${(tilt * g).toFixed(3)}deg) scale(${(1 + 0.018 * g).toFixed(4)})`; });
-    anim(fn, "new", ms);
-    anim([{ opacity: 1, transform: "scale(1)" }, { offset: 0.6, opacity: 1 }, { opacity: 0.85, transform: "scale(.992)" }], "old", ms);
+      fn.push({ offset: k, clipPath: `circle(${r.toFixed(1)}px at ${(c[0] - o.left).toFixed(1)}px ${(c[1] - o.top).toFixed(1)}px)` }); }
+    // the page is lifted a touch by the wave and settles flat: tilted away from where it began, a hair large. A body
+    // played by hand gets no tilt: a transform would unfix what's fixed on it
+    let done = Promise.resolve();
+    if (body) done = body.animate(fn, { duration: ms, easing: "linear", fill: "both" }).finished;
+    else {
+      const u = unitv(z0), tilt = 2.2;
+      fn.forEach((f, i) => { const k = i / N, g = Math.pow(1 - k, 2);
+        f.transform = `perspective(1400px) rotate3d(${(-u[1]).toFixed(3)}, ${u[0].toFixed(3)}, 0, ${(tilt * g).toFixed(3)}deg) scale(${(1 + 0.018 * g).toFixed(4)})`; });
+      anim(fn, "new", ms);
+      anim([{ opacity: 1, transform: "scale(1)" }, { offset: 0.6, opacity: 1 }, { opacity: 0.85, transform: "scale(.992)" }], "old", ms);
+    }
     // a stray record and sleeve (the old page's guess, src/page.html) go as the wave front passes where they were
     if (st) { let i = 0; while (i < N) { const { c, r } = circle(rmax * i / N); if (Math.hypot(st[0] - c[0], st[1] - c[1]) < r) break; i++; }
       const k = Math.min(0.9, i / N);
       for (const name of ["rec", "sleeve"]) root.animate([{ opacity: 1 }, { offset: k, opacity: 1 }, { offset: k + 0.08, opacity: 0 }, { opacity: 0 }],
         { duration: ms, fill: "both", pseudoElement: `::view-transition-old(${name})` }); }
-    if (!cv) return;
+    if (!cv) return done;
     // the crests: each ring is a soft raised band, lit on the side towards the disk's centre and shaded outside.
     // The light and the shade are this theme's paper and ink, whichever is lighter and darker.
     const css = getComputedStyle(root), rgb = h => { h = h.replace("#", ""); if (h.length === 3) h = [...h].map(x => x + x).join(""); const n = parseInt(h, 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
@@ -98,6 +109,7 @@ html.vt-head::view-transition-old(rec), html.vt-head::view-transition-old(sleeve
       if (k < 1) requestAnimationFrame(frame); else ctx.clearRect(0, 0, W, H);
     };
     requestAnimationFrame(frame);
+    return done;
   }
 
   /* Which page a turn goes from and to. Chrome says (navigation.activation, and pageswap's activation); Safari turns
@@ -115,6 +127,10 @@ html.vt-head::view-transition-old(rec), html.vt-head::view-transition-old(sleeve
     if (!isHead(A, B)) return;
     try { sessionStorage.vtwave = JSON.stringify([e.clientX, e.clientY]);
           sessionStorage.vtfrom = JSON.stringify({ from: location.href, to: a.href, t: Date.now() }); } catch (_) {}
+    if (native) return;
+    e.preventDefault();                                   // the old half: the page fades to its paper, then goes
+    root.classList.add("vt-out");
+    setTimeout(() => { location.href = a.href; }, 170);
   });
   addEventListener("pageswap", e => {
     const n = note(), to = e.activation && e.activation.entry && e.activation.entry.url
@@ -129,6 +145,7 @@ html.vt-head::view-transition-old(rec), html.vt-head::view-transition-old(sleeve
 
   /* arriving */
   addEventListener("pagereveal", e => {
+    if (!native) return;                                  // played by hand, below
     if (where(location.href) === "home") try { sessionStorage.removeItem("vtvol"); } catch (_) {}   // a volume's note is for the shelf only (src/page.html)
     const n = note(); let st = null;
     try { st = JSON.parse(sessionStorage.vtstray || "null"); sessionStorage.removeItem("vtfrom"); sessionStorage.removeItem("vtstray"); } catch (_) {}
@@ -145,5 +162,41 @@ html.vt-head::view-transition-old(rec), html.vt-head::view-transition-old(sleeve
     document.body.append(cv); vt.finished.finally(() => cv.remove());
     vt.ready.then(() => wave(A, B, cv, st));
   });
+
+  /* Browsers that can't turn pages (Firefox) play the wave by hand: leaving, the page fades to its paper (the click
+     above) and leaves its note on pagehide; arriving, the body starts clipped to nothing, so only the paper shows, and
+     opens in the wave's circle once the page and its fonts are in. Where it came from is kept in vtFrom for the
+     shelf and volume turns (src/page.html). Also on Back to a page kept in the page cache, which shows it again
+     without loading it. */
+  if (native) return;
+  addEventListener("pagehide", () => {
+    const n = note(), to = n && same(n.from, location.href) ? n.to : null;
+    try { sessionStorage.vtfrom = JSON.stringify({ from: location.href, to, t: Date.now() }); } catch (_) {}
+  });
+  const arrive = cached => {
+    root.classList.remove("vt-out");
+    const n = note();
+    try { sessionStorage.removeItem("vtfrom"); sessionStorage.removeItem("vtstray"); } catch (_) {}
+    const from = n && (!n.to || same(n.to, location.href)) && !same(n.from, location.href) ? n.from : null;
+    window.vtFrom = from;
+    if (where(location.href) === "home") try { sessionStorage.removeItem("vtvol"); } catch (_) {}
+    const A = where(from), B = where(location.href);
+    if (reduce || !from || !isHead(A, B)) { try { sessionStorage.removeItem("vtwave"); } catch (_) {} return; }
+    root.classList.add("vt-in");
+    const safe = setTimeout(() => root.classList.remove("vt-in"), 4000);   // whatever happens, the page shows
+    const go = () => {
+      const cv = document.createElement("canvas"); cv.className = "vt-wave solo"; cv.setAttribute("aria-hidden", "true");
+      cv.width = Math.round(innerWidth / 2); cv.height = Math.round(innerHeight / 2);
+      root.append(cv);                                    // outside the body, so the crests aren't clipped with it
+      const body = document.body;
+      wave(A, B, cv, null, body).finally(() => { clearTimeout(safe); root.classList.remove("vt-in");
+        body.getAnimations().forEach(a => a.cancel()); cv.remove(); });
+    };
+    const ready = () => Promise.race([document.fonts ? document.fonts.ready : null, new Promise(w => setTimeout(w, 500))])
+      .then(() => requestAnimationFrame(go));
+    if (cached || document.readyState !== "loading") ready(); else addEventListener("DOMContentLoaded", ready, { once: true });
+  };
+  arrive(false);
+  addEventListener("pageshow", e => { if (e.persisted) arrive(true); });
 })();
 </script>

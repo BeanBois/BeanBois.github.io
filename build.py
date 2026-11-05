@@ -325,7 +325,11 @@ document.querySelectorAll(".lp-card").forEach(card => card.addEventListener("cli
   card.querySelector(".sl").style.viewTransitionName = "sleeve";
   if (reduce) return;
   e.preventDefault();
-  const pull = () => { card.classList.add("pulling"); setTimeout(() => { location.href = card.href; }, 420); };  // out, clear, a beat at rest, then the turn
+  const pull = () => { card.classList.add("pulling"); setTimeout(() => {          // out, clear, a beat at rest, then the turn
+    /* where the record and sleeve are, for a browser that can't turn pages and flies them across by hand (src/page.html) */
+    const box = el => { const b = el.getBoundingClientRect(); return [b.left, b.top, b.width, b.height]; };
+    try { sessionStorage.vtfly = JSON.stringify({ vol: card.dataset.vt, rec: box(card.querySelector(".disc")), sl: box(card.querySelector(".sl")), t: Date.now() }); } catch (_) {}
+    location.href = card.href; }, 420); };
   /* first the shelf breaks into dots round the chosen card, then the record comes out */
   const s = card.querySelector(".lp").getBoundingClientRect();
   card.classList.add("chosen");
@@ -398,7 +402,8 @@ VOLUME_JS = r"""<script>
     angle += dy * 0.35; kick();
   }, { passive: true });
   draw();
-  if ("onpagereveal" in window) addEventListener("pagereveal", e => (e.viewTransition ? e.viewTransition.finished : Promise.resolve()).then(play, play), { once: true });
+  if (window.vtLanded) window.vtLanded.then(play, play);       // flown in by hand (src/page.html)
+  else if ("onpagereveal" in window) addEventListener("pagereveal", e => (e.viewTransition ? e.viewTransition.finished : Promise.resolve()).then(play, play), { once: true });
   else setTimeout(play, 150);
 })();
 </script>"""

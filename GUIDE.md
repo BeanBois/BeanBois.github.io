@@ -10,7 +10,7 @@ Each part is for a different reader, and the corners of every page lead between 
 |---|---|---|---|
 | The hook | the cover (`index.html`) | anyone arriving | the record, and a blurb written like the back of a book (`cover.blurb_head`, `cover.blurb`), with two doors: the brief and the projects. Clicking a project shows only its blurb and a link to its volume. |
 | The brief | 作者紹介 (`author.html`) | someone with thirty seconds, e.g. a recruiter | your summary, the highlights (`pages.highlights` picks which volumes, in order), the years, contact, the CV PDFs, and the CV in full below |
-| The projects | 目次 (`contents.html`) and a volume each | someone who wants depth | every volume as a record in its sleeve. Click one: the record comes out and the volume opens with it (Chrome, Edge and Safari animate this; other browsers just open the page). On the volume the record spins, then turns as you scroll, and the tonearm shows how far you've read. Every volume links to the ones either side. |
+| The projects | 目次 (`contents.html`) and a volume each | someone who wants depth | every volume as a record in its sleeve. Click one: the record comes out and the volume opens with it (Chrome, Edge and Safari animate this themselves; Firefox plays the same turn in two halves, one on each page, that meet on plain paper). On the volume the record spins, then turns as you scroll, and the tonearm shows how far you've read. Every volume links to the ones either side. |
 | The footnote | 奥付 (`colophon.html`) | the curious | when the site last changed (the date of the last commit), what changed lately, and how it's made. Every page's foot also says "last updated" and links here. |
 
 ## What lives where
