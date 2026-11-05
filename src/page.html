@@ -352,23 +352,6 @@ if (/vol-[\w-]+\.html$/.test(location.pathname)) {
   addEventListener("load", () => (window.requestIdleCallback || setTimeout)(get, { timeout: 2000 }));
 }
 addEventListener("pageshow", () => document.querySelectorAll(".deck .rec-wrap, .vsleeve").forEach(el => el.style.transform = ""));
-/* leaving the shelf by Back or Forward: a card's click names its record and sleeve, but the browser's buttons click
-   nothing. Chrome says where they lead; Safari doesn't, and the likeliest is the volume this shelf was last brought
-   back from (Forward again), so that card is named. If it leads elsewhere, a head page's wave keeps the stray record
-   under the old page, where it was (src/turn.html) */
-let lastVol = null;
-addEventListener("pageswap", e => {
-  if (!e.viewTransition || [...document.querySelectorAll("[data-vt] .disc")].some(d => d.style.viewTransitionName)) return;
-  let to = e.activation?.entry?.url;
-  if (!to) try { to = JSON.parse(sessionStorage.vtfrom || "null")?.to; } catch (_) {}   // a click on a link (src/turn.html)
-  const vid = to ? (to.match(/vol-([\w-]+)\.html/) || [])[1] : lastVol;
-  const card = vid && document.querySelector(`[data-vt="${vid}"]`);
-  if (!card) return;
-  card.querySelector(".disc").style.viewTransitionName = "rec";
-  card.querySelector(".sl").style.viewTransitionName = "sleeve";
-  const r = card.querySelector(".lp").getBoundingClientRect();
-  if (!to) try { sessionStorage.vtstray = JSON.stringify([r.left + r.width / 2, r.top + r.height / 2]); } catch (_) {}
-});
 /* back on the shelf from a volume: that volume's record and sleeve go home to their card */
 addEventListener("pagereveal", e => {
   document.querySelectorAll("[data-vt] .disc, [data-vt] .sl").forEach(el => el.style.viewTransitionName = "");
@@ -379,7 +362,6 @@ addEventListener("pagereveal", e => {
     : left && Date.now() - left[1] < 8000 ? left[0] : null;                   // else the note the volume left, if it's fresh
   const card = vid && document.querySelector(`[data-vt="${vid}"]`);
   if (!card) return;
-  lastVol = vid;
   /* by the 目次 link (not Back) the shelf opens at its top, so most cards are off screen: bring this one to the middle
      first, or the record and sleeve fly home off the bottom of the screen */
   let r = card.querySelector(".lp").getBoundingClientRect();
