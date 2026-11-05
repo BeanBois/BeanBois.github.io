@@ -73,9 +73,14 @@ body { position: relative; min-height: 100vh; }
 .corners .br i { clip-path: polygon(100% 0, 100% 100%, 0 100%); }
 @media (max-width: 860px) {
   .wrap { padding-top: 20px; }
-  .corners { display: flex; flex-wrap: wrap; gap: 8px 18px; padding: 16px max(16px, env(safe-area-inset-right, 0px)) 14px max(16px, env(safe-area-inset-left, 0px)); border-bottom: 2px solid var(--ink); }
+  .corners { display: flex; flex-wrap: wrap; gap: 8px 18px; padding: 16px 0 14px; border-bottom: 2px solid var(--ink); }   /* the body's margin is the gutter */
   .corners .c { position: static; padding: 0; background: none; }
   .corners .tl { flex-basis: 100%; }
+  /* a phone: the name alone goes home, and the pages read as they do along the foot of the cover */
+  .corners .part { display: none; }
+  .corners .c:not(.tl) a, .corners .tr a, .corners .br a { flex-direction: row; gap: 4px; font-size: 12px; }
+  .corners .c:not(.tl) i { display: none; }
+  .corners .c:not(.tl) a b { font-size: 13px; }
 }
 .obj { position: relative; background: var(--paper); }
 .obj::after {
@@ -207,7 +212,12 @@ html:has(.lp-grid) { overflow-x: clip; }   /* a record pulled out of the last co
 .volnav .vn-all { place-content: center; font-size: 18px; }
 .volnav a:hover, .volnav a:focus-visible { background: var(--ink); color: var(--paper); }
 .volnav a:hover span { color: var(--paper); }
-@media (max-width: 640px) { .volnav { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .volnav .vn-all { display: none; } }
+@media (max-width: 640px) {   /* a phone: two slim buttons, the titles in the body face so even a long one stays short */
+  .volnav { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; margin-top: 56px; } .volnav .vn-all { display: none; }
+  .volnav a { padding: 8px 12px 9px; border-width: 2px; gap: 3px; align-content: start; }
+  .volnav a span { font-size: 11px; }
+  .volnav a b { font: 700 14px/1.3 var(--font-body); overflow-wrap: anywhere; }
+}
 .back { max-width: 880px; margin: 56px auto 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 28px; }
 .back h3 { font: 500 12px var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 8px; }
 .back ol, .back ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 14px; }
@@ -281,7 +291,8 @@ html:has(.lp-grid) { overflow-x: clip; }   /* a record pulled out of the last co
 .pipe i { font-style: normal; color: var(--muted); }
 .upd-big { display: grid; gap: 2px; margin: 0 0 20px; }
 .upd-big span { font-size: 12px; }
-.upd-big b { font: 400 clamp(30px, 4vw, 40px)/1 var(--font-display); font-variant-numeric: tabular-nums; }
+.upd-big b { font: 400 clamp(30px, 4vw, 40px)/1 var(--font-display); font-variant-numeric: tabular-nums; white-space: nowrap; }
+@media (max-width: 520px) { .upd-big b { font-size: 8vw; } }   /* the date on one line, even on a small phone */
 .folio .upd { color: var(--muted); margin-left: 14px; white-space: nowrap; }
 @media (max-width: 640px) { .folio { grid-template-columns: minmax(0, 1fr); } .folio .upd { margin-left: 8px; } }
 @media (max-width: 860px) { .flap .seal { display: none; } }   /* phones: the brief reaches the summary sooner */

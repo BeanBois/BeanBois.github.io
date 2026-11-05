@@ -629,7 +629,7 @@ def colophon_page(n_entries, n_public, n_vols, log, titles):
         name = f'<a href="vol-{vid}.html">{esc(title)}</a>' if vid else esc(title)
         recent += f"<li><time>{d}</time>{name}: {esc(msg)}</li>"
     main = split(box, f'<div class="back">{f"<div><h3>更新履歴 · lately</h3><ol>{recent}</ol></div>" if recent else ""}'
-                      f'<div><h3>収録 · in this printing</h3><ul class="pages">{pages}</ul></div></div>')
+                      f'<div><h3>収録 · in this printing</h3><ul class="pages">{pages}</ul></div></div>', rail_first=False)   # phones: the colophon itself first
     page("colophon.html", "奥付 · Teoh Kai Shun", f'奥付 {esc(cfg("nav.colophon"))}', main)
 
 
