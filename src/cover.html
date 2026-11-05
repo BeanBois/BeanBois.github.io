@@ -416,18 +416,23 @@ function layout() {
     tR = R0; tx = W * 0.07 + S + R0 * 0.3; ty = H / 2;
   } else if (!open) { tx = W / 2; ty = H / 2; tR = Math.min(W, H) / 2 - 28; }
   else {
-    tR = Math.max(70, Math.min(W / 2 - 20, H * 0.19));
-    tx = W / 2; ty = tR + 20;
+    // a phone with a project open: the record shrinks and sits below the name and what's playing (with room for the
+    // track printed round its rim), and the project's notes take the screen under it
+    const head = Math.max(mastEl.getBoundingClientRect().bottom, deckEl.getBoundingClientRect().bottom) + 34;
+    tR = Math.max(60, Math.min(W / 2 - 44, H * 0.14));
+    tx = W / 2; ty = head + tR;
   }
   placeSay();
 }
+const mastEl = document.querySelector(".mast"), deckEl = document.querySelector(".deck");
+new ResizeObserver(() => { if (W && !sayEl.hidden && !wide()) { layout(); kick(); } }).observe(deckEl);
 function placeSay() {
   if (sayEl.hidden) return;
   const s = sayEl.style;
   if (wide()) {
     s.cssText = "";                  // it's printed on the sleeve
   } else {
-    Object.assign(s, { left: "12px", right: "12px", width: "auto", top: (ty + tR + GAP * 0.6) + "px", bottom: "12px", height: "auto" });
+    Object.assign(s, { left: "12px", right: "12px", width: "auto", top: (ty + tR + GAP * 0.5) + "px", bottom: "12px", height: "auto" });
   }
 }
 function resize() {
