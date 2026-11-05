@@ -6,9 +6,6 @@
    transitions, and reduced motion, just open the page. */
 @view-transition { navigation: auto; }
 @media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }
-/* iPhone and iPad (-webkit-touch-callout is iOS only): no page turns. Safari there leaves the strip under its floating
-   bar out of a turn, so the old page froze there, went blank and then filled in late. Pages just open. */
-@supports (-webkit-touch-callout: none) { @view-transition { navigation: none; } }
 html.vt-head .deck .rec-wrap, html.vt-head .vsleeve { view-transition-name: none !important; }
 html.vt-head::view-transition { background: var(--paper) !important; }
 html.vt-head::view-transition-old(root), html.vt-head::view-transition-new(root) {

@@ -318,8 +318,7 @@ def contents_page(nodes, vols, chapters):
     main = (f'<div class="pt"><h1>目次</h1><p>{esc(cfg("pages.contents_intro"))}</p></div>{filt}' + "".join(secs))
     script = r"""<script>
 /* click: pull the record all the way out, then open its volume; the browser carries record and sleeve across */
-// no pull without a turn to carry the record on: reduced motion, and iPhones, where pages don't turn (src/turn.html)
-const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches || CSS.supports("-webkit-touch-callout", "none");
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 document.querySelectorAll(".lp-card").forEach(card => card.addEventListener("click", e => {
   if (e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
   card.querySelector(".disc").style.viewTransitionName = "rec";
