@@ -104,6 +104,13 @@ dl.meta dd { margin: 0; min-width: 0; }
 .np a { font: inherit; letter-spacing: normal; color: inherit; text-decoration: none; }
 .deck { position: fixed; z-index: 2; left: max(20px, calc(env(safe-area-inset-left, 0px) + 12px)); top: calc(env(safe-area-inset-top, 0px) + 66px); pointer-events: auto; }
 .mastnav small { display: none; }
+/* a phone with a project open: the page scrolls instead of the card. The record keeps its size and goes up the page
+   with the name, what's playing and the notes under it; the way on to the other pages waits at the end */
+html.reading, html.reading body { height: auto; overflow-x: hidden; overflow-y: auto; }
+html.reading #ball { touch-action: pan-y; }        /* up and down scrolls the page; side to side still spins the record */
+html.reading .mast, html.reading .deck { position: absolute; }
+html.reading .say { position: absolute; overflow: visible; }
+html.reading .mastnav { position: absolute; bottom: auto; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 18px); }
 /* Wide screens: the record (circle) half pulled out of its sleeve (square), with triangles in the corners pointing
    the way out. The sleeve is what you read: the intro on home, a project's liner notes when one is open. JS sizes it
    and cuts a hole where the record sits in front of it. Phones get the column below the record instead. */
@@ -416,23 +423,31 @@ function layout() {
     tR = R0; tx = W * 0.07 + S + R0 * 0.3; ty = H / 2;
   } else if (!open) { tx = W / 2; ty = H / 2; tR = Math.min(W, H) / 2 - 28; }
   else {
-    // a phone with a project open: the record shrinks and sits below the name and what's playing (with room for the
-    // track printed round its rim), and the project's notes take the screen under it
-    const head = Math.max(mastEl.getBoundingClientRect().bottom, deckEl.getBoundingClientRect().bottom) + 34;
-    tR = Math.max(60, Math.min(W / 2 - 44, H * 0.14));
-    tx = W / 2; ty = head + tR;
+    // a phone with a project open: the record sits below the name and what's playing (with room for the track printed
+    // round its rim), at the size it is on the front, and the project's notes follow it down the page
+    const head = Math.max(mastEl.offsetTop + mastEl.offsetHeight, deckEl.offsetTop + deckEl.offsetHeight) + 34;
+    tR = Math.min(W, H) / 2 - 28;    // the size it is on the front: the notes go below it and the page scrolls
+    tx = W / 2; tyPage = head + tR; ty = tyPage - scrollY;
   }
+  reading = open && !wide();
+  document.documentElement.classList.toggle("reading", reading);
   placeSay();
 }
-const mastEl = document.querySelector(".mast"), deckEl = document.querySelector(".deck");
-new ResizeObserver(() => { if (W && !sayEl.hidden && !wide()) { layout(); kick(); } }).observe(deckEl);
+const mastEl = document.querySelector(".mast"), deckEl = document.querySelector(".deck"), navEl = document.querySelector(".mastnav");
+let reading = false, tyPage = 0;    // reading: a phone with a project open, the page scrolling; tyPage: the record's centre on the page
+new ResizeObserver(() => { if (W && reading) { layout(); kick(); } }).observe(deckEl);
+new ResizeObserver(() => { if (reading) placeSay(); }).observe(sayEl);
+// the record goes up the page with the scroll at once, not eased
+addEventListener("scroll", () => { if (!reading) return; const d = tyPage - scrollY - ty; ty += d; cy += d; kick(); }, { passive: true });
 function placeSay() {
+  if (!reading) navEl.style.top = "";
   if (sayEl.hidden) return;
   const s = sayEl.style;
   if (wide()) {
     s.cssText = "";                  // it's printed on the sleeve
   } else {
-    Object.assign(s, { left: "12px", right: "12px", width: "auto", top: (ty + tR + GAP * 0.5) + "px", bottom: "12px", height: "auto" });
+    Object.assign(s, { left: "12px", right: "12px", width: "auto", top: (tyPage + tR + GAP * 0.5) + "px", bottom: "auto", height: "auto" });
+    navEl.style.top = (sayEl.offsetTop + sayEl.offsetHeight + 24) + "px";
   }
 }
 function resize() {
@@ -1035,7 +1050,7 @@ function drawRimPlayer(now) {
 // the tonearm: pivots just above the record's top right edge (clear of the bubble); the stylus rides from the outer groove inward as the song goes on.
 // When nothing plays it lifts back to its rest beside the record.
 function drawArm(now) {
-  const P = [cx + R * 1.0, Math.max(16, cy - R * 0.95)], L = R * 1.06;
+  const P = [cx + R * 1.0, reading ? cy - R * 0.95 : Math.max(16, cy - R * 0.95)], L = R * 1.06;
   const frac = music.duration_ms ? songAt(now) / (music.duration_ms / 1000) : 0;
   const rr = R * (0.94 - 0.58 * frac);
   // the stylus is where a circle of the arm's length about the pivot meets the groove of radius rr (the right-hand meeting)
@@ -1121,6 +1136,7 @@ function render() {
   }
   sayEl.scrollTop = 0;
   document.getElementById("railscroll").scrollTop = 0;
+  if (scrollY) scrollTo(0, 0);
 }
 sayEl.addEventListener("click", ev => {
   const b = ev.target.closest("[data-go]"); if (b) return select(byId.get(b.dataset.go));
@@ -1150,7 +1166,7 @@ function select(n) {
   if (!wasOpen) { sayEl.style.animation = "none"; void sayEl.offsetWidth; sayEl.style.animation = ""; }
   layout(); flyTo(n.z); kick();
 }
-function closeSay() { rec.target = ME; closePick(); clusters = null; sel = null; sayEl.hidden = true; layout(); omega = [...IDLE]; goHome(); kick(); }
+function closeSay() { rec.target = ME; closePick(); clusters = null; sel = null; sayEl.hidden = true; scrollTo(0, 0); layout(); omega = [...IDLE]; goHome(); kick(); }
 
 /* ---------- a plain list for keyboards and screen readers ---------- */
 document.getElementById("srlist").innerHTML = `<button type="button" data-go="me">${esc(D.profile.name)}</button>` +
