@@ -334,14 +334,25 @@ addEventListener("pageswap", e => {
   try { if (r) sessionStorage.vtrec = JSON.stringify([r.left + r.width / 2, r.top + r.height / 2]);
         if (v) sessionStorage.vtvol = JSON.stringify([v[1], Date.now()]); } catch (_) {}
 });
+/* a volume fetches the shelf once it has loaded and the browser is idle, or sooner if a link to it is pointed at. Back
+   finds the shelf in the page cache, but a link (目次, all the projects) loads it afresh, and it is a big page: a turn
+   kept waiting on the network for more than a few seconds is dropped, and the shelf just appears without it */
+if (/vol-[\w-]+\.html$/.test(location.pathname)) {
+  let got = false;
+  const get = () => { if (got) return; got = true;
+    const l = document.createElement("link"); l.rel = "prefetch"; l.href = "contents.html"; document.head.append(l); };
+  ["pointerover", "focusin", "touchstart"].forEach(ev => document.addEventListener(ev, e => {
+    if (e.target.closest?.('a[href="contents.html"]')) get(); }, { passive: true }));
+  addEventListener("load", () => (window.requestIdleCallback || setTimeout)(get, { timeout: 2000 }));
+}
 addEventListener("pageshow", () => document.querySelectorAll(".deck .rec-wrap, .vsleeve").forEach(el => el.style.transform = ""));
 /* back on the shelf from a volume: that volume's record and sleeve go home to their card */
 addEventListener("pagereveal", e => {
   document.querySelectorAll("[data-vt] .disc, [data-vt] .sl").forEach(el => el.style.viewTransitionName = "");
   let left = null; try { left = JSON.parse(sessionStorage.vtvol || "null"); sessionStorage.removeItem("vtvol"); } catch (_) {}
-  const act = window.navigation?.activation;
+  const from = window.navigation?.activation?.from?.url;   // null in browsers without it, and in some that have it
   const vid = !e.viewTransition ? null
-    : act ? ((act.from?.url || "").match(/vol-([\w-]+)\.html/) || [])[1]     // the browser says where we came from
+    : from ? (from.match(/vol-([\w-]+)\.html/) || [])[1]                     // the browser says where we came from
     : left && Date.now() - left[1] < 8000 ? left[0] : null;                   // else the note the volume left, if it's fresh
   const card = vid && document.querySelector(`[data-vt="${vid}"]`);
   if (!card) return;
