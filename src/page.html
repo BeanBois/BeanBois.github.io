@@ -403,7 +403,7 @@ addEventListener("pagereveal", e => {
    from the record. Back (the 目次 link, or the browser's button): the volume breaks up from its record if it can
    (a link; Back gives no warning) and leaves a note of where they were (vtland); the shelf starts as paper, they fly
    home to their card, and the dots clear from it. */
-const vtHand = !("CSSViewTransitionRule" in window) && !matchMedia("(prefers-reduced-motion: reduce)").matches;
+const vtHand = !("CSSViewTransitionRule" in window) && !window.vtFramed && !matchMedia("(prefers-reduced-motion: reduce)").matches;
 const vtVol = p => (String(p || "").match(/vol-([\w-]+)\.html/) || [])[1];
 const vtTake = k => { try { const n = JSON.parse(sessionStorage.getItem(k) || "null"); sessionStorage.removeItem(k); return n && Date.now() - n.t < 8000 ? n : null; } catch (_) { return null; } };
 const vtBox = el => { const b = el.getBoundingClientRect(); return [b.left, b.top, b.width, b.height]; };

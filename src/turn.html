@@ -3,8 +3,9 @@
    src/page.html: the wave. Each part has a fixed place in a Poincaré disk (the cover at the centre, the others out
    towards the rim); the new page opens in a hyperbolic circle round where you clicked, or from the side the old page
    lies on Back. The shelf <-> volume turn (the record) is separate and untouched. Browsers without cross-page
-   transitions (Firefox) play the wave themselves, in two halves: the old page fades to paper as it's left, and the new
-   one opens out of the paper in the same circle (vt-out, vt-in below). Reduced motion just opens the page. */
+   transitions (Firefox) play the wave themselves: a click opens the new page in a hidden frame over the old one and
+   grows it in the circle (vt-pre), then goes to it; Back, which gives the old page no warning, opens the new page out
+   of plain paper (vt-in). Reduced motion just opens the page. */
 @view-transition { navigation: auto; }
 @media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }
 html.vt-head .deck .rec-wrap, html.vt-head .vsleeve { view-transition-name: none !important; }
@@ -19,8 +20,9 @@ html.vt-head::view-transition-new(vt-wave) { animation: none !important; }
 html.vt-head::view-transition-group(rec), html.vt-head::view-transition-group(sleeve),
 html.vt-head::view-transition-old(rec), html.vt-head::view-transition-old(sleeve) { animation: none !important; }
 /* the two halves, where the browser can't turn pages: the body goes, leaving its paper; the new body starts as nothing */
-html.vt-out body { opacity: 0; transition: opacity .16s ease-in; }
 html.vt-in body { clip-path: circle(0px at 50% 50%); }
+.vt-pre { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; border: 0; margin: 0; z-index: 49;
+  background: var(--paper); clip-path: circle(0px at 50% 50%); pointer-events: none; }
 .vt-wave.solo { z-index: 50; }
 </style>
 <script>
@@ -28,6 +30,9 @@ html.vt-in body { clip-path: circle(0px at 50% 50%); }
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const root = document.documentElement;
   const native = "CSSViewTransitionRule" in window;   // the browser turns pages itself (Chrome, Edge, Safari); not Firefox
+  let framed = false; try { framed = !!(frameElement && frameElement.classList.contains("vt-pre")); } catch (_) {}
+  window.vtFramed = framed;                            // the next page, being opened over this one: it turns nothing
+  if (framed) return;
 
   /* where each part lives in the disk (x right, y down); a volume lives with the projects */
   const SPOT = { home: [0, 0], brief: [-0.6, 0], projects: [0.6, 0], colophon: [0, 0.6] };
@@ -127,12 +132,10 @@ html.vt-in body { clip-path: circle(0px at 50% 50%); }
     if (!isHead(A, B)) return;
     try { sessionStorage.vtwave = JSON.stringify([e.clientX, e.clientY]);
           sessionStorage.vtfrom = JSON.stringify({ from: location.href, to: a.href, t: Date.now() }); } catch (_) {}
-    if (native) return;
-    e.preventDefault();                                   // the old half: the page fades to its paper, then goes
-    root.classList.add("vt-out");
-    setTimeout(() => { location.href = a.href; }, 170);
+    if (!native) { e.preventDefault(); overlay(A, B, a.href); }
   });
   addEventListener("pageswap", e => {
+    if (!native) return;                                  // its note is left on pagehide, below
     const n = note(), to = e.activation && e.activation.entry && e.activation.entry.url
       || (n && same(n.from, location.href) ? n.to : null);          // Safari: only a click says where it leads, not Back
     try { sessionStorage.vtfrom = JSON.stringify({ from: location.href, to, t: Date.now() }); } catch (_) {}
@@ -163,25 +166,56 @@ html.vt-in body { clip-path: circle(0px at 50% 50%); }
     vt.ready.then(() => wave(A, B, cv, st));
   });
 
-  /* Browsers that can't turn pages (Firefox) play the wave by hand: leaving, the page fades to its paper (the click
-     above) and leaves its note on pagehide; arriving, the body starts clipped to nothing, so only the paper shows, and
-     opens in the wave's circle once the page and its fonts are in. Where it came from is kept in vtFrom for the
-     shelf and volume turns (src/page.html). Also on Back to a page kept in the page cache, which shows it again
-     without loading it. */
+  /* Browsers that can't turn pages (Firefox) play the wave by hand. By a click, the old page opens the new one in a
+     frame over itself, waits for it to be in, grows it in the circle, then goes to it: the new page comes from the
+     cache looking just as the frame did, and the browser holds the frame on screen until it's painted. If the frame
+     is slow, it just goes, and the new page plays the wave out of plain paper, as it does on Back (arrive, below).
+     Where a page was opened from is kept in vtFrom for the shelf and volume turns (src/page.html). */
   if (native) return;
+  let busy = false;
+  function overlay(A, B, href) {
+    if (busy) return; busy = true;
+    const f = document.createElement("iframe"); f.className = "vt-pre"; f.setAttribute("aria-hidden", "true"); f.tabIndex = -1;
+    f.src = href;
+    root.append(f);
+    let gone = false;
+    const go = done => { if (gone) return; gone = true;
+      try { const n = note(); if (n) sessionStorage.vtfrom = JSON.stringify({ ...n, done, t: Date.now() }); } catch (_) {}
+      location.href = href; };
+    const slow = setTimeout(() => { f.remove(); go(false); }, 1500);   // the new page plays the wave itself
+    f.addEventListener("load", () => {
+      if (gone) return;
+      const d = f.contentDocument;
+      Promise.race([d && d.fonts ? d.fonts.ready : null, new Promise(w => setTimeout(w, 300))]).then(() => requestAnimationFrame(() => {
+        if (gone) return; clearTimeout(slow);
+        const cv = document.createElement("canvas"); cv.className = "vt-wave solo"; cv.setAttribute("aria-hidden", "true");
+        cv.width = Math.round(innerWidth / 2); cv.height = Math.round(innerHeight / 2);
+        root.append(cv);
+        wave(A, B, cv, null, f).then(() => go(true));
+      }));
+    }, { once: true });
+  }
+  /* whatever started on the way out is gone if Back brings this page back from the cache */
+  addEventListener("pageshow", e => { if (e.persisted) { busy = false; document.querySelectorAll(".vt-pre, .vt-wave.solo").forEach(el => el.remove()); } });
+  /* a head page is fetched as soon as a link to it is pointed at, so the frame opens quickly */
+  const got = new Set();
+  ["pointerover", "focusin", "touchstart"].forEach(ev => document.addEventListener(ev, e => {
+    const a = e.target.closest && e.target.closest("a[href]");
+    if (!a || got.has(a.href) || !isHead(where(location.href), where(a.href))) return;
+    got.add(a.href); const l = document.createElement("link"); l.rel = "prefetch"; l.href = a.href; document.head.append(l);
+  }, { passive: true }));
   addEventListener("pagehide", () => {
     const n = note(), to = n && same(n.from, location.href) ? n.to : null;
-    try { sessionStorage.vtfrom = JSON.stringify({ from: location.href, to, t: Date.now() }); } catch (_) {}
+    try { sessionStorage.vtfrom = JSON.stringify({ from: location.href, to, done: !!(n && n.done && to), t: Date.now() }); } catch (_) {}
   });
   const arrive = cached => {
-    root.classList.remove("vt-out");
     const n = note();
     try { sessionStorage.removeItem("vtfrom"); sessionStorage.removeItem("vtstray"); } catch (_) {}
     const from = n && (!n.to || same(n.to, location.href)) && !same(n.from, location.href) ? n.from : null;
     window.vtFrom = from;
     if (where(location.href) === "home") try { sessionStorage.removeItem("vtvol"); } catch (_) {}
     const A = where(from), B = where(location.href);
-    if (reduce || !from || !isHead(A, B)) { try { sessionStorage.removeItem("vtwave"); } catch (_) {} return; }
+    if (reduce || !from || !isHead(A, B) || n.done) { try { sessionStorage.removeItem("vtwave"); } catch (_) {} return; }
     root.classList.add("vt-in");
     const safe = setTimeout(() => root.classList.remove("vt-in"), 4000);   // whatever happens, the page shows
     const go = () => {
@@ -192,7 +226,7 @@ html.vt-in body { clip-path: circle(0px at 50% 50%); }
       wave(A, B, cv, null, body).finally(() => { clearTimeout(safe); root.classList.remove("vt-in");
         body.getAnimations().forEach(a => a.cancel()); cv.remove(); });
     };
-    const ready = () => Promise.race([document.fonts ? document.fonts.ready : null, new Promise(w => setTimeout(w, 500))])
+    const ready = () => Promise.race([document.fonts ? document.fonts.ready : null, new Promise(w => setTimeout(w, 300))])
       .then(() => requestAnimationFrame(go));
     if (cached || document.readyState !== "loading") ready(); else addEventListener("DOMContentLoaded", ready, { once: true });
   };

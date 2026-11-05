@@ -402,6 +402,7 @@ VOLUME_JS = r"""<script>
     angle += dy * 0.35; kick();
   }, { passive: true });
   draw();
+  if (window.vtFramed) return;                                   // being opened over the page before it: it plays once it's here
   if (window.vtLanded) window.vtLanded.then(play, play);       // flown in by hand (src/page.html)
   else if ("onpagereveal" in window) addEventListener("pagereveal", e => (e.viewTransition ? e.viewTransition.finished : Promise.resolve()).then(play, play), { once: true });
   else setTimeout(play, 150);
