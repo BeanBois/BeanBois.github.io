@@ -1183,7 +1183,7 @@ if (wantId === "me" || byId.has(wantId)) setTimeout(() => select(wantId === "me"
    Without a tempo they sway gently; with nothing playing they lie flat. */
 const meter = document.getElementById("meter"), mctx = meter.getContext("2d");
 const BARS = 28, level = new Float32Array(BARS), peak = new Float32Array(BARS);
-let meterLast = performance.now();
+let meterLast = performance.now(), meterDrawn = "";   // meterDrawn: what the canvas last settled on
 function drawMeter(now) {
   const dt = Math.min(0.1, (now - meterLast) / 1000); meterLast = now;
   const live = music && music.is_playing && rec.vis > 0.5;     // quiet while the record is being changed
@@ -1200,6 +1200,11 @@ function drawMeter(now) {
   }
   const w = meter.clientWidth, h = meter.clientHeight;
   if (!w || !h) return;
+  // nothing playing and the bars have settled flat: the last frame is still right, so skip the repaint
+  const still = !live && level.every((l, i) => Math.abs(l - 0.04) < 1e-3 && peak[i] - l < 1e-3);
+  const look = `${w}x${h}@${dpr}${col["--rim-player-level-bars"]}`;
+  if (still && meterDrawn === look) return;
+  meterDrawn = still ? look : "";
   if (meter.width !== Math.round(w * dpr) || meter.height !== Math.round(h * dpr)) { meter.width = Math.round(w * dpr); meter.height = Math.round(h * dpr); }
   mctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   mctx.clearRect(0, 0, w, h);

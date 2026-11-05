@@ -17,6 +17,7 @@ Four parts, each for a different reader:
   colophon.html     the footnote (奥付): when the site was last updated and how this printing was made
 """
 import html, json, math, os, re, shutil, subprocess, sys, tempfile
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date
 from pathlib import Path
 
@@ -558,12 +559,11 @@ def cv_pdfs():
             raise SystemExit("CV PDFs: no Chrome found on the deploy")
         print("CV PDFs: skipped, no Chrome found (set CHROME to its path); the author page shows no PDF links")
         return set()
-    made = set()
     with tempfile.TemporaryDirectory() as tmp:
-        for lens, label in LENSES:
+        def one(lens, label):
             f = CONTENT / "cv" / f"{lens}.md"
             if not f.exists():
-                continue
+                return None
             out = DIST / pdf_name(lens)
             for pt in ("9.4pt", "9.1pt", "8.8pt"):    # the body size: smaller until the CV fits one page
                 page_ = Path(tmp) / f"{lens}.html"
@@ -587,11 +587,13 @@ def cv_pdfs():
                 if ci:
                     raise SystemExit(f"CV PDFs: Chrome failed on {lens}: {err}")
                 print(f"CV PDFs: Chrome failed on {lens} ({err}), skipped")
-                continue
+                return None
             if pdf_pages(out) > 1:
                 print(f"CV PDFs: the {label} CV runs to {pdf_pages(out)} pages even at {pt}")
-            made.add(lens)
-    return made
+            return lens
+        # each lens is its own Chrome, so the three print side by side: the build waits for the slowest, not the sum
+        with ThreadPoolExecutor(len(LENSES)) as pool:
+            return {lens for lens in pool.map(lambda l: one(*l), LENSES) if lens}
 
 
 def ordinal(n):
@@ -640,10 +642,15 @@ def barcode(text):
     return f'<svg class="bars" viewBox="0 0 {x + 6} 34" aria-hidden="true"><g fill="currentColor">{"".join(bars)}</g></svg>'
 
 
+COVER_SKIPS = ("bullets", "stack", "repo", "kind", "story")   # node fields src/cover.html never reads
+
+
 def cover_page(data, vols, chapters, home):
     t = (SRC / "cover.html").read_text().replace("<!--TURN-->", turn_html())
     ep = lambda i, ch: next((e["n"] for e in ch["episodes"] if e.get("entry") == i), ch["episodes"][0]["n"])
-    data = dict(data, chapters={i: {"href": f"vol-{v}.html", "vol": vols[v], "ep": ep(i, chapters[v])} for i, v in home.items()},
+    # the cover reads only what it shows: no bullets, stacks or repos (the volumes and the brief have those), no log
+    nodes = [{k: v for k, v in n.items() if k not in COVER_SKIPS} for n in data["nodes"]]
+    data = dict({k: v for k, v in data.items() if k not in ("log", "years", "counts")}, nodes=nodes, chapters={i: {"href": f"vol-{v}.html", "vol": vols[v], "ep": ep(i, chapters[v])} for i, v in home.items()},
                 vols={n["id"]: vols[home.get(n["id"], n["id"])] for n in data["nodes"]}, musicApi=MUSIC_API or None,
                 profile=dict(data["profile"], oneliner=cfg("you.one_liner")), playlistIds=music_settings({n["id"] for n in data["nodes"]}),
                 text={"intro": cfg("cover.intro"), "labelRim": cfg("cover.label_rim"), "blurbHead": cfg("cover.blurb_head"), "blurb": cfg("cover.blurb"),
@@ -724,8 +731,8 @@ def subset_fonts():
     say) falls back to the system's Japanese font."""
     pages = sorted(DIST.glob("*.html"))
     chars = set(map(chr, range(32, 127))) | set("·–—…→←↑↓×’“”")
-    for f in pages:
-        chars |= {c for c in html.unescape(f.read_text()) if c.isprintable() and not c.isspace()}
+    seen = set().union(*(set(html.unescape(f.read_text())) for f in pages))   # each distinct character once, not each of 8M
+    chars |= {c for c in seen if c.isprintable() and not c.isspace()}
     text = "".join(sorted(chars))
     from urllib.parse import quote
     link = ('<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap">\n'
