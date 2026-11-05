@@ -1129,10 +1129,7 @@ ART = {
                                  + ring(370, 215 - k * 12, 13, 3, "fill:none") + t(370, 221 - k * 12, "$", 16, "display", "middle") + "</g>" for k in range(3))
                        + t(370, 140, "$5,000", 26, "display", "middle") + note(370, 282, "the prize", "middle")),
     # --- CarDesigner ---
-    "scan": lambda: (car(60, 90, 330) + "".join(dot(70 + 310 * seed("lid", i), 80 + 100 * seed("lid2", i), 2.2, SPOT if i % 7 == 0 else INK) for i in range(120))
-                     + ln("M40 40 L120 90 M40 40 L60 150", 2, "4 5") + r(20, 20, 30, 50, INK, 3, rx=5)
-                     + motion("@keyframes sc-s{from{transform:translateX(0)}to{transform:translateX(320px)}}.sc-s{animation:sc-s 7s ease-in-out infinite alternate}")
-                     + f'<g class="mv sc-s"><rect x="66" y="60" width="4" height="150" style="{SPOT};opacity:.55"/></g>'),
+    "scan": lambda: scan(),
     "driveway": lambda: (phone(150, 20, 150, 270, 0, ln("M170 200 L280 200 M180 250 L270 250", 2, "5 6") + car(166, 150, 118, "fill:var(--live-red)"))),
     # --- the data terminal ---
     "ticks": lambda: ("".join(ln(f"M{30 + i * 16} {130 - 70 * seed('tk', i):.0f} v{10 + 50 * seed('tk2', i):.0f}", 6) for i in range(10))
@@ -1482,6 +1479,19 @@ def atlas():
     out += [dot(36, 150, 9, SPOT), note(36, 100, "pipeline, day 1"), dot(86, 150, 9, SPOT), note(100, 72, "real data, week 1")]
     out += ["".join(r(30 + i * 66, 214, 58, 40, PAPER if i else INK, 4, rx=4) for i in range(6)), note(225, 282, "six domains, one citable shape", "middle")]
     return "".join(out)
+
+
+def scan():
+    """Scan: the LiDAR line sweeps the car and the points land behind it, then it sweeps back and takes them up again,
+    a boomerang. Still, the sweep rests at the far end with every point showing."""
+    cid = f"sc{next(_tone_ids)}"
+    css = ("@keyframes sc-s{from{transform:translateX(0)}to{transform:translateX(320px)}}"
+           ".sc-s{transform:translateX(320px);animation:sc-s 6s ease-in-out infinite alternate}")
+    points = "".join(dot(70 + 310 * seed("lid", i), 80 + 100 * seed("lid2", i), 2.2, SPOT if i % 7 == 0 else INK) for i in range(120))
+    return (motion(css) + f'<defs><clipPath id="{cid}"><rect class="mv sc-s" x="-252" y="0" width="320" height="300"/></clipPath></defs>'
+            + car(60, 90, 330) + f'<g clip-path="url(#{cid})">{points}</g>'
+            + ln("M40 40 L120 90 M40 40 L60 150", 2, "4 5") + r(20, 20, 30, 50, INK, 3, rx=5)
+            + f'<g class="mv sc-s"><rect x="66" y="60" width="4" height="150" style="{SPOT};opacity:.55"/></g>')
 
 
 ART.update({
