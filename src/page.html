@@ -145,6 +145,7 @@ html.vt-back::view-transition-group(rec), html.vt-back::view-transition-group(sl
 .lp { position: relative; }
 .lp .sl { line-height: 0; position: relative; z-index: 1; border: 2.5px solid var(--ink); }
 .sleeve-art, .record { display: block; width: 100%; height: auto; }
+.lp .sleeve-art .mv { animation: none; }   /* the shelf stays still: only a volume's own pictures move */
 .disc { position: absolute; z-index: 0; top: 3%; left: 3%; width: 94%; transition: transform .45s cubic-bezier(.2, .8, .2, 1); }
 .lp-card:hover .disc, .lp-card:focus-visible .disc { transform: translateX(38%) rotate(40deg); }
 html:has(.lp-grid) { overflow-x: clip; }   /* a record pulled out of the last column runs off the page, not into a scrollbar */

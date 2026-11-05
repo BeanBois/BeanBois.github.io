@@ -35,7 +35,7 @@ episodes:
         caption: No reward shaping
         text: DDPG with Hindsight Experience Replay and a sparse reward, +1 for a win and −1 for a loss, over the game's two win conditions.
       - span: 3
-        art: fps
+        art: yolo
         caption: Seeing
         text: YOLOv5 for enemy detection, about 60 fps on the player machine against 16 for the first approach.
   - n: 3

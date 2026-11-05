@@ -21,7 +21,7 @@ episodes:
         caption: The model
         text: The original Transformer, encoder, decoder and attention, reimplemented from the paper in PyTorch, with training and evaluation scripts.
       - span: 3
-        art: subtitles
+        art: archerloss
         caption: The data
         text: A learning exercise. Given one line of Archer, predict the next, trained on fourteen seasons of subtitles. Training loss fell from 7.5 to 4.4 over 200 epochs.
     next: BERT from scratch.

@@ -2,7 +2,7 @@
 entry: terminel
 kana: 端末
 obi: We finally succeeded in adding code.
-cover: tui
+cover: hello
 episodes:
   - n: 1
     title: A terminal in the browser

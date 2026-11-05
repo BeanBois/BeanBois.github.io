@@ -2,13 +2,13 @@
 entry: wordle-ai
 kana: 単語
 obi: Rewarded for what it learns, not for winning.
-cover: chars
+cover: wordle
 episodes:
   - n: 1
     title: Five letters
     panels:
       - span: 4
-        art: chars
+        art: wordle
         caption: The reward
         text: A learning exercise over four days. Wordle as reinforcement learning, where the reward is information gain, how much a guess narrows the answer against an optimal guess.
       - span: 2

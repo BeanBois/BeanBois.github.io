@@ -2,7 +2,7 @@
 entry: dgl-coursework
 kana: 曲率
 obi: Before the hyperbolic thesis, the curvature of graphs.
-cover: poincare
+cover: curvature
 episodes:
   - n: 1
     title: Graphs
@@ -12,6 +12,6 @@ episodes:
         caption: From scratch
         text: Imperial MSc coursework, February 2025. GCN layers written from scratch in PyTorch, made graph-level with sum, mean and max pooling, then a heterogeneous graph whose two node types don't share a feature size.
       - span: 3
-        art: poincare
+        art: curvature
         caption: Curvature
         text: How a graph's shape changes what a GNN can learn, measured by degree, betweenness and Ollivier–Ricci curvature. I wrote the curvature's core, the Wasserstein distance. The geometry led to the hyperbolic thesis.

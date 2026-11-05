@@ -2,13 +2,13 @@
 entry: carbon-coin
 kana: 炭素
 obi: Runner-up, in a day.
-cover: table
+cover: carbon
 episodes:
   - n: 1
     title: Carbon on a chain
     panels:
       - span: 3
-        art: vote
+        art: carbon
         caption: The idea
         text: Our HackKing's 2022 entry, first runner-up, built in one day by a team of three. Track and regulate carbon coins on a blockchain, so the companies in a supply chain are rewarded for staying carbon-friendly.
       - span: 3

@@ -27,7 +27,7 @@ episodes:
         caption: What breaks
         text: Federated learning on edge devices scales badly. Every client stores its data, downloads a large model and trains it, and a central server runs the show. The ideal is peer-to-peer, sparse and asynchronous.
       - span: 3
-        art: chip
+        art: vonneumann
         caption: Why it breaks
         text: The review argues those limits are built into classical computing, which keeps memory apart from compute and needs somewhere for data to be centralised.
       - span: 4
