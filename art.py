@@ -14,20 +14,28 @@ def seed(s, k=0):
 INK, PAPER, SPOT, ONSPOT = "fill:var(--ink)", "fill:var(--paper)", "fill:var(--live-red)", "fill:var(--live-on-red)"
 
 
+_tone_ids = iter(range(10**9))   # pattern ids, unique across the build and so on any one page
+
+
 def tone(x0, y0, x1, y1, step, rmax, fade_from_top=True):
-    """Screentone: a dot grid whose dots grow across the area."""
-    out = []
-    y, row = y0, 0
+    """Screentone: a dot grid whose dots grow across the area. Each row of dots is one rect filled with a
+    one-dot pattern, not a circle per dot: the same picture, with a few dozen elements instead of thousands."""
+    defs, rects = [], []
+    y, row, h = y0, 0, step * 0.87
     while y <= y1:
         x = x0 + (row % 2) * step / 2
         f = (y - y0) / max(1, y1 - y0) if fade_from_top else 1 - (y - y0) / max(1, y1 - y0)
         r = rmax * max(0, min(1, f)) ** 1.2
-        while x <= x1 and r > 0.25:
-            out.append(f'<circle cx="{x:.0f}" cy="{y:.0f}" r="{r:.2f}"/>')
-            x += step
-        y += step * 0.87
+        n = int((x1 - x) // step) + 1 if x <= x1 else 0
+        if r > 0.25 and n:
+            pid = f"tn{next(_tone_ids)}"
+            # the tile is centred on the dot, so the row's rect runs half a step either side of its first and last dots
+            defs.append(f'<pattern id="{pid}" x="{x - step / 2:g}" y="{y - h / 2:.2f}" width="{step:g}" height="{h:.2f}" patternUnits="userSpaceOnUse">'
+                        f'<circle cx="{step / 2:g}" cy="{h / 2:.2f}" r="{r:.2f}"/></pattern>')
+            rects.append(f'<rect x="{x - step / 2:g}" y="{y - h / 2:.2f}" width="{n * step:g}" height="{h:.2f}" fill="url(#{pid})"/>')
+        y += h
         row += 1
-    return f'<g style="{INK}">{"".join(out)}</g>'
+    return f'<defs style="{INK}">{"".join(defs)}</defs><g>{"".join(rects)}</g>'
 
 
 def sheet(x, y, w, h, rot, rows=7):
