@@ -338,8 +338,11 @@ document.querySelectorAll(".lp-card").forEach(card => ["pointerenter", "focus", 
   if (got.has(card.href)) return; got.add(card.href);
   const l = document.createElement("link"); l.rel = "prefetch"; l.href = card.href; document.head.append(l);
 }, { passive: true })));
-/* back from a volume: hand the record back to its own sleeve */
-addEventListener("pageshow", () => {
+/* back from a volume: hand the record back to its own sleeve. Only for a shelf restored from the page cache, as it was
+   left: a fresh load has nothing to tidy, and its pageshow comes when the fonts are in, partway through the turn home,
+   where taking the veil away cut the turn short and the shelf just appeared */
+addEventListener("pageshow", e => {
+  if (!e.persisted) return;
   document.querySelectorAll(".pulling, .chosen").forEach(c => c.classList.remove("pulling", "chosen"));
   document.querySelectorAll(".tone-veil").forEach(v => v.remove());
 });
