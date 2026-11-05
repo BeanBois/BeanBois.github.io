@@ -429,11 +429,21 @@ const vtReady = () => new Promise(w => document.readyState === "loading" ? addEv
   .then(() => Promise.race([document.fonts ? document.fonts.ready : null, vtWait(500)]));
 if (vtHand) {
   const root = document.documentElement, onVol = vtVol(location.pathname), onShelf = /(^|\/)contents\.html$/.test(location.pathname);
-  const arrive = () => {
+  const arrive = cached => {
     const from = window.vtFrom;                        // where this page was opened from (src/turn.html)
     const fly = onVol && /(^|\/)contents\.html$/.test(new URL(from || "x:", location.href).pathname) && vtTake("vtfly");
-    const land = onShelf && vtVol(from) && vtTake("vtland");
-    const n = fly && fly.vol === onVol ? fly : land && land.vol === vtVol(from) ? land : null;
+    /* back on the shelf: from a volume, by the note it left. Firefox can bring a shelf back from its page cache before
+       the note that volume left on its way out can be read, so a shelf brought back with a card still chosen (the
+       one it was left by) knows the volume from that, and where its record and sleeve were from what the volume kept
+       noting while it was open (vtseen) */
+    let land = null;
+    if (onShelf) {
+      const chosen = cached && document.querySelector(".lp-card.chosen"), vid = vtVol(from) || (!from && chosen ? chosen.dataset.vt : null);
+      land = vid && vtTake("vtland");
+      if (vid && (!land || land.vol !== vid)) try { const v = JSON.parse(sessionStorage.vtseen || "null"); land = v && v.vol === vid ? v : null; } catch (_) {}
+      if (land && land.vol !== vid) land = null;
+    }
+    const n = fly && fly.vol === onVol ? fly : land;
     if (!n) return;
     root.classList.add("vt-hide");
     const safe = setTimeout(() => root.classList.remove("vt-hide"), 4000);   // whatever happens, the page shows
@@ -469,17 +479,24 @@ if (vtHand) {
       stands.forEach(c => c.remove()); cv.remove();
     }).finally(() => { clearTimeout(safe); root.classList.remove("vt-hide"); });
   };
-  arrive();
+  arrive(false);
   addEventListener("pageshow", e => {
     if (!e.persisted) return;
     if (onVol) document.querySelectorAll(".vt-stand, .tone-veil").forEach(el => el.remove());   // as it was left for the shelf
-    arrive();
+    arrive(true);
   });
-  /* leaving a volume by any way: where its record and sleeve are, in case it's for the shelf */
-  if (onVol) addEventListener("pagehide", () => {
-    const rec = document.querySelector(".deck .rec-wrap"), sl = document.querySelector(".vsleeve");
-    try { sessionStorage.vtland = JSON.stringify({ vol: onVol, rec: vtOnScreen(rec), sl: vtOnScreen(sl), t: Date.now() }); } catch (_) {}
-  });
+  /* a volume notes where its record and sleeve are, in case it's left for the shelf: on the way out (vtland), and,
+     for a browser that may not read that in time, whenever it has been scrolled (vtseen) */
+  if (onVol) {
+    const boxes = () => ({ vol: onVol, rec: vtOnScreen(document.querySelector(".deck .rec-wrap")), sl: vtOnScreen(document.querySelector(".vsleeve")), t: Date.now() });
+    const seen = () => { try { sessionStorage.vtseen = JSON.stringify(boxes()); } catch (_) {} };
+    let st = 0;
+    addEventListener("scroll", () => { clearTimeout(st); st = setTimeout(seen, 150); }, { passive: true });
+    addEventListener("resize", () => { clearTimeout(st); st = setTimeout(seen, 150); });
+    addEventListener("load", () => setTimeout(seen, 1200));       // once the record has landed
+    addEventListener("pageshow", e => { if (e.persisted) seen(); });
+    addEventListener("pagehide", () => { try { sessionStorage.vtland = JSON.stringify(boxes()); } catch (_) {} });
+  }
   /* leaving a volume for the shelf by a link: it breaks up from its record first, the record and sleeve standing */
   if (onVol) document.addEventListener("click", e => {
     if (e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;

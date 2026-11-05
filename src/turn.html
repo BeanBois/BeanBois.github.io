@@ -209,8 +209,12 @@ html.vt-in body { clip-path: circle(0px at 50% 50%); }
     try { sessionStorage.vtfrom = JSON.stringify({ from: location.href, to, done: !!(n && n.done && to), t: Date.now() }); } catch (_) {}
   });
   const arrive = cached => {
-    const n = note();
-    try { sessionStorage.removeItem("vtfrom"); sessionStorage.removeItem("vtstray"); } catch (_) {}
+    let n = note(), last = null;
+    try { sessionStorage.removeItem("vtfrom"); sessionStorage.removeItem("vtstray");
+          last = sessionStorage.vtat; sessionStorage.vtat = location.href; } catch (_) {}
+    // Firefox can bring a page back from its cache before the page left has written its note: then it was the page
+    // shown last (each page says so as it shows)
+    if (!n && cached && last && !same(last, location.href)) n = { from: last, to: null };
     const from = n && (!n.to || same(n.to, location.href)) && !same(n.from, location.href) ? n.from : null;
     window.vtFrom = from;
     if (where(location.href) === "home") try { sessionStorage.removeItem("vtvol"); } catch (_) {}
