@@ -114,6 +114,7 @@ html.vt-back::view-transition-old(root) { z-index: 1; animation: vt-gone .62s bo
 html.vt-back::view-transition-group(tone), html.vt-back::view-transition-new(tone) { animation: none; }
 html.vt-back::view-transition-group(rec), html.vt-back::view-transition-group(sleeve) { animation-delay: .6s; }
 @media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }
+@supports (-webkit-touch-callout: none) { @view-transition { navigation: none; } }   /* iPhone: no turns (see src/turn.html) */
 
 /* folio: page number and the next page, like the foot of a printed page */
 .folio { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 3fr); gap: 12px 56px; align-items: baseline; margin-top: 72px; padding-block: 14px 28px; border-top: 2px solid var(--ink); font: 12px var(--font-mono); }
