@@ -109,6 +109,8 @@ html.vt-back::view-transition-group(rec) { z-index: 1; }
    stops short of it, so a veil the size of innerHeight left the shelf showing through under the bar */
 .tone-veil { position: fixed; left: 0; top: -80px; width: 100vw; height: calc(100vh + 160px); height: calc(100lvh + 160px); z-index: 20; pointer-events: none; }
 html .lp-card.chosen { z-index: 21; }   /* above the veil, over the hover and pull rules below */
+html.leaving .corners, html.leaving .wrap, html.leaving .folio { visibility: hidden; }   /* the shelf under the veil, gone (see the shelf's script) */
+html.leaving .lp-card.chosen { visibility: visible; }
 @keyframes vt-hold { to { opacity: 1; } }
 @keyframes vt-gone { 0%, 99% { opacity: 1; } 100% { opacity: 0; } }
 html.vt-back::view-transition-new(root) { animation: vt-hold 1.75s both; }       /* keeps the turn open for the dots */

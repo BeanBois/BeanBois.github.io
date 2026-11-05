@@ -329,7 +329,9 @@ document.querySelectorAll(".lp-card").forEach(card => card.addEventListener("cli
   /* first the shelf breaks into dots round the chosen card, then the record comes out */
   const s = card.querySelector(".lp").getBoundingClientRect();
   card.classList.add("chosen");
-  toneDots(toneVeil(), s.left + s.width / 2, s.top + s.height / 2, 640);
+  /* once the dots cover it, the rest of the shelf goes too: on an iPhone the page runs on under Safari's bar, where
+     the veil doesn't reach, and the cards there showed through the whole turn */
+  toneDots(toneVeil(), s.left + s.width / 2, s.top + s.height / 2, 640).then(() => document.documentElement.classList.add("leaving"));
   setTimeout(pull, 600);
 }));
 /* fetch a volume as soon as a card is pointed at, so the turn doesn't wait on the network */
@@ -345,6 +347,7 @@ addEventListener("pageshow", e => {
   if (!e.persisted) return;
   document.querySelectorAll(".pulling, .chosen").forEach(c => c.classList.remove("pulling", "chosen"));
   document.querySelectorAll(".tone-veil").forEach(v => v.remove());
+  document.documentElement.classList.remove("leaving");
 });
 const want = { status: "all", mix: "all" };
 document.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () => {
