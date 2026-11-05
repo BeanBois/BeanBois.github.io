@@ -113,6 +113,7 @@ html.vt-back::view-transition-group(rec), html.vt-back::view-transition-group(sl
    left breaks into dots, the one arriving starts as nothing but paper (vt-hide) and the record and sleeve fly over it
    as stand-ins (.vt-stand) before the dots clear */
 html.vt-hide body { visibility: hidden; }
+html.vt-flying .deck .rec-wrap, html.vt-flying .vsleeve:not(.vt-stand) { visibility: hidden; }   /* the stand-ins are still on their way */
 .vt-stand { position: fixed !important; margin: 0 !important; pointer-events: none; visibility: visible; transform-origin: 50% 50%; }
 
 /* folio: page number and the next page, like the foot of a printed page */
@@ -431,7 +432,8 @@ if (vtHand) {
   const root = document.documentElement, onVol = vtVol(location.pathname), onShelf = /(^|\/)contents\.html$/.test(location.pathname);
   const arrive = cached => {
     const from = window.vtFrom;                        // where this page was opened from (src/turn.html)
-    const fly = onVol && /(^|\/)contents\.html$/.test(new URL(from || "x:", location.href).pathname) && vtTake("vtfly");
+    // onto a volume from the shelf, or from the volume either side (build.py's volnav)
+    const fly = onVol && (/(^|\/)contents\.html$/.test(new URL(from || "x:", location.href).pathname) || vtVol(from)) && vtTake("vtfly");
     /* back on the shelf: from a volume, by the note it left. Firefox can bring a shelf back from its page cache before
        the note that volume left on its way out can be read, so a shelf brought back with a card still chosen (the
        one it was left by) knows the volume from that, and where its record and sleeve were from what the volume kept
@@ -464,20 +466,21 @@ if (vtHand) {
       const cv = vtFullVeil();
       cv.style.visibility = "visible";
       // forward the record lands on top of its sleeve, coming out of its quarter turn; back it goes in behind
-      const flights = [vtStand(sl, onVol ? 30 : 31, n.sl), vtStand(rec, onVol ? 31 : 30, n.rec, 800, onVol ? 90 : 0)];
+      const flights = [vtStand(sl, onVol ? 30 : 31, n.sl), vtStand(rec, onVol ? 31 : 30, n.rec, 800, onVol ? n.turn ?? 90 : 0)];
       root.classList.remove("vt-hide"); clearTimeout(safe);
       const at = el => { const b = el.getBoundingClientRect(); return [b.left + b.width / 2, b.top + b.height / 2]; };
       let stands;
       if (onVol) {                                     // the volume forms round the record as it lands
+        root.classList.add("vt-flying");
         await vtWait(350); const o = at(rec);
         const dots = toneDots(cv, o[0], o[1], 700, false);
-        stands = await Promise.all(flights); await dots;
+        stands = await Promise.all(flights); root.classList.remove("vt-flying"); await dots;
       } else {                                         // home first, then the shelf comes back from the card
         stands = await Promise.all(flights); await vtWait(120);
         const o = at(home); await toneDots(cv, o[0], o[1], 700, false);
       }
       stands.forEach(c => c.remove()); cv.remove();
-    }).finally(() => { clearTimeout(safe); root.classList.remove("vt-hide"); });
+    }).finally(() => { clearTimeout(safe); root.classList.remove("vt-hide", "vt-flying"); });
   };
   arrive(false);
   addEventListener("pageshow", e => {
@@ -497,20 +500,25 @@ if (vtHand) {
     addEventListener("pageshow", e => { if (e.persisted) seen(); });
     addEventListener("pagehide", () => { try { sessionStorage.vtland = JSON.stringify(boxes()); } catch (_) {} });
   }
-  /* leaving a volume for the shelf by a link: it breaks up from its record first, the record and sleeve standing */
+  /* leaving a volume by a link for the shelf, or for another volume: it breaks up first, the record and sleeve
+     standing; for the shelf from the record, as the browser's turn does, and for a volume from where you clicked. The
+     next volume's record and sleeve then fly in from where these were, as the browser carries them across */
   if (onVol) document.addEventListener("click", e => {
     if (e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     const a = e.target.closest && e.target.closest("a[href]");
-    if (!a || a.target || !/(^|\/)contents\.html$/.test(new URL(a.href).pathname) || new URL(a.href).origin !== location.origin) return;
+    if (!a || a.target) return;
+    const u = new URL(a.href), toVol = vtVol(u.pathname);
+    if (u.origin !== location.origin || !(/(^|\/)contents\.html$/.test(u.pathname) || (toVol && toVol !== onVol))) return;
     e.preventDefault();
     const rec = document.querySelector(".deck .rec-wrap"), sl = document.querySelector(".vsleeve");
     const boxes = { rec: vtOnScreen(rec), sl: vtOnScreen(sl) };
     Promise.all([vtStand(sl, 30), vtStand(rec, 31)]).then(stands => {
       stands.forEach(c => { const b = c === stands[0] ? boxes.sl : boxes.rec; c.style.left = b[0] + "px"; c.style.top = b[1] + "px"; });
-      const o = [boxes.rec[0] + boxes.rec[2] / 2, boxes.rec[1] + boxes.rec[3] / 2];
+      const o = toVol ? [e.clientX, e.clientY] : [boxes.rec[0] + boxes.rec[2] / 2, boxes.rec[1] + boxes.rec[3] / 2];
       return toneDots(toneVeil(), o[0], o[1], 620);
     }).then(() => vtWait(120)).then(() => {
-      try { sessionStorage.vtfrom = JSON.stringify({ from: location.href, to: a.href, t: Date.now() }); } catch (_) {}
+      try { sessionStorage.vtfrom = JSON.stringify({ from: location.href, to: a.href, t: Date.now() });
+            if (toVol) sessionStorage.vtfly = JSON.stringify({ vol: toVol, ...boxes, turn: 0, t: Date.now() }); } catch (_) {}
       location.href = a.href;
     });
   });
