@@ -13,6 +13,10 @@ html.vt-head::view-transition-old(root), html.vt-head::view-transition-new(root)
 .vt-wave { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; view-transition-name: vt-wave; }
 html.vt-head::view-transition-group(vt-wave) { z-index: 2; animation: none !important; }
 html.vt-head::view-transition-new(vt-wave) { animation: none !important; }
+/* a record and sleeve the old page named because it couldn't tell this was a head turn (Safari, by Back or Forward):
+   they stay put on the old page until the wave reaches them (wave below) */
+html.vt-head::view-transition-group(rec), html.vt-head::view-transition-group(sleeve),
+html.vt-head::view-transition-old(rec), html.vt-head::view-transition-old(sleeve) { animation: none !important; }
 </style>
 <script>
 (() => {
@@ -45,7 +49,7 @@ html.vt-head::view-transition-new(vt-wave) { animation: none !important; }
   /* wave: the new page opens in a hyperbolic circle round where you clicked. Its hyperbolic radius grows evenly, so on
      screen it starts quick and slows towards the rim; a few faint rings trail it at even hyperbolic spacing, bunching
      at the edge, and lean towards the centre of the disk, as circles there do. */
-  function wave(A, B, cv) {
+  function wave(A, B, cv, st) {
     const W = innerWidth, H = innerHeight, RD = Math.hypot(W, H) / 2 * 1.6, ms = 1100;   // the disk is bigger than the screen, so a corner isn't at its very rim
     let z0 = null;
     try { const c = JSON.parse(sessionStorage.vtwave || "null"); sessionStorage.removeItem("vtwave"); if (c) z0 = [(c[0] - W / 2) / RD, (c[1] - H / 2) / RD]; } catch (_) {}
@@ -64,6 +68,11 @@ html.vt-head::view-transition-new(vt-wave) { animation: none !important; }
       f.transform = `perspective(1400px) rotate3d(${(-u[1]).toFixed(3)}, ${u[0].toFixed(3)}, 0, ${(tilt * g).toFixed(3)}deg) scale(${(1 + 0.018 * g).toFixed(4)})`; });
     anim(fn, "new", ms);
     anim([{ opacity: 1, transform: "scale(1)" }, { offset: 0.6, opacity: 1 }, { opacity: 0.85, transform: "scale(.992)" }], "old", ms);
+    // a stray record and sleeve (the old page's guess, src/page.html) go as the wave front passes where they were
+    if (st) { let i = 0; while (i < N) { const { c, r } = circle(rmax * i / N); if (Math.hypot(st[0] - c[0], st[1] - c[1]) < r) break; i++; }
+      const k = Math.min(0.9, i / N);
+      for (const name of ["rec", "sleeve"]) root.animate([{ opacity: 1 }, { offset: k, opacity: 1 }, { offset: k + 0.08, opacity: 0 }, { opacity: 0 }],
+        { duration: ms, fill: "both", pseudoElement: `::view-transition-old(${name})` }); }
     if (!cv) return;
     // the crests: each ring is a soft raised band, lit on the side towards the disk's centre and shaded outside.
     // The light and the shade are this theme's paper and ink, whichever is lighter and darker.
@@ -91,17 +100,26 @@ html.vt-head::view-transition-new(vt-wave) { animation: none !important; }
     requestAnimationFrame(frame);
   }
 
-  /* leaving: remember where the click was, so the wave starts there */
+  /* Which page a turn goes from and to. Chrome says (navigation.activation, and pageswap's activation); Safari turns
+     pages too but says neither, so each page also leaves a note on the way out: where it was, and where a click was
+     taking it. A note is only believed for a few seconds, the longest a turn waits for its new page. */
+  const note = () => { try { const n = JSON.parse(sessionStorage.vtfrom || "null"); return n && Date.now() - n.t < 8000 ? n : null; } catch (_) { return null; } };
+  const same = (a, b) => { try { return new URL(a, location.href).pathname === new URL(b, location.href).pathname; } catch (_) { return false; } };
+
+  /* leaving: remember where the click was, so the wave starts there, and where it leads */
   document.addEventListener("click", e => {
     if (reduce || e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     const a = e.target.closest && e.target.closest("a[href]");
-    if (!a || a.target || a.hasAttribute("download") || !("onpagereveal" in window)) return;
+    if (!a || a.target || a.hasAttribute("download")) return;
     const A = where(location.href), B = where(a.href);
     if (!isHead(A, B)) return;
-    try { sessionStorage.vtwave = JSON.stringify([e.clientX, e.clientY]); } catch (_) {}
+    try { sessionStorage.vtwave = JSON.stringify([e.clientX, e.clientY]);
+          sessionStorage.vtfrom = JSON.stringify({ from: location.href, to: a.href, t: Date.now() }); } catch (_) {}
   });
   addEventListener("pageswap", e => {
-    const to = e.activation && e.activation.entry && e.activation.entry.url;
+    const n = note(), to = e.activation && e.activation.entry && e.activation.entry.url
+      || (n && same(n.from, location.href) ? n.to : null);          // Safari: only a click says where it leads, not Back
+    try { sessionStorage.vtfrom = JSON.stringify({ from: location.href, to, t: Date.now() }); } catch (_) {}
     if (e.viewTransition && to && isHead(where(location.href), where(to))) root.classList.add("vt-head");
   });
   addEventListener("pageshow", e => {
@@ -112,8 +130,11 @@ html.vt-head::view-transition-new(vt-wave) { animation: none !important; }
   /* arriving */
   addEventListener("pagereveal", e => {
     if (where(location.href) === "home") try { sessionStorage.removeItem("vtvol"); } catch (_) {}   // a volume's note is for the shelf only (src/page.html)
-    const vt = e.viewTransition, from = window.navigation && navigation.activation && navigation.activation.from && navigation.activation.from.url;
-    if (!vt || reduce || !from) return;
+    const n = note(); let st = null;
+    try { st = JSON.parse(sessionStorage.vtstray || "null"); sessionStorage.removeItem("vtfrom"); sessionStorage.removeItem("vtstray"); } catch (_) {}
+    const act = window.navigation && navigation.activation && navigation.activation.from && navigation.activation.from.url;
+    const vt = e.viewTransition, from = act || (n && (!n.to || same(n.to, location.href)) ? n.from : null);
+    if (!vt || reduce || !from) { try { sessionStorage.removeItem("vtwave"); } catch (_) {} return; }
     const A = where(from), B = where(location.href);
     if (!isHead(A, B)) return;
     root.classList.add("vt-head");
@@ -122,7 +143,7 @@ html.vt-head::view-transition-new(vt-wave) { animation: none !important; }
     // the crests are soft gradients with no edge to keep sharp, so half the CSS pixels is plenty and a quarter of the work
     cv.width = Math.round(innerWidth / 2); cv.height = Math.round(innerHeight / 2);
     document.body.append(cv); vt.finished.finally(() => cv.remove());
-    vt.ready.then(() => wave(A, B, cv));
+    vt.ready.then(() => wave(A, B, cv, st));
   });
 })();
 </script>
