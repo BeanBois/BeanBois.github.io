@@ -275,7 +275,8 @@ html:has(.lp-grid) { overflow-x: clip; }   /* a record pulled out of the last co
 .pipe i { font-style: normal; color: var(--muted); }
 .upd-big { display: grid; gap: 2px; margin: 0 0 20px; }
 .upd-big span { font-size: 12px; }
-.upd-big b { font: 400 clamp(30px, 4vw, 40px)/1 var(--font-display); font-variant-numeric: tabular-nums; }
+.upd-big b { font: 400 clamp(30px, 4vw, 40px)/1 var(--font-display); font-variant-numeric: tabular-nums; white-space: nowrap; }
+@media (max-width: 520px) { .upd-big b { font-size: 8vw; } }   /* the date on one line, even on a small phone */
 .folio .upd { color: var(--muted); margin-left: 14px; white-space: nowrap; }
 @media (max-width: 640px) { .folio { grid-template-columns: minmax(0, 1fr); } .folio .upd { margin-left: 8px; } }
 @media (max-width: 860px) { .flap .seal { display: none; } }   /* phones: the brief reaches the summary sooner */
