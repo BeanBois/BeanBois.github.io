@@ -17,7 +17,16 @@ html.vt-head::view-transition-new(vt-wave) { animation: none !important; }
    they stay put on the old page until the wave reaches them (wave below) */
 html.vt-head::view-transition-group(rec), html.vt-head::view-transition-group(sleeve),
 html.vt-head::view-transition-old(rec), html.vt-head::view-transition-old(sleeve) { animation: none !important; }
+/* DEBUG (design/phone-debug only): every layer a loud colour, to see which fills the strip under Safari's bar */
+html.dbg { background: #ff00ff !important; }
+html.dbg body { background: #00d0ff !important; }
+html.dbg::view-transition, html.dbg.vt-head::view-transition { background: #ffe600 !important; }
+html.dbg::view-transition-old(root) { outline: 8px solid #ff2020 !important; outline-offset: -8px; }
+html.dbg::view-transition-new(root) { outline: 8px solid #20c020 !important; outline-offset: -8px; }
+html.dbg .tone-veil, html.dbg .vt-wave { outline: 8px dashed #ff8800; outline-offset: -8px; }
 </style>
+<script>try { if (/[?&]debug\b/.test(location.search)) sessionStorage.dbg = "1"; if (/[?&]nodebug\b/.test(location.search)) sessionStorage.removeItem("dbg");
+  if (sessionStorage.dbg) document.documentElement.classList.add("dbg"); } catch (_) {}</script>
 <script>
 (() => {
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
