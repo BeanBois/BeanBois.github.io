@@ -8,7 +8,7 @@ episodes:
     title: At home
     panels:
       - span: 3
-        art: switch
+        art: statemachine
         caption: The flow
         text: I designed the service robot's state-flow diagram, the states it moves through for a task and what moves it between them.
       - span: 3

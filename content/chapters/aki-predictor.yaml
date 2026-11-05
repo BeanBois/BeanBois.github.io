@@ -12,7 +12,7 @@ episodes:
         caption: The model
         text: Group coursework at Imperial in 2025. As a group, a gradient-boosted classifier trained on NHS creatinine blood-test data, reaching 87% AUC for early detection of acute kidney injury.
       - span: 2
-        art: k8s
+        art: aksvc
         caption: The service
         text: My part, the deployment. On Kubernetes with Prometheus monitoring, alerting and automated rollback on model degradation.
       - span: 6

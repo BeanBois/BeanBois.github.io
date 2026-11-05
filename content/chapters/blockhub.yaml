@@ -12,11 +12,11 @@ episodes:
         caption: The theme
         text: The hackathon asked for blockchain for social good. I read it as open source, software everyone uses that struggles to reach the developers it needs.
       - span: 2
-        art: claim
+        art: pitch
         caption: My idea
         text: I came up with it and pitched it to my team of six. Their feedback made it a better product.
       - span: 3
-        art: board
+        art: platform
         caption: The platform
         text: Open-source projects reach potential contributors, and contributors vote on-chain to rank projects, so the ones judged most impactful draw the most help. A major contributor gets a Polygon ID certificate to prove it anywhere on Polygon.
       - span: 3

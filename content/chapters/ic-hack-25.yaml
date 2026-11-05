@@ -2,24 +2,24 @@
 entry: ic-hack-25
 kana: 火災
 obi: The fire alarm writes itself.
-cover: ghost
+cover: firegame
 episodes:
   - n: 1
     title: Thirty hours
     panels:
       - span: 4
-        art: ghost
+        art: firegame
         caption: The game
         text: Imperial's student hackathon, February 2025, thirty hours non-stop in a team of six. A game for job interviews. A 2D game drops you into an office fire alarm, and an LLM writes each act from scripted beats as you play.
       - span: 2
-        art: sources
+        art: embed
         caption: Scoring you
         text: Each answer is matched by embedding similarity to reference actions with known Big Five levels, in a vector database.
       - span: 3
-        art: views
+        art: bigfive
         caption: The reading
         text: The point of it. Your choices are scored into a Big Five personality sheet, printed as a PDF, for the interviewer. It ran end to end at the demo.
       - span: 3
-        art: commits
+        art: hackcommits
         caption: My part
         text: 42 of the team's 97 commits, the most of anyone. The graphics and sprites, the fire and the maze, and wiring the engine to them.

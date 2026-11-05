@@ -236,8 +236,166 @@ def board(x, y, s, n=8, pieces=()):
     return r(x, y, s, s, PAPER, 4) + sq + "".join(ring(x + (i + 0.5) * c, y + (j + 0.5) * c, c * 0.3, 3, SPOT if red else PAPER) for i, j, red in pieces) + r(x, y, s, s, "fill:none", 5)
 
 
+PIECES = {   # outlines on a unit square centred on 0,0, drawn at a board's cell size
+    "pawn": "M-.28 .36H.28L.16 .2L.08-.02H-.08L-.16 .2Z M0-.3A.13 .13 0 1 1 0-.04A.13 .13 0 1 1 0-.3Z",
+    "rook": "M-.28 .36H.28V.24H.2L.16-.14H.24V-.34H.12V-.24H.04V-.34H-.04V-.24H-.12V-.34H-.24V-.14H-.16L-.2 .24H-.28Z",
+    "king": "M-.28 .36H.28L.2 .1Q.3-.12 .06-.14V-.22H.14V-.3H.06V-.4H-.06V-.3H-.14V-.22H-.06V-.14Q-.3-.12-.2 .1Z",
+    "knight": "M-.26 .36H.26L.2 .1Q.22-.2-.02-.36L-.08-.24Q-.24-.16-.28 0L-.18 .06L-.04-.04Q-.04 .12-.18 .24Z",
+}
+
+
+def piece(cx, cy, c, kind, side):
+    """A chess piece on a square: white (1) in paper with an ink edge, black (0) in ink with a paper edge, red (2) for the one that moved."""
+    fill, edge = {0: ("var(--ink)", "var(--paper)"), 1: ("var(--paper)", "var(--ink)"), 2: ("var(--live-red)", "var(--ink)")}[side]
+    return (f'<path d="{PIECES[kind]}" transform="translate({cx:.1f} {cy:.1f}) scale({c * 1.3:.1f})" vector-effect="non-scaling-stroke" '
+            f'style="fill:{fill};stroke:{edge};stroke-width:2.5;stroke-linejoin:round"/>')
+
+
+def monkey(cx, cy, s=1.0, fill=PAPER, arm_up=True):
+    """A monkey, sitting up: ears, head, a muzzle, one arm raised (or not)."""
+    k = lambda v: v * s
+    arm = (f"M{cx + k(22):.0f} {cy + k(42):.0f} L{cx + k(46):.0f} {cy + k(4):.0f}" if arm_up else f"M{cx + k(22):.0f} {cy + k(42):.0f} L{cx + k(38):.0f} {cy + k(82):.0f}")
+    return (
+            ring(cx - k(29), cy - k(4), k(11), 4, fill) + ring(cx + k(29), cy - k(4), k(11), 4, fill)
+            + ln(f"M{cx + k(20):.0f} {cy + k(84):.0f} C{cx + k(60):.0f} {cy + k(90):.0f} {cx + k(64):.0f} {cy + k(50):.0f} {cx + k(48):.0f} {cy + k(56):.0f}", 4)
+            + r(cx - k(24), cy + k(28), k(48), k(62), fill, 5, rx=k(20))
+            + ln(f"M{cx - k(22):.0f} {cy + k(42):.0f} L{cx - k(38):.0f} {cy + k(82):.0f} " + arm, 6)
+            + ln(f"M{cx - k(12):.0f} {cy + k(88):.0f} V{cy + k(108):.0f} M{cx + k(12):.0f} {cy + k(88):.0f} V{cy + k(108):.0f}", 6)
+            + ring(cx, cy, k(27), 5, fill)
+            + f'<ellipse cx="{cx:.0f}" cy="{cy + k(9):.0f}" rx="{k(16):.0f}" ry="{k(11):.0f}" style="{PAPER};stroke:var(--ink);stroke-width:3"/>'
+            + dot(cx - k(9), cy - k(7), k(3.5)) + dot(cx + k(9), cy - k(7), k(3.5))
+            + ln(f"M{cx - k(6):.0f} {cy + k(11):.0f} Q{cx:.0f} {cy + k(16):.0f} {cx + k(6):.0f} {cy + k(11):.0f}", 2.5))
+
+
+def pix(x, y, p, rows, colours=None):
+    """Pixel art: one string per row, a character per pixel (# ink, + tone, . paper, r red, space clear).
+    Each run of one colour is one rect, so a sprite stays a few dozen elements."""
+    colours = colours or {"#": INK, "+": "fill:var(--tone)", ".": PAPER, "r": SPOT}
+    out = []
+    for j, row in enumerate(rows):
+        i = 0
+        while i < len(row):
+            c, k = row[i], i
+            while k < len(row) and row[k] == c:
+                k += 1
+            if c in colours:
+                out.append(f'<rect x="{x + i * p:g}" y="{y + j * p:g}" width="{(k - i) * p:g}" height="{p:g}" style="{colours[c]}"/>')
+            i = k
+    return "".join(out)
+
+
+HOUSE = ("     ##############     ", "    #++++++++++++++#    ", "   #++++++++++++++++#   ", "  #++++++++++++++++++#  ",
+         " ###################### ", "  #..................#  ", "  #.####........####.#  ", "  #.#..#........#..#.#  ",
+         "  #.####..####..####.#  ", "  #.......#..#.......#  ", "  #.......#..#.......#  ", "  ####################  ")
+TREE = ("  ####  ", " #++++# ", "#++++++#", "#++#+++#", "#++++#+#", " #++++# ", "  ####  ", "   ##   ", "   ##   ", "  ####  ")
+WALKER = ("  rrrr  ", " rrrrrr ", " #.##.# ", " #....# ", "  ####  ", " #+##+# ", "#.####.#", "  #..#  ", "  #  #  ", " ##  ## ")
+
+
+def bubble(x, y, w, h, tail_x, tail_dir=1, fill=PAPER):
+    """A speech bubble with its tail under it, pointing left (-1) or right (1)."""
+    b = y + h
+    return (f'<path d="M{x + 14} {y} H{x + w - 14} Q{x + w} {y} {x + w} {y + 14} V{b - 14} Q{x + w} {b} {x + w - 14} {b} '
+            f'H{tail_x + 14} L{tail_x + 2 + 18 * tail_dir} {b + 26} L{tail_x - 4} {b} H{x + 14} Q{x} {b} {x} {b - 14} V{y + 14} Q{x} {y} {x + 14} {y}Z" '
+            f'style="{fill};stroke:var(--ink);stroke-width:5;stroke-linejoin:round"/>')
+
+
+def db(cx, y, w, h, fill=PAPER):
+    """A database: a cylinder with two bands."""
+    rx, ry = w / 2, w * 0.14
+    side = f'<path d="M{cx - rx} {y} V{y + h} A{rx} {ry} 0 0 0 {cx + rx} {y + h} V{y}" style="{fill};stroke:var(--ink);stroke-width:5"/>'
+    bands = "".join(f'<path d="M{cx - rx} {y + h * f:.0f} A{rx} {ry} 0 0 0 {cx + rx} {y + h * f:.0f}" style="fill:none;stroke:var(--ink);stroke-width:3"/>' for f in (0.33, 0.66))
+    return side + bands + f'<ellipse cx="{cx}" cy="{y}" rx="{rx}" ry="{ry:.0f}" style="{fill};stroke:var(--ink);stroke-width:5"/>'
+
+
+FIRE = ("   r   ", "  rr   ", "  rrr r", " rr.rrr", " r...rr", "rr...rr", "r.....r", " rrrrr ")
+
+
+def commit_dots(mine, total, per, label, sub):
+    """A share of commits: one dot per `per` commits, mine inked in, with the count under it."""
+    n = math.ceil(total / per)
+    cols = 10 if n <= 40 else 20
+    gap = 380 / (cols - 1) if n > 40 else 38
+    rad = min(13, gap * 0.36)
+    return ("".join(dot(40 + (i % cols) * gap, 50 + (i // cols) * gap, rad) if i < round(mine / per) else ring(40 + (i % cols) * gap, 50 + (i // cols) * gap, rad * 0.8, 3) for i in range(n))
+            + t(40, 250, label, 40, "display") + note(40, 284, sub))
+
+
+def sr_tile(x, soft, label):
+    """A crop of zigzag texture after 4× upscaling: blurred (as MSE leaves it) or crisp (as perceptual loss does)."""
+    rows = "".join(ln(f"M{x + 8} {64 + k * 15} " + " ".join(f"l9 {-8 if q % 2 == 0 else 8}" for q in range(8)), 4) for k in range(5))
+    blur = ' filter="url(#srgan-blur)"' if soft else ""
+    return r(x, 50, 84, 84, PAPER, 4) + f"<g{blur}>{rows}</g>" + t(x + 42, 156, label, 14, "mono", "middle")
+
+
+def envelope(x, y, w, h, fill=PAPER):
+    return r(x, y, w, h, fill, 4, rx=3) + ln(f"M{x} {y} L{x + w / 2:.0f} {y + h * 0.6:.0f} L{x + w} {y}", 3)
+
+
+def tick(x, y, s=1.0, colour="var(--art-win)"):
+    return ln(f"M{x} {y} l{6 * s:.0f} {6 * s:.0f} l{12 * s:.0f} {-13 * s:.0f}", 4, colour=colour)
+
+
+def key_icon(x, y, s=1.0, sw=5):
+    k = lambda v: v * s
+    return ring(x, y, k(16), sw) + ln(f"M{x + k(16):.0f} {y:.0f} H{x + k(70):.0f} M{x + k(50):.0f} {y:.0f} V{y + k(14):.0f} M{x + k(62):.0f} {y:.0f} V{y + k(12):.0f}", sw)
+
+
+def drop(x, y, s=1.0, fill=SPOT):
+    return f'<path d="M{x} {y} q{7 * s:.0f} {11 * s:.0f} 0 {16 * s:.0f} q{-7 * s:.0f} {-5 * s:.0f} 0 {-16 * s:.0f}Z" style="{fill};stroke:var(--ink);stroke-width:2"/>'
+
+
+def branch(pts, w0, w1, fill="fill:var(--tone)"):
+    """A tapering, crooked branch along a polyline: thick (w0) at the first point, thin (w1) at the last."""
+    n = len(pts) - 1
+    left, right = [], []
+    for i, (x, y) in enumerate(pts):
+        ax, ay = pts[max(0, i - 1)]
+        bx, by = pts[min(n, i + 1)]
+        dx, dy = bx - ax, by - ay
+        d = math.hypot(dx, dy) or 1
+        w = (w0 + (w1 - w0) * i / n) / 2
+        left.append((x - dy / d * w, y + dx / d * w))
+        right.append((x + dy / d * w, y - dx / d * w))
+    d = "M" + " L".join(f"{x:.1f} {y:.1f}" for x, y in left + right[::-1]) + "Z"
+    return f'<path d="{d}" style="{fill};stroke:var(--ink);stroke-width:4;stroke-linejoin:round"/>'
+
+
+def leaf(cx, cy, rot, s=1.0):
+    return (f'<g transform="rotate({rot} {cx} {cy})"><path d="M{cx - 14 * s:.0f} {cy} Q{cx} {cy - 9 * s:.0f} {cx + 14 * s:.0f} {cy} Q{cx} {cy + 9 * s:.0f} {cx - 14 * s:.0f} {cy}Z" '
+            f'style="fill:var(--paper);stroke:var(--ink);stroke-width:3"/>' + ln(f"M{cx - 12 * s:.0f} {cy} H{cx + 12 * s:.0f}", 1.5) + "</g>")
+
+
+def pi_board(x, y, w=70, h=48, fill=PAPER, dash=None):
+    """A small single-board computer: the board, its pin header, the chip."""
+    return (r(x, y, w, h, fill, 4, dash=dash, rx=4) + "".join(dot(x + 8 + k * (w - 16) / 9, y + 7, 1.8) for k in range(10))
+            + r(x + w * 0.38, y + h * 0.38, w * 0.26, h * 0.4, INK, 0))
+
+
+def weather(cx, cy, kind):
+    if kind == "sun":
+        return ring(cx, cy, 9, 3) + "".join(ln(f"M{cx + 13 * math.cos(a):.0f} {cy + 13 * math.sin(a):.0f} L{cx + 18 * math.cos(a):.0f} {cy + 18 * math.sin(a):.0f}", 2.5) for a in [i * math.pi / 4 for i in range(8)])
+    cloud = f'<path d="M{cx - 16} {cy + 6} a8 8 0 0 1 4 -14 a10 10 0 0 1 18 -2 a8 8 0 0 1 10 16z" style="fill:var(--paper);stroke:var(--ink);stroke-width:3"/>'
+    if kind == "rain":
+        return cloud + ln(f"M{cx - 8} {cy + 12} l-3 8 M{cx} {cy + 12} l-3 8 M{cx + 8} {cy + 12} l-3 8", 2.5)
+    if kind == "snow":
+        return cloud + "".join(dot(cx + d, cy + 16, 2.2) for d in (-8, 0, 8))
+    return cloud
+
+
 def disk(cx, cy, rad):
     return ring(cx, cy, rad, 5) + ring(cx, cy, rad * 0.66, 1.5, "fill:none", "4 5") + ring(cx, cy, rad * 0.33, 1.5, "fill:none", "4 5")
+
+
+def vinyl(cx, cy, rad, grooves=4):
+    """A record: grooves, a red label, the spindle hole."""
+    rings = "".join(f'<circle cx="{cx}" cy="{cy}" r="{rad * (0.48 + 0.44 * i / max(1, grooves - 1)):.1f}"/>' for i in range(grooves))
+    return (ring(cx, cy, rad, 5, INK) + f'<g style="fill:none;stroke:var(--paper);stroke-width:1.5">{rings}</g>'
+            + ring(cx, cy, rad * 0.32, 4, SPOT) + dot(cx, cy, max(2.5, rad * 0.05), PAPER))
+
+
+def sleeve_sq(x, y, s, fill=PAPER):
+    """A square record sleeve, with a band across the top like the site's sleeves."""
+    return r(x, y, s, s, fill, 5) + f'<rect x="{x + 5:.0f}" y="{y + 5:.0f}" width="{s - 10:.0f}" height="{s * 0.14:.0f}" style="{INK}"/>'
 
 
 def tree_in_disk(cx, cy, rad, depth=4, red_leaf=None):
@@ -290,6 +448,19 @@ def arm2():
 
 
 ART = {
+    # --- this website ---
+    # the record's three stops: half out of its sleeve on the cover, one sleeve of many on the shelf (breaking into
+    # screentone where it's clicked), and on the deck in the volume with the tonearm down
+    "vinyl": lambda: (vinyl(118, 128, 54) + sleeve_sq(14, 76, 104) + t(66, 150, "♪", 30, "display", "middle")
+                      + "".join(sleeve_sq(188 + (i % 2) * 56, 76 + (i // 2) * 56, 48) for i in range(3))
+                      + "".join(dot(258 + 34 * seed("vy", i), 86 + 34 * seed("vy", i + 9), 1.5 + 3.5 * seed("vy", i + 30)) for i in range(26))
+                      + vinyl(362, 132, 60) + ln("M432 52 L428 92 L392 148", 7) + r(420, 40, 24, 24, PAPER, 5, rx=12) + r(385, 141, 16, 12, INK, 0)
+                      + note(66, 270, "cover", "middle") + note(240, 270, "contents", "middle") + note(362, 270, "volume", "middle")),
+    # the record at the tempo of the song: a worker asks Spotify what's on and finds its beats per minute
+    "nowplaying": lambda: (vinyl(140, 150, 112, 5) + ln("M140 22 A128 128 0 0 1 266 132", 4, "6 8", "var(--muted)") + arrow(258, 112, 266, 136, 4)
+                           + t(345, 128, "118", 54, "display", "middle") + note(345, 156, "bpm", "middle")
+                           + bars(296, 196, 100, 36, [0.5, 1, 0.5, 1, 0.5, 1, 0.5, 1], 5, hi=1)
+                           + note(345, 270, "live, from Spotify", "middle")),
     # --- the model deployment platform (Tencent) ---
     "commits": lambda: ("".join(dot(52 + (i % 11) * 32, 70 + (i // 11) * 32, 11) if i < 45 else ring(52 + (i % 11) * 32, 70 + (i // 11) * 32, 9, 3) for i in range(55))
                         + t(40, 250, "450 / 550", 40, "display") + note(40, 284, "commits, Mar–Sep 2026")),
@@ -419,6 +590,475 @@ ART = {
                         + "".join(r(222, 30 + i * 52, 200, 34, INK if i != 2 else SPOT, 3) for i in range(5)) + note(322, 296, "one citable signal schema", "middle")),
     "fusion": lambda: ("".join(r(20 + i * 10, 40 + i * 52, 120, 34, INK, 3) for i in range(3)) + doc(40, 210, 70, 80, 3, -8) + cross(75, 250, 26, 6)
                        + arrow(170, 120, 240, 150) + r(250, 90, 170, 120, PAPER, 6) + t(335, 160, "LLM", 30, "display", "middle") + note(335, 250, "signals in, never documents", "middle")),
+    # --- the FPS agent ---
+    # imitation: the copy does what it saw, with no idea why
+    "imitate": lambda: (monkey(110, 96) + monkey(340, 96, 1, SPOT) + arrow(170, 120, 276, 120, 4, "7 7") + note(223, 104, "copies the move", "middle")
+                        + t(392, 52, "?", 30, "display", "middle") + note(110, 250, "monkey see", "middle") + note(340, 250, "monkey do", "middle")),
+    # three laptops and the game: what each one hands on
+    "split": lambda: (laptop(20, 50, 100) + laptop(175, 50, 100) + laptop(330, 50, 100)
+                      + t(70, 92, "GSI", 16, "mono", "middle") + t(225, 96, "θ", 24, "display", "middle")
+                      + ring(380, 81, 13, 3, "fill:none") + ln("M380 63 V99 M362 81 H398", 3, colour="var(--live-red)")
+                      + t(70, 142, "SPECTATOR", 15, "display", "middle") + t(225, 142, "AGENT", 15, "display", "middle") + t(380, 142, "PLAYER", 15, "display", "middle")
+                      + note(70, 160, "sees everything", "middle") + note(225, 160, "learns", "middle") + note(380, 160, "YOLOv5 enemies", "middle")
+                      + arrow(124, 74, 171, 74, 4) + note(148, 38, "full state", "middle") + arrow(279, 74, 326, 74, 4) + note(302, 38, "actions", "middle")
+                      + r(160, 210, 130, 60, INK, 5) + t(225, 248, "CS:GO", 22, "display", "middle", PAPER)
+                      + arrow(160, 228, 92, 172, 4) + note(20, 215, "game state") + arrow(380, 172, 292, 228, 4) + note(430, 215, "mouse, keys", "end")),
+    # the critic stands in the open and sees the sun; the actor's view is blocked by a hill
+    "asymmetry": lambda: (ring(225, 82, 26, 5) + "".join(ln(f"M{225 + 34 * math.cos(a):.0f} {82 + 34 * math.sin(a):.0f} L{225 + 46 * math.cos(a):.0f} {82 + 46 * math.sin(a):.0f}", 4) for a in [i * math.pi / 4 for i in range(8)])
+                          + '<path d="M250 270 C272 80 348 80 370 270" style="fill:var(--tone);stroke:var(--ink);stroke-width:5"/>' + ln("M10 270 H440", 6)
+                          + person(75, 205, 1.3) + person(398, 205, 1.3, SPOT)
+                          + ln("M86 196 L192 104", 3, "6 6") + ln("M388 198 L342 162", 3, "6 6") + cross(338, 158, 10, 5)
+                          + t(20, 40, "critic", 20, "display") + note(20, 62, "sees it all")
+                          + t(430, 40, "actor", 20, "display", "end") + note(430, 62, "a player's view", "end")),
+    # a sparse reward: nothing for every step, then +1 for a win or −1 for a loss at the round's end
+    "sparse": lambda: ("".join("".join(dot(40 + j * 16, 44 + i * 42, 2, MUTED) for j in range(int((e - 40) // 16)))
+                               + dot(e, 44 + i * 42, 13, "fill:var(--art-win)" if w else "fill:var(--art-loss)") + t(e + 22, 49 + i * 42, "+1" if w else "−1", 15, "mono")
+                               for i, (e, w) in enumerate(((330, 1), (260, 0), (380, 0), (300, 1), (220, 0))))
+                       + note(40, 270, "0 every step, then +1 for a win or −1 for a loss")),
+    # what it learnt: keep moving, so the bot's slow aim lands where it was, and fire now and then to make it wary
+    "exploit": lambda: (ln("M170 240 L215 200 L195 160 L250 128 L282 176 L322 148", 4, "8 7", "var(--muted)")
+                        + "".join(ring(x, y, 11, 3, "fill:none", "4 4") for x, y in ((215, 200), (195, 160), (250, 128), (282, 176)))
+                        + ln("M80 170 L246 129", 3, "4 6") + ring(80, 170, 18, 5, INK) + ln("M80 170 L104 164", 7)
+                        + "".join(ln(f"M{322 - 242 * f:.0f} {148 + 22 * f:.0f} L{322 - 242 * (f + 0.05):.0f} {148 + 22 * (f + 0.05):.0f}", 4, colour="var(--live-red)") for f in (0.14, 0.26, 0.38))
+                        + ring(322, 148, 13, 5, SPOT) + clockface(392, 64, 30, 0, 50, 8)
+                        + note(80, 210, "bot: slow aim", "middle") + note(330, 186, "keep moving") + note(392, 116, "run the clock", "middle")
+                        + stamp(355, 255, "39 / 100", -6, 20, kind="display")),
+    # --- BlockHub ---
+    # the pitch: the team of six round a table, and me standing with the idea
+    "pitch": lambda: ('<path d="M50 230 A150 30 0 0 1 350 230 A150 30 0 0 1 50 230Z" style="fill:var(--tone);stroke:var(--ink);stroke-width:5"/>'.join(
+                          ["".join(person(90 + i * 60, 168, 1.0) for i in range(5)), ""])
+                      + ln("M80 236 V278 M320 236 V278", 6)
+                      + r(110, 128, 34, 22, PAPER, 3, rx=8) + t(127, 144, "…", 14, "mono", "middle") + r(266, 128, 34, 22, PAPER, 3, rx=8) + t(283, 144, "?", 14, "mono", "middle")
+                      + ring(400, 108, 16, 5, SPOT) + r(386, 128, 28, 74, SPOT, 5, rx=10) + ln("M392 200 V276 M408 200 V276", 7) + ln("M388 140 L362 112 M412 140 L424 176", 6)
+                      + ring(400, 52, 15, 4) + r(393, 66, 14, 10, INK, 0) + ln("M396 80 H404", 3)
+                      + "".join(ln(f"M{400 + 22 * math.cos(a):.0f} {52 + 22 * math.sin(a):.0f} L{400 + 31 * math.cos(a):.0f} {52 + 31 * math.sin(a):.0f}", 3) for a in [math.pi * (1 + i / 4) for i in range(5)])),
+    # --- carbon-coin ---
+    # the demo, built in a day: a rough window taped up, placeholder boxes, a scanner that's only a concept
+    "rough": lambda: ('<g transform="rotate(-2 225 150)">' + r(34, 34, 382, 224, PAPER, 5, rx=4) + ln("M34 60 H416", 4) + dot(50, 47, 4) + dot(64, 47, 4) + dot(78, 47, 4)
+                      + "".join(r(52, 76 + i * 40, 26, 26, PAPER, 3) + ln(f"M52 {76 + i * 40} l26 26 M78 {76 + i * 40} l-26 26", 2)
+                                + f'<rect x="90" y="{82 + i * 40}" width="{70 + 60 * seed("rough", i):.0f}" height="6" style="{INK}"/>'
+                                + f'<rect x="90" y="{94 + i * 40}" width="{40 + 30 * seed("rough", i + 5):.0f}" height="4" style="{MUTED}"/>'
+                                + r(214, 78 + i * 40, 40, 20, PAPER, 3) for i in range(4))
+                      + r(282, 76, 116, 150, "fill:none", 4, dash="8 7") + ln("M310 120 H370 M310 120 V108 M370 120 V108 M310 180 H370 M310 180 V192 M370 180 V192", 4)
+                      + ln("M300 150 H380", 3, colour="var(--live-red)") + t(340, 214, "concept", 12, "mono", "middle", MUTED) + "</g>"
+                      + '<rect x="12" y="24" width="64" height="20" transform="rotate(-28 44 34)" style="fill:var(--tone);opacity:.85"/>'
+                      + '<rect x="372" y="246" width="64" height="20" transform="rotate(-24 404 256)" style="fill:var(--tone);opacity:.85"/>'
+                      + stamp(118, 270, "built in a day", -4, 15, kind="mono")),
+    # --- this website, continued ---
+    # the site before this one: a little black-and-white pixel town, walked round like an old handheld game
+    "pixeltown": lambda: ('<rect x="207" y="96" width="36" height="128" style="fill:var(--tone)"/>'
+                          + "".join(pix(30 + 400 * seed("grass", i), 20 + 190 * seed("grass", i + 50), 4, ("# #", " # ")) for i in range(28)
+                                    if not (140 < 30 + 400 * seed("grass", i) < 300 and 20 + 190 * seed("grass", i + 50) < 110) and not (195 < 30 + 400 * seed("grass", i) < 250))
+                          + pix(153, 24, 6, HOUSE) + pix(40, 40, 6, TREE) + pix(92, 108, 6, TREE) + pix(352, 30, 6, TREE) + pix(312, 120, 6, TREE)
+                          + pix(201, 150, 6, WALKER)
+                          + r(12, 226, 426, 64, PAPER, 5, rx=4) + r(19, 233, 412, 50, "fill:none", 2, rx=2)
+                          + t(34, 264, "Welcome! Have a look around.", 16, "mono") + pix(408, 266, 3, ("#####", " ### ", "  #  "))),
+    # its two rooms, as a house plan
+    "houseplan": lambda: (ln("M180 262 H40 V38 H410 V262 H250", 7) + ln("M225 38 V120 M225 172 V262", 6)
+                          + t(132, 84, "poems", 22, "mono", "middle") + "".join(f'<rect x="80" y="{110 + i * 22}" width="{60 + 40 * seed("poem", i):.0f}" height="5" style="{INK}"/>' for i in range(5))
+                          + t(318, 84, "CS:GO", 22, "mono", "middle") + ring(318, 170, 34, 4, "fill:none") + ln("M318 124 V216 M272 170 H364", 4)
+                          + arrow(215, 296, 215, 236, 5) + dot(215, 222, 10, SPOT)),
+    # the series: four books, one per reader, the cover first
+    "series": lambda: ("".join(r(50 + i * 92, 40 + (i % 2) * 6, 74, 204 - (i % 2) * 6, SPOT if i == 0 else PAPER, 5)
+                               + f'<rect x="{56 + i * 92}" y="{48 + (i % 2) * 6}" width="62" height="18" style="{INK}"/>'
+                               + "".join(t(87 + i * 92, 104 + j * 34, ch, 28, "body", "middle", ONSPOT if i == 0 else INK) for j, ch in enumerate(k))
+                               + t(87 + i * 92, 226, str(i + 1), 18, "display", "middle", ONSPOT if i == 0 else INK)
+                               + note(87 + i * 92, 274, w, "middle")
+                               for i, (k, w) in enumerate(zip(("表紙", "作者", "目次", "奥付"), ("the hook", "the brief", "in depth", "the footnote"))))
+                       + ln("M30 250 H420", 6)),
+    # one source of truth: the bank held up high, and what it lights: the site and three CVs
+    "truth": lambda: ("<style>@keyframes sot-tw{0%,100%{opacity:.25}50%{opacity:.9}}.sot-tw{animation:sot-tw 4s ease-in-out infinite}"
+                      ".sot-tw:nth-of-type(2){animation-delay:1.3s}.sot-tw:nth-of-type(3){animation-delay:2.6s}"
+                      "@media (prefers-reduced-motion: reduce){.sot-tw{animation:none;opacity:.7}}</style>"
+                      + '<defs><radialGradient id="sot-glow"><stop offset="0" style="stop-color:var(--art-glow);stop-opacity:.75"/>'
+                        '<stop offset=".45" style="stop-color:var(--art-glow);stop-opacity:.25"/><stop offset="1" style="stop-color:var(--art-glow);stop-opacity:0"/></radialGradient></defs>'
+                      + '<circle cx="230" cy="60" r="70" fill="url(#sot-glow)"/>'
+                      + "<g>" + "".join(f'<path class="sot-tw" d="M{x} {y - k} Q{x} {y} {x + k} {y} Q{x} {y} {x} {y + k} Q{x} {y} {x - k} {y} Q{x} {y} {x} {y - k}Z" style="fill:var(--art-glow)"/>'
+                                        for x, y, k in ((196, 44, 9), (266, 30, 7), (258, 92, 6))) + "</g>"
+                      + person(110, 190, 1.6) + branch(((146, 262), (160, 228), (174, 196), (178, 172), (194, 140), (204, 112), (216, 88), (230, 60)), 24, 7) + branch(((180, 166), (164, 146), (150, 128), (130, 116)), 9, 3) + branch(((152, 132), (146, 112), (140, 96)), 6, 2) + leaf(120, 112, 30) + leaf(138, 86, 70, 0.9) + '<ellipse cx="170" cy="210" rx="4" ry="8" transform="rotate(22 170 210)" style="fill:var(--ink)"/>' + ln("M160 246 l5 -12 M182 170 l4 -9 M208 106 l4 -10", 2) + ln("M124 222 L175 190", 6)
+                      + note(180, 28, "the bank", "end")
+                      + r(300, 36, 120, 44, PAPER, 4) + t(360, 64, "site", 16, "mono", "middle") + r(300, 104, 120, 44, PAPER, 4) + t(360, 132, "CV ×3", 16, "mono", "middle")
+                      + arrow(270, 60, 294, 58, 3, "5 5") + arrow(262, 82, 294, 118, 3, "5 5")
+                      + stamp(360, 214, "no leaks", -6, 18, kind="mono")),
+    # ship it: a small, cheerful cargo ship carrying the site and the CVs
+    "ship": lambda: ("<style>@keyframes puff{0%{transform:translate(0,0);opacity:1}100%{transform:translate(14px,-16px);opacity:0}}"
+                     ".puff{animation:puff 3s ease-out infinite}.puff:nth-child(2){animation-delay:1s}.puff:nth-child(3){animation-delay:2s}"
+                     "@media (prefers-reduced-motion: reduce){.puff{animation:none}}</style>"
+                     + r(345, 112, 30, 78, PAPER, 5) + r(345, 112, 30, 14, SPOT, 5)
+                     + "<g>" + "".join(f'<g class="puff">{ring(368 + 16 * i, 92 - 20 * i, 8 + 3 * i, 4)}</g>' for i in range(3)) + "</g>"
+                     + r(90, 150, 80, 40, INK, 5) + t(130, 176, "site", 15, "mono", "middle", PAPER)
+                     + "".join(r(175 + i * 55, 150, 50, 40, PAPER, 5) + t(200 + i * 55, 176, "CV", 15, "mono", "middle") for i in range(3))
+                     + ln("M100 150 V108", 4) + '<path d="M100 108 L128 116 L100 124Z" style="fill:var(--live-red)"/>'
+                     + '<path d="M54 190 H396 L362 244 H92Z" style="fill:var(--paper);stroke:var(--ink);stroke-width:5;stroke-linejoin:round"/>'
+                     + dot(140, 210, 5) + dot(170, 210, 5) + ln("M146 222 Q155 230 164 222", 3) + dot(128, 222, 6, "fill:var(--live-edge);opacity:.6") + dot(182, 222, 6, "fill:var(--live-edge);opacity:.6")
+                     + ln("M20 252 q20 -12 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0", 4)
+                     + ln("M40 270 q20 -10 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0", 3, colour="var(--muted)")
+                     + note(225, 294, "a push deploys", "middle")),
+    # --- terminel ---
+    # the idea: a terminal in the browser, and the first thing anyone runs in one
+    "hello": lambda: (terminal(40, 20, 370, 180, ('> print("Hello World")', "Hello World")) + "".join(r(60 + i * 58, 220, 48, 44, PAPER, 4, rx=6) + t(84 + i * 58, 249, k, 15, "mono", "middle") for i, k in enumerate(("j", "k", "a", "d", "q", "↵")))),
+    # the hard part: fine on my machine; live, the serverless function buckles under the Python
+    "serverless": lambda: (laptop(30, 70, 150) + ln("M80 118 L98 136 L132 98", 7, colour="var(--art-win)") + note(105, 196, "my machine", "middle")
+                           + r(262, 96, 160, 62, INK, 5) + t(342, 136, "python", 20, "mono", "middle", PAPER)
+                           + '<path d="M290 160 H394 L388 212 H296Z" style="fill:var(--paper);stroke:var(--ink);stroke-width:5;stroke-linejoin:round"/>' + t(342, 198, "λ", 30, "display", "middle")
+                           + ln("M282 176 l-12 -4 M282 194 l-14 2 M402 176 l12 -4 M402 194 l14 2", 3)
+                           + '<path d="M410 228 q6 10 0 14 q-6 -4 0 -14Z" style="fill:var(--tone);stroke:var(--ink);stroke-width:2"/>'
+                           + ln("M250 214 H440", 6) + note(342, 238, "live", "middle")
+                           + stamp(225, 276, "fix5 · fix6", -3, 16, kind="mono")),
+    # --- German Learning Hub ---
+    # the same question twice, in English and in German
+    "translate": lambda: (bubble(20, 40, 190, 92, 60, -1) + t(115, 82, "Where is the", 17, "mono", "middle") + t(115, 106, "station?", 17, "mono", "middle")
+                          + bubble(240, 40, 190, 92, 390, 1, SPOT) + t(335, 82, "Wo ist der", 17, "mono", "middle", ONSPOT) + t(335, 106, "Bahnhof?", 17, "mono", "middle", ONSPOT)
+                          + arrow(196, 160, 254, 160, 4) + t(60, 196, "EN", 22, "display", "middle") + t(390, 196, "DE", 22, "display", "middle")
+                          + note(225, 262, "screenshot → OCR → lines → translation", "middle")),
+    # --- 9Loop, continued ---
+    # the database, before and after: a change designed in, in red
+    "dbchange": lambda: (db(110, 100, 110, 120) + db(340, 100, 110, 120)
+                         + '<path d="M285 60 V100 A55 15 0 0 0 395 100 V60" style="fill:var(--live-red);stroke:var(--ink);stroke-width:5"/>'
+                         + '<ellipse cx="340" cy="60" rx="55" ry="15" style="fill:var(--live-red);stroke:var(--ink);stroke-width:5"/>'
+                         + arrow(180, 160, 270, 160, 5) + note(225, 146, "redesigned", "middle") + note(410, 64, "new", "start")
+                         + note(110, 270, "before", "middle") + note(340, 270, "after", "middle")),
+    # --- the DGL coursework ---
+    # from scratch: a sheet of paper with a graph sketched on it, a pencil, an eraser and its crumbs
+    "scratch": lambda: ('<g transform="rotate(-4 170 150)">' + r(40, 30, 250, 240, PAPER, 5)
+                        + "".join(ln(f"M{x1} {y1} L{x2} {y2}", 3) for x1, y1, x2, y2 in ((100, 90, 170, 70), (100, 90, 120, 170), (170, 70, 230, 120), (120, 170, 230, 120), (120, 170, 190, 220)))
+                        + "".join(ring(x, y, 12, 4) for x, y in ((100, 90), (170, 70), (120, 170), (230, 120), (190, 220)))
+                        + ln("M215 200 L262 228", 3, "3 5", "var(--muted)") + ring(262, 228, 12, 3, "fill:none", "3 5") + "</g>"
+                        + '<g transform="rotate(38 360 150)">' + r(340, 20, 30, 200, "fill:var(--tone)", 5) + r(340, 20, 30, 24, SPOT, 5)
+                        + '<path d="M340 220 L355 262 L370 220Z" style="fill:var(--paper);stroke:var(--ink);stroke-width:5;stroke-linejoin:round"/>' + dot(355, 254, 5) + "</g>"
+                        + '<g transform="rotate(-14 352 244)">' + r(310, 222, 84, 40, PAPER, 5, rx=6) + r(310, 222, 30, 40, INK, 5, rx=6) + "</g>"
+                        + "".join(dot(296 + 30 * seed("crumb", i), 270 + 18 * seed("crumb", i + 9), 2 + 2 * seed("crumb", i + 20), MUTED) for i in range(7))),
+    # --- IC Hack 25 ---
+    # the game: an office maze on fire, in pixels, and the act the LLM is writing
+    "firegame": lambda: (r(14, 14, 422, 186, PAPER, 6) + ln("M120 14 V110 M220 74 V200 M320 14 V120 M14 150 H160 M270 160 H436", 6)
+                         + pix(240, 26, 4, FIRE) + pix(270, 40, 4, FIRE) + pix(356, 150, 4, FIRE) + pix(150, 160, 4, FIRE) + pix(388, 160, 4, FIRE)
+                         + pix(56, 96, 4, WALKER) + r(370, 28, 56, 24, "fill:var(--art-win)", 4) + t(398, 46, "EXIT", 14, "mono", "middle", PAPER)
+                         + r(14, 212, 422, 76, PAPER, 5, rx=4) + t(32, 240, "ACT 2", 14, "display") + t(32, 268, "Someone is calling for help.", 16, "mono")),
+    # scoring you: your answer, embedded among reference actions with known Big Five levels; the nearest one counts
+    "embed": lambda: (ring(225, 150, 120, 2, "fill:none", "4 7")
+                      + "".join(ring(225 + 110 * math.cos(a), 150 + 100 * math.sin(a), 22, 4) + t(225 + 110 * math.cos(a), 157 + 100 * math.sin(a), k, 18, "display", "middle")
+                                for k, a in zip("OCEAN", [math.pi * (-0.5 + 0.4 * i) for i in range(5)]))
+                      + ln(f"M262 104 L{225 + 110 * math.cos(-0.1 * math.pi) - 18:.0f} {150 + 100 * math.sin(-0.1 * math.pi) + 6:.0f}", 4, "6 5") + dot(262, 104, 12, SPOT) + note(250, 84, "your answer", "end")
+                      + note(225, 290, "nearest by similarity", "middle")),
+    # the reading: the Big Five sheet, printed for the interviewer
+    "bigfive": lambda: (r(110, 20, 230, 262, PAPER, 5) + t(130, 56, "Big Five", 20, "display") + r(282, 34, 44, 22, INK, 0) + t(304, 50, "PDF", 13, "mono", "middle", PAPER)
+                        + "".join(t(134, 104 + i * 38, k, 18, "display", "middle") + r(152, 88 + i * 38, 168, 20, "fill:none", 3)
+                                  + f'<rect x="152" y="{88 + i * 38}" width="{168 * v:.0f}" height="20" style="{SPOT if i == 2 else INK}"/>'
+                                  for i, (k, v) in enumerate(zip("OCEAN", (0.7, 0.55, 0.85, 0.6, 0.4))))),
+    "hackcommits": lambda: commit_dots(42, 97, 1, "42 / 97", "commits, Feb 2025: the most in the team"),
+    # --- robot-learning coursework ---
+    # the methods in the order the coursework took them: random play, a learnt model, replanning, cloning
+    "methods": lambda: ("".join(r(x, y, 205, 128, PAPER, 4, rx=6) + t(x + 14, y + 26, str(i + 1), 18, "display") + note(x + 102, y + 116, lab, "middle")
+                                for i, (x, y, lab) in enumerate(((15, 12, "random play"), (230, 12, "a learnt model"), (15, 158, "replan every step"), (230, 158, "copy the demos"))))
+                        + "".join(ln(f"M100 66 L{100 + 52 * math.cos(a):.0f} {66 + 34 * math.sin(a):.0f}", 3, "3 4") + dot(100 + 52 * math.cos(a), 66 + 34 * math.sin(a), 4) for a in [6.283 * seed("rp", i) for i in range(9)]) + dot(100, 66, 7, SPOT)
+                        + r(292, 40, 82, 46, INK, 4, rx=6) + t(333, 69, "f", 20, "display", "middle", PAPER) + note(282, 68, "s, a", "end") + arrow(376, 63, 404, 63, 3) + t(410, 68, "s′", 15, "mono")
+                        + ring(176, 196, 10, 4, SPOT) + ln("M40 240 Q70 236 92 220 T150 204 L170 198", 4) + "".join(dot(x, y, 4) for x, y in ((66, 237), (92, 220), (122, 211), (150, 204)))
+                        + ln("M40 240 Q90 232 130 236 T200 252", 3, "6 6", "var(--muted)")
+                        + ln("M256 240 Q300 200 340 214 T408 186", 4, "8 7", "var(--muted)") + ln("M256 244 Q300 206 340 220 T408 192", 4) + person(392, 172, 0.6) ),
+    # --- plate recognition ---
+    # scarce data: three short stacks of images in a tray built for far more (each plate ≈ 20 images)
+    "scarce": lambda: (r(20, 20, 410, 200, "fill:none", 3, dash="9 8") + note(225, 48, "room for a lot more", "middle")
+                       + "".join(r(x0 + (i % 5) * 24, 196 - (i // 5) * 14, 20, 10, fill, 2) for x0, n, fill in ((40, 8, SPOT), (170, 20, PAPER), (310, 3, INK)) for i in range(n))
+                       + note(100, 244, "168 Malaysian", "middle") + note(230, 244, "400+ foreign", "middle") + note(370, 244, "60 negatives", "middle")
+                       + note(225, 282, "each plate ≈ 20 images", "middle")),
+    # the weak stage: finding the plate gets you halfway across; reading it is where the bridge gives out
+    "bridge": lambda: ('<path d="M0 160 H140 L150 300 H0Z" style="fill:var(--tone);stroke:var(--ink);stroke-width:5"/>'
+                       + '<path d="M450 160 H310 L300 300 H450Z" style="fill:var(--tone);stroke:var(--ink);stroke-width:5"/>'
+                       + '<path d="M140 160 H200 L192 168 L204 174 H140Z" style="fill:var(--paper);stroke:var(--ink);stroke-width:4;stroke-linejoin:round"/>'
+                       + '<path d="M310 160 H262 L270 167 L258 174 H310Z" style="fill:var(--paper);stroke:var(--ink);stroke-width:4;stroke-linejoin:round"/>'
+                       + ln("M140 128 L198 136 M310 128 L264 138", 3) + ln("M150 160 V128 M180 160 V132 M300 160 V128 M276 160 V134", 3)
+                       + '<rect x="216" y="206" width="34" height="10" transform="rotate(28 233 211)" style="fill:var(--paper);stroke:var(--ink);stroke-width:3"/>'
+                       + '<rect x="228" y="252" width="30" height="10" transform="rotate(-36 243 257)" style="fill:var(--paper);stroke:var(--ink);stroke-width:3"/>'
+                       + t(70, 84, "find", 24, "display", "middle") + t(70, 124, "0.96", 26, "mono", "middle")
+                       + t(380, 84, "read", 24, "display", "middle") + t(380, 124, "0.26", 26, "mono", "middle", SPOT)),
+    # --- BlockHub, continued ---
+    # the platform: projects ranked by contributors' on-chain votes; a major contributor gets a certificate
+    "platform": lambda: ("".join(r(20, 30 + i * 62, 230, 50, SPOT if i == 0 else PAPER, 4, rx=6) + t(40, 62 + i * 62, f"#{i + 1}", 18, "display", fill=ONSPOT if i == 0 else INK)
+                                 + "".join(f'<circle cx="{x}" cy="{y + i * 62}" r="4" style="fill:none;stroke:var({"--live-on-red" if i == 0 else "--ink"});stroke-width:2.5"/>' for x, y in ((92, 46), (92, 66), (110, 46)))
+                                 + ln(f"M92 {50 + i * 62} V{62 + i * 62} M110 {50 + i * 62} Q110 {58 + i * 62} 96 {62 + i * 62}", 2.5, colour="var(--live-on-red)" if i == 0 else "var(--ink)")
+                                 + "".join(dot(140 + k * 14, 55 + i * 62, 4.5, ONSPOT if i == 0 else INK) for k in range(6 - 2 * i))
+                                 for i in range(3))
+                         + note(135, 234, "ranked by votes", "middle")
+                         + r(290, 50, 140, 110, PAPER, 5) + t(360, 84, "certificate", 13, "mono", "middle") + ln("M312 100 H408 M312 114 H380", 3)
+                         + ring(400, 150, 20, 5, SPOT) + '<path d="M390 166 L384 194 L400 186 L416 194 L410 166" style="fill:var(--live-red);stroke:var(--ink);stroke-width:4;stroke-linejoin:round"/>'
+                         + note(360, 234, "Polygon ID", "middle")),
+    # --- task tracker ---
+    # the brief: the team's requirements, turned into a design, built, and used by them
+    "brief": lambda: (r(20, 46, 110, 150, PAPER, 5, rx=4) + r(52, 36, 46, 18, INK, 0, rx=4) + t(75, 80, "needs", 13, "mono", "middle")
+                      + "".join(dot(38, 102 + i * 24, 3) + f'<rect x="48" y="{99 + i * 24}" width="{50 + 20 * seed("brief", i):.0f}" height="5" style="{INK}"/>' for i in range(4))
+                      + arrow(140, 120, 176, 120, 4)
+                      + r(186, 46, 120, 150, PAPER, 5, rx=4) + ln("M186 70 H306", 3) + r(198, 82, 44, 100, "fill:var(--tone)", 3) + r(250, 82, 44, 46, PAPER, 3) + r(250, 136, 44, 46, PAPER, 3)
+                      + arrow(316, 120, 352, 120, 4)
+                      + "".join(person(360 + i * 28, 104 + (i % 2) * 10, 0.8) for i in range(3)) + tick(380, 170, 1.4)
+                      + note(75, 236, "their needs", "middle") + note(246, 236, "my design", "middle") + note(398, 236, "they used it", "middle")),
+    # the app: a checklist filling up, and a late task that emails on its own
+    "taskboard": lambda: (r(20, 30, 200, 220, PAPER, 5, rx=6) + t(36, 60, "checklist", 15, "mono")
+                          + "".join(r(36, 78 + i * 30, 18, 18, PAPER, 3) + (tick(39, 86 + i * 30, 0.7, "var(--ink)") if i < 3 else "")
+                                    + f'<rect x="64" y="{84 + i * 30}" width="{70 + 50 * seed("chk", i):.0f}" height="5" style="{INK if i < 3 else MUTED}"/>' for i in range(5))
+                          + r(36, 228, 168, 10, "fill:none", 3) + f'<rect x="36" y="228" width="{168 * 0.6:.0f}" height="10" style="{INK}"/>'
+                          + r(250, 60, 180, 110, SPOT, 5, rx=6) + t(266, 92, "task", 15, "mono", fill=ONSPOT) + t(414, 92, "LATE", 15, "display", "end", ONSPOT)
+                          + f'<rect x="266" y="108" width="120" height="5" style="{ONSPOT}"/><rect x="266" y="122" width="80" height="5" style="{ONSPOT}"/>'
+                          + clockface(290, 214, 26, 2, 0, 4) + note(290, 262, "cron", "middle")
+                          + ln("M330 200 Q350 180 364 196", 3, "4 5", "var(--muted)") + envelope(370, 192, 56, 38) + note(398, 262, "email", "middle")),
+    # --- the model platform, redrawn ---
+    # the bill: GPU usage totalled per project and per service group; two API calls refactored into one
+    "bill": lambda: (r(30, 24, 210, 252, PAPER, 5) + t(48, 58, "GPU usage", 17, "display")
+                     + "".join(f'<rect x="48" y="{82 + i * 30}" width="{60 + 30 * seed("bill", i):.0f}" height="6" style="{INK}"/>'
+                               + f'<rect x="{222 - 36 - 20 * seed("bill", i + 7):.0f}" y="{82 + i * 30}" width="{36 + 20 * seed("bill", i + 7):.0f}" height="6" style="{INK}"/>' for i in range(5))
+                     + ln("M48 238 H222 M48 244 H222", 3) + t(48, 266, "total", 13, "mono") + f'<rect x="166" y="258" width="56" height="8" style="{SPOT}"/>'
+                     + ln("M266 96 Q330 96 352 140 M266 184 Q330 184 352 140", 4, "6 6", "var(--muted)") + arrow(352, 140, 384, 140, 4)
+                     + note(266, 86, "call 1") + note(266, 208, "call 2") + r(386, 116, 50, 48, INK, 4) + t(411, 146, "1", 22, "display", "middle", PAPER)),
+    # the right versions: a service can only be updated to the model versions it's bound to
+    "versions": lambda: (r(24, 110, 120, 80, INK, 5, rx=8) + t(84, 156, "service", 16, "mono", "middle", PAPER)
+                         + "".join((ln(f"M144 150 L290 {60 + i * 90}", 4) if ok else ln(f"M144 150 L290 {60 + i * 90}", 3, "6 6", "var(--muted)"))
+                                   + r(296, 36 + i * 90, 120, 48, PAPER if ok else "fill:none", 4, dash=None if ok else "6 5", rx=24) + t(356, 67 + i * 90, f"model v{v}", 15, "mono", "middle", INK if ok else MUTED)
+                                   + (tick(426, 58 + i * 90) if ok else cross(430, 60 + i * 90, 9, 4)) for i, (v, ok) in enumerate(((1, True), (2, True), (3, False))))
+                         + note(84, 230, "an update offers only", "middle") + note(84, 248, "the bound versions", "middle")),
+    # where it lands: a GPU-type template, the cards it supports, then the cluster and namespace it deploys into;
+    # and the fix: a refused call to the cluster manager no longer reads as "take it offline"
+    "lands": lambda: (r(10, 70, 110, 130, PAPER, 5, rx=6) + t(65, 100, "template", 14, "mono", "middle") + ln("M28 124 H102 M28 142 H90 M28 160 H96", 3)
+                      + note(65, 222, "GPU type", "middle") + arrow(126, 135, 156, 135, 4)
+                      + "".join(r(166 + (i % 2) * 52, 78 + (i // 2) * 62, 44, 50, SPOT if i == 1 else PAPER, 4) + ln(f"M{172 + (i % 2) * 52} {128 + (i // 2) * 62} V{136 + (i // 2) * 62} M{204 + (i % 2) * 52} {128 + (i // 2) * 62} V{136 + (i // 2) * 62}", 3) for i in range(4))
+                      + note(214, 222, "the cards it fits", "middle") + arrow(274, 135, 304, 135, 4)
+                      + r(312, 56, 128, 156, PAPER, 5, rx=6) + t(376, 82, "cluster", 14, "mono", "middle") + r(326, 96, 100, 100, "fill:none", 3, dash="7 6") + t(376, 150, "namespace", 12, "mono", "middle", MUTED)
+                      + dot(376, 176, 8, SPOT) + stamp(225, 270, "refused ≠ offline", -3, 15, kind="mono")),
+    # three spare weeks: an audit from 9 July to 11 August, about thirty defects, merged to production on 17–19 August
+    "weeks": lambda: ("".join(r(14 + i * 72, 40, 62, 170, SPOT if i == 5 else PAPER, 4, rx=4) + t(45 + i * 72, 64, d, 13, "mono", "middle", ONSPOT if i == 5 else INK)
+                              + "".join(dot(30 + i * 72 + (k % 3) * 15, 92 + (k // 3) * 22, 5) for k in range(n))
+                              for i, (d, n) in enumerate((("9 Jul", 6), ("16 Jul", 7), ("23 Jul", 6), ("30 Jul", 7), ("6 Aug", 4), ("17 Aug", 0))))
+                      + t(405, 140, "prod", 16, "display", "middle", ONSPOT)
+                      + note(160, 242, "≈30 defects, each with its cause and fix", "middle") + note(405, 242, "merged", "middle")),
+    # offline, still running: two status constants copied the wrong way round, so "offline" got scaled back up
+    "offline": lambda: (r(30, 30, 120, 40, PAPER, 4, rx=20) + t(90, 56, "ONLINE", 14, "mono", "middle") + r(300, 30, 120, 40, PAPER, 4, rx=20) + t(360, 56, "OFFLINE", 14, "mono", "middle")
+                        + ln("M150 50 C220 50 230 110 300 110 M300 50 C230 50 220 110 150 110", 3, "6 5", "var(--live-red)") + note(225, 132, "copied the wrong way round", "middle")
+                        + r(40, 186, 96, 46, PAPER, 5, rx=23) + dot(64, 209, 15) + t(88, 262, "off", 15, "mono", "middle")
+                        + server(250, 160, 110, 110, 4, (0, 1, 2, 3)) + arrow(392, 260, 392, 166, 6) + note(392, 290, "scaled up", "middle")),
+    # the clean-up that never ran: the rollback only deleted zero-replica deployments, so every real one kept its GPUs
+    "nocleanup": lambda: (r(20, 50, 150, 110, PAPER, 5, rx=6) + t(95, 82, "deployment", 14, "mono", "middle") + t(95, 124, "replicas: 2", 16, "mono", "middle")
+                          + chip(56, 196, 80, 44, "GPU") + drop(96, 252) + drop(118, 262, 0.8)
+                          + arrow(380, 104, 250, 104, 5) + note(380, 92, "rollback", "end") + ln("M232 40 V170", 9) + stamp(330, 160, "only if 0", -4, 16, kind="mono")
+                          + cross(232, 104, 14, 5) + note(300, 262, "the leak it was for, every time", "middle")),
+    # ten models: a hard-coded LIMIT 10 cut the list off before the TTS model; and NULLs that never collide
+    "limit10": lambda: ("".join(r(30, 16 + i * 20, 200, 16, PAPER, 2) + f'<rect x="40" y="{21 + i * 20}" width="{50 + 70 * seed("lim", i):.0f}" height="5" style="{INK}"/>' for i in range(10))
+                        + ln("M16 220 H244", 4, "8 6", "var(--live-red)") + t(250, 225, "LIMIT 10", 15, "mono", fill=SPOT)
+                        + r(30, 232, 200, 22, "fill:none", 2, dash="4 4") + t(40, 248, "TTS", 14, "mono", fill=MUTED)
+                        + t(345, 110, "NULL ≠ NULL", 24, "display", "middle") + note(345, 140, "so a duplicate", "middle") + note(345, 158, "hid a service group", "middle")),
+    # guards: an empty config push bounces off; the templates and credentials behind it stay; the client renews itself
+    "guardrails": lambda: (r(14, 120, 80, 60, PAPER, 4, rx=8) + t(54, 158, "{ }", 22, "mono", "middle") + arrow(98, 150, 150, 150, 5)
+                           + '<path d="M225 50 L290 74 V146 Q290 212 225 246 Q160 212 160 146 V74Z" style="fill:var(--live-red);stroke:var(--ink);stroke-width:6;stroke-linejoin:round"/>'
+                           + tick(206, 150, 1.8, "var(--live-on-red)")
+                           + doc(320, 70, 90, 70, 3, 4, False) + key_icon(326, 200, 0.9)
+                           + note(366, 166, "templates", "middle") + note(366, 238, "credentials", "middle")),
+    # keys out of the code: the keys leave the source for the config centre; the server won't start without them
+    "keys": lambda: (r(16, 40, 140, 190, PAPER, 5) + t(30, 66, "source", 13, "mono", fill=MUTED)
+                     + "".join(f'<rect x="30" y="{84 + i * 22}" width="{60 + 50 * seed("src", i):.0f}" height="5" style="{INK}"/>' for i in range(6) if i != 3)
+                     + t(30, 156, "KEY = \u2026", 13, "mono", fill=SPOT) + ln("M28 152 H140", 3, colour="var(--live-red)")
+                     + arrow(164, 135, 214, 135, 4) + key_icon(176, 112, 0.6, 4)
+                     + r(222, 70, 110, 130, INK, 5, rx=8) + ring(277, 120, 22, 4, "fill:none") + ln("M277 98 V106 M277 134 V142 M255 120 H263 M291 120 H299", 3, colour="var(--paper)")
+                     + t(277, 176, "config", 13, "mono", "middle", PAPER) + arrow(338, 135, 374, 135, 4) + server(378, 90, 60, 90, 3, (1,))
+                     + stamp(250, 262, "old keys rotated", -3, 15, kind="mono")),
+    # both ends: the deploy finishes its database write even past the deadline, and a sweep clears orphaned Deployments
+    "bothends": lambda: (r(70, 110, 310, 44, "fill:var(--tone)", 5) + r(50, 98, 30, 68, SPOT, 5, rx=4) + r(370, 98, 30, 68, SPOT, 5, rx=4)
+                         + chip(185, 104, 80, 56, "GPU") + note(65, 196, "the write", "middle") + note(65, 214, "always lands", "middle")
+                         + note(385, 196, "a sweep for", "middle") + note(385, 214, "orphans", "middle")
+                         + note(225, 262, "the leak, closed from both ends", "middle")),
+    # --- KKP Wallet, redrawn ---
+    # the statement is the judge: replay its rows; if they reproduce every balance it prints, it counts; if not, it's a claim
+    "judge": lambda: (r(16, 24, 130, 250, PAPER, 5) + t(30, 52, "statement", 13, "mono", fill=MUTED)
+                      + "".join(t(30, 84 + i * 26, "+" if seed("jd", i) > 0.45 else "−", 16, "mono") + f'<rect x="48" y="{74 + i * 26}" width="{40 + 40 * seed("jd", i + 3):.0f}" height="6" style="{INK}"/>' for i in range(6))
+                      + ln("M30 244 H132", 3) + t(30, 264, "balance", 12, "mono") + f'<rect x="96" y="256" width="36" height="8" style="{INK}"/>'
+                      + arrow(152, 150, 196, 150, 4) + note(174, 138, "replay", "middle") + ring(232, 150, 32, 5, INK) + t(232, 162, "Σ", 30, "display", "middle", PAPER)
+                      + arrow(264, 132, 300, 84, 4) + arrow(264, 168, 300, 216, 4, "6 6")
+                      + r(304, 50, 136, 66, PAPER, 5, rx=6) + t(372, 78, "matches", 14, "mono", "middle") + t(372, 100, "counts", 16, "display", "middle") + tick(410, 64, 1.1)
+                      + r(304, 184, 136, 66, "fill:none", 4, dash="7 6", rx=6) + t(372, 212, "doesn't", 14, "mono", "middle", MUTED) + t(372, 234, "a claim", 16, "display", "middle", MUTED)
+                      + note(372, 280, "used by nothing", "middle")),
+    # the wall: thirteen Gradle modules, and a dependency that crosses one fails the build
+    "modules": lambda: ("".join(r(24 + (i % 5) * 82, 24 + (i // 5) * 56, 70, 40, INK if i == 6 else PAPER, 4, rx=4) for i in range(13))
+                        + '<path d="M101 64 Q150 140 260 136" style="fill:none;stroke:var(--live-red);stroke-width:4;stroke-dasharray:6 5"/>' + cross(186, 118, 11, 5)
+                        + t(330, 164, "13", 30, "display", "middle") + note(330, 184, "modules", "middle")
+                        + stamp(140, 236, "BUILD FAILED", -5, 18, spot=True, kind="display") + note(340, 248, "~1,200 tests", "middle")),
+    # 26 times faster: the home screen's refresh before and after the log reads were cached
+    "fast": lambda: (t(30, 60, "before", 14, "mono", fill=MUTED) + r(30, 72, 390, 34, INK, 4) + t(412, 96, "5.8 s", 16, "mono", "end", PAPER)
+                     + t(30, 150, "after", 14, "mono", fill=MUTED) + r(30, 162, 15, 34, SPOT, 4) + t(56, 186, "221 ms", 16, "mono")
+                     + t(330, 196, "26×", 54, "display", "middle") + note(225, 270, "once the log reads were cached", "middle")),
+    # no passcodes: a figure is taken only word for word; a message that looks like it holds a passcode is dropped whole
+    "nopasscode": lambda: (r(20, 24, 300, 66, PAPER, 4, rx=14) + dot(46, 57, 9, INK) + f'<rect x="66" y="44" width="110" height="6" style="{INK}"/>'
+                           + r(184, 38, 80, 22, PAPER, 3) + t(224, 54, "RM 0.00", 13, "mono", "middle") + tick(282, 52) + note(170, 110, "every figure, word for word", "middle")
+                           + r(20, 134, 300, 66, PAPER, 4, dash="8 6", rx=14) + dot(46, 167, 9, INK) + f'<rect x="66" y="154" width="90" height="6" style="{INK}"/>'
+                           + t(66, 186, "code • • • • • •", 14, "mono", fill=SPOT)
+                           + arrow(330, 168, 380, 168, 4) + r(386, 140, 52, 60, PAPER, 4) + ln("M386 152 H438", 3) + cross(412, 176, 12, 5) + note(412, 222, "dropped", "middle")
+                           + r(20, 240, 300, 34, "fill:none", 3, dash="5 5") + t(36, 262, "refused · text not kept", 13, "mono", fill=MUTED)),
+    # kept in order: three versioned docs, 22 dated decisions, and each doc pointing at the code it covers
+    "docs": lambda: ("".join(r(20 + i * 18, 34 + i * 74, 150, 64, PAPER, 4) + t(34 + i * 18, 58 + i * 74, k, 14, "mono")
+                             + r(134 + i * 18, 40 + i * 74, 28, 20, SPOT if i == 2 else INK, 0) + t(148 + i * 18, 55 + i * 74, "v", 13, "mono", "middle", PAPER)
+                             + f'<rect x="{34 + i * 18}" y="{72 + i * 74}" width="100" height="5" style="{INK}"/><rect x="{34 + i * 18}" y="{84 + i * 74}" width="70" height="5" style="{INK}"/>'
+                             for i, k in enumerate(("product", "design", "frontend")))
+                     + ln("M232 34 V250", 4) + "".join(ln(f"M226 {40 + i * 9.6:.0f} H238", 2) for i in range(22)) + note(232, 274, "22 decisions, dated", "middle")
+                     + r(330, 100, 100, 90, INK, 5, rx=6) + t(380, 154, "</>", 24, "mono", "middle", PAPER)
+                     + ln("M170 66 C290 66 300 118 330 126 M188 140 C290 140 300 145 330 145 M206 214 C290 214 300 172 330 164", 3, "5 5", "var(--muted)")),
+    # the face: an original UI, from a first sketch to the fourth frontend version
+    "face": lambda: ("".join(phone(18 + i * 108, 30 + (0 if i == 3 else 10), 86, 170 - (0 if i == 3 else 10), 0,
+                                   (ln(f"M{36 + i * 108} {70 + j * 22} H{80 + i * 108}", 3, "4 4" if i == 0 else None) for j in range(1)) and
+                                   "".join((ln(f"M{34 + i * 108} {66 + j * 20} H{86 + i * 108}", 2 + i * 0.6, "4 5" if i == 0 else None) if i < 2 else
+                                            r(34 + i * 108, 60 + j * 26, 54, 18, SPOT if (i == 3 and j == 0) else ("fill:var(--tone)" if i == 2 else INK), 2, rx=3 * i)) for j in range(4)))
+                             + t(61 + i * 108, 232, f"v{i + 1}", 18, "display", "middle", SPOT if i == 3 else INK) for i in range(4))
+                     + note(225, 274, "four frontend versions, from scratch", "middle")),
+    # --- neuromorphic study ---
+    # the case: memory and compute in the same place, sparse spikes out, and what that buys
+    "neurocase": lambda: (ring(76, 120, 50, 5) + r(54, 98, 44, 44, INK, 0, rx=4) + ln("M60 110 H92 M60 120 H92 M60 130 H92", 3, colour="var(--paper)")
+                          + note(76, 196, "stores and computes", "middle") + note(76, 212, "in one place", "middle")
+                          + ln("M126 120 H200", 3) + "".join(ln(f"M{138 + x} 120 V98", 4) for x in (6, 30, 38)) + note(170, 150, "spikes", "middle")
+                          + r(220, 20, 210, 74, PAPER, 4, rx=8) + r(238, 40, 44, 26, "fill:none", 4) + r(282, 46, 6, 14, INK, 0) + f'<rect x="242" y="44" width="12" height="18" style="{SPOT}"/>'
+                          + t(300, 60, "frugal", 16, "display") + note(300, 80, "with energy")
+                          + r(220, 112, 210, 74, PAPER, 4, rx=8) + "".join(f'<rect x="{238 + (k % 4) * 11}" y="{128 + (k // 4) * 11}" width="9" height="9" style="{INK};opacity:{0.15 + 0.6 * seed("priv", k):.2f}"/>' for k in range(16))
+                          + t(300, 152, "private", 16, "display") + note(300, 172, "no inputs kept")
+                          + r(220, 204, 210, 74, PAPER, 4, rx=8)
+                          + ln("M244 224 L268 244 L244 262 M268 244 L288 226 M268 244 L288 262", 2.5) + "".join(dot(x, y, 5) for x, y in ((244, 224), (244, 262), (288, 226), (288, 262))) + dot(268, 244, 6, PAPER) + cross(268, 244, 7, 3)
+                          + t(300, 244, "tolerant", 16, "display") + note(300, 264, "of faults")),
+    # the ground the review covers, as layers of earth under a sprout
+    "strata": lambda: (ln("M225 64 V40", 4) + leaf(210, 40, -30) + leaf(242, 34, 30)
+                       + "".join(r(20, 64 + i * 56, 410, 56, f, 4) + t(40, 100 + i * 56, k, 20, "display", fill=tf)
+                                 for i, (k, f, tf) in enumerate((("9 properties", PAPER, INK), ("hardware", "fill:var(--tone)", INK), ("software", PAPER, INK), ("learning rules", INK, PAPER))))
+                       ),
+    # the critique, in the report's own three limits: hard-coded mouse moves, no sound, too little training
+    "critique": lambda: (r(70, 24, 46, 70, PAPER, 5, rx=22) + ln("M93 24 V48 M70 48 H116", 3) + "".join(arrow(128, 59, 128 + 46 * math.cos(a), 59 + 46 * math.sin(a), 3, "4 4") for a in (0, -0.75, 0.75))
+                         + t(200, 52, "fixed", 20, "display") + t(200, 78, "mouse moves", 20, "display")
+                         + '<path d="M70 132 H88 L112 112 V176 L88 156 H70Z" style="fill:var(--paper);stroke:var(--ink);stroke-width:5;stroke-linejoin:round"/>' + cross(140, 144, 12, 5)
+                         + t(200, 140, "no sound,", 20, "display") + t(200, 166, "no \u201cfrom where\u201d", 20, "display")
+                         + r(64, 204, 76, 66, PAPER, 5, rx=4) + ln("M64 222 H140", 4) + "".join(r(72 + (k % 5) * 13, 230 + (k // 5) * 14, 10, 10, SPOT if k < 5 else "fill:none", 2) for k in range(10))
+                         + t(200, 234, "5 days,", 20, "display") + t(200, 260, "1 game", 20, "display")),
+    # --- Wordle AI ---
+    # three players: a letter-by-position table, a DQN, and an LSTM-DQN that reads the guesses so far, each playing a row
+    "threeplayers": lambda: ('<g transform="translate(60 0)">' + "".join(
+        (("".join(f'<rect x="{24 + (k % 4) * 15}" y="{y + 6 + (k // 4) * 15}" width="13" height="13" style="{INK};opacity:{0.15 + 0.85 * seed("tbl", k):.2f}"/>' for k in range(12))) if i == 0 else
+         ("".join(ln(f"M{30} {y + 10 + a * 18} L{58} {y + 10 + b * 18} L{86} {y + 28}", 2) for a in range(3) for b in range(3))
+          + "".join(dot(30, y + 10 + a * 18, 5) + dot(58, y + 10 + a * 18, 5) for a in range(3)) + dot(86, y + 28, 6, SPOT if i == 2 else INK)
+          + (ln(f"M52 {y + 4} C52 {y - 14} 72 {y - 14} 66 {y + 2}", 3) + arrow(68, y - 4, 64, y + 4, 3) if i == 2 else "")))
+        + t(112, y + 16, name, 18, "display")
+        + "".join(r(112 + k * 38, y + 26, 32, 32, fill, 3) for k, fill in enumerate(row))
+        for i, (y, name, row) in enumerate(((22, "table", ("fill:var(--art-glow)", PAPER, "fill:var(--art-win)", PAPER, PAPER)),
+                                            (112, "DQN", (PAPER, "fill:var(--art-win)", PAPER, "fill:var(--art-glow)", PAPER)),
+                                            (202, "LSTM-DQN", (PAPER, PAPER, "fill:var(--art-glow)", PAPER, "fill:var(--art-win)")))))
+        + "</g>" + note(225, 292, "judged by average guesses", "middle")),
+    # --- AKI predictor ---
+    # the service: the model on Kubernetes, watched by Prometheus, rolled back when it degrades
+    "aksvc": lambda: (r(20, 14, 410, 82, PAPER, 5, rx=8) + t(36, 40, "k8s", 16, "mono", fill=MUTED)
+                      + "".join(r(110 + k * 104, 30, 88, 52, PAPER, 4, rx=10) + t(154 + k * 104, 62, "v2", 18, "display", "middle") for k in range(3))
+                      + ln("M30 186 H330", 3) + ln("M30 150 H330", 2, "6 5", "var(--muted)") + note(30, 172, "threshold")
+                      + ln("M30 128 L80 124 L130 132 L180 126 L222 140 L262 168 L300 176 L330 172", 4) + dot(234, 150, 8, SPOT)
+                      + '<path d="M384 112 a22 22 0 0 1 22 22 v18 l8 10 h-60 l8 -10 v-18 a22 22 0 0 1 22 -22z" style="fill:var(--live-red);stroke:var(--ink);stroke-width:4;stroke-linejoin:round"/>' + dot(384, 168, 5)
+                      + note(384, 196, "alert", "middle")
+                      + r(250, 222, 80, 52, PAPER, 4, rx=10) + t(290, 255, "v2", 18, "display", "middle") + r(60, 222, 80, 52, INK, 4, rx=10) + t(100, 255, "v1", 18, "display", "middle", PAPER)
+                      + ln("M250 236 C210 206 180 206 146 236", 4) + arrow(160, 226, 144, 238, 4) + note(195, 290, "rollback", "middle")),
+    # the module: the hardware it reviewed, Intel's Lava, the learning rules from STDP to surrogate gradients; and a warning
+    "neuromodule": lambda: ("".join(chip(44, 34 + k * 84, 64, 40) + t(138, 60 + k * 84, name, 15, "mono") for k, name in enumerate(("Loihi", "TrueNorth", "SpiNNaker 2")))
+                            + '<path d="M362 30 L420 128 H304Z" style="fill:var(--live-red);stroke:var(--ink);stroke-width:5;stroke-linejoin:round"/>'
+                            + t(362, 116, "!", 46, "display", "middle", ONSPOT) + note(362, 150, "the one they", "middle") + note(362, 166, "warn you off", "middle")
+                            + r(270, 186, 70, 34, INK, 4, rx=6) + t(305, 209, "Lava", 15, "mono", "middle", PAPER)
+                            + ln("M250 250 H430", 4) + dot(250, 250, 6) + dot(430, 250, 6, SPOT) + note(250, 276, "STDP") + note(430, 276, "surrogate", "end") + note(430, 292, "gradients", "end")),
+    # --- Instant Policy++ ---
+    # the four tasks of the 2D game: reach the goal, eat all edibles, push and place, parking
+    "fourtasks": lambda: ("".join(r(x, y, 205, 124, PAPER, 4, rx=4) + note(x + 102, y + 116, lab, "middle")
+                                  for x, y, lab in ((15, 12, "reach the goal"), (230, 12, "eat all edibles"), (15, 162, "push and place"), (230, 162, "parking")))
+                          + dot(46, 80, 10, SPOT) + ln("M58 76 Q110 30 170 52", 3, "5 6") + ring(180, 54, 14, 4) + dot(180, 54, 5)
+                          + dot(262, 84, 10, SPOT) + ln("M272 80 L300 50 L340 80 L380 46 L410 82", 3, "5 6") + "".join(dot(x, y, 5) for x, y in ((300, 50), (340, 80), (380, 46), (410, 82)))
+                          + dot(48, 232, 10, SPOT) + r(70, 214, 34, 34, INK, 3) + arrow(112, 231, 140, 231, 3) + r(150, 210, 42, 42, "fill:none", 3, dash="5 4")
+                          + ln("M296 196 V256 M346 196 V256 M396 196 V256 M296 256 H396", 4) + r(306, 204, 30, 46, SPOT, 4, rx=7) + ln("M310 216 H332", 3) + r(356, 210, 30, 40, "fill:none", 2, dash="4 4") + arrow(262, 250, 296, 236, 3)),
+    # the probe: can the frozen hyperbolic embeddings predict the next action? worse than a bigram
+    "probe": lambda: (ln("M50 250 H400", 5) + r(90, 250 - 210 * 0.185 / 0.366, 110, 210 * 0.185 / 0.366, SPOT, 4) + r(250, 40, 110, 210, INK, 4)
+                      + t(145, 236 - 210 * 0.185 / 0.366, "18.5%", 22, "display", "middle") + t(305, 30, "36.6%", 22, "display", "middle")
+                      + t(145, 280, "probe", 18, "mono", "middle") + t(305, 280, "bigram", 18, "mono", "middle")),
+    # my mistake: downsampling a demonstration evenly drops the frames that matter, and the policy oscillates
+    "downsample": lambda: (ln("M30 70 H420", 3) + "".join(ln(f"M{30 + k * 26} 60 V80", 3 if k % 4 else 5, colour="var(--live-red)" if k in (3, 6, 9, 14) else "var(--ink)") for k in range(16))
+                           + "".join(ring(30 + k * 26, 70, 11, 3, "fill:none") for k in range(0, 16, 4))
+                           + note(30, 44, "kept: every 4th frame") + note(420, 108, "missed: the ones that matter", "end")
+                           + ln("M30 220 " + " ".join(f"Q{45 + k * 30} {190 if k % 2 == 0 else 250} {60 + k * 30} 220" for k in range(12)), 4) + dot(420, 220, 9, SPOT)
+                           + note(225, 284, "the policy oscillates", "middle")),
+    # what breaks: federated learning on the edge, every client storing data and downloading a big model, a server in charge;
+    # the ideal is a sparse, peer-to-peer mesh
+    "fedbreaks": lambda: (server(94, 20, 60, 70, 3, (1,)) + note(162, 56, "the server")
+                          + "".join(arrow(124, 96, x + 25, 170, 6) + r(x, 176, 50, 40, PAPER, 4, rx=4) + db(x + 25, 232, 30, 22) for x in (10, 70, 128, 186))
+                          + note(124, 292, "store, download, train", "middle")
+                          + "".join(ln(f"M{x1} {y1} L{x2} {y2}", 2.5, "5 5") for x1, y1, x2, y2 in ((300, 90, 380, 70), (380, 70, 420, 150), (300, 90, 330, 190), (330, 190, 420, 150), (300, 90, 420, 150)))
+                          + "".join(ring(x, y, 12, 4) for x, y in ((300, 90), (380, 70), (420, 150), (330, 190)))
+                          + note(360, 236, "the ideal:", "middle") + note(360, 254, "peer to peer", "middle")),
+    # together: each device broadcasts its averaged weight changes every 100 updates, over HTTP, and the others merge them
+    "together": lambda: ("".join(pi_board(x - 35, y - 24) for x, y in ((225, 52), (80, 220), (370, 220)))
+                         + "".join(arrow(ax, ay, bx, by, 3, "6 5") for ax, ay, bx, by in ((190, 82, 116, 190), (128, 196, 202, 88), (260, 82, 334, 190), (322, 196, 248, 88), (122, 230, 328, 230)))
+                         + t(140, 128, "Δw", 18, "display", "middle") + t(310, 128, "Δw", 18, "display", "middle") + t(225, 222, "Δw", 18, "display", "middle")
+                         + note(225, 150, "every 100", "middle") + note(225, 166, "updates", "middle") + note(225, 284, "over HTTP", "middle")),
+    # the result: the plan (four Pi cameras, four kinds of weather) and what happened (out of memory; 12 hours, not converged)
+    "piresult": lambda: ("".join(pi_board(16 + k * 108, 52, 84, 52, "fill:none", "6 5") + weather(58 + k * 108, 26, w) for k, w in enumerate(("sun", "rain", "cloud", "snow")))
+                         + note(225, 126, "the plan", "middle")
+                         + pi_board(40, 158, 110, 70) + r(40, 240, 110, 16, "fill:none", 3) + r(40, 240, 110, 16, SPOT, 0) + note(95, 280, "Pi 3B: out of memory", "middle")
+                         + laptop(270, 158, 130) + curve(282, 168, 106, 60, lambda u: 0.9 - 0.5 * (1 - math.exp(-2 * u)) + 0.04 * math.sin(30 * u), 30, 3)
+                         + note(335, 280, "12 h, not converged", "middle")),
+    # less code: a monolith handler split, over four phases, into small packages, with the dead code taken out
+    "lesscode": lambda: (r(20, 30, 110, 200, PAPER, 5) + "".join(f'<rect x="32" y="{44 + i * 14}" width="{50 + 36 * seed("mono", i):.0f}" height="5" style="{INK}"/>' for i in range(13))
+                         + note(75, 254, "one handler", "middle")
+                         + ln("M140 130 H262", 4) + arrow(250, 130, 268, 130, 4) + "".join(ring(158 + k * 30, 130, 11, 3, SPOT if k == 3 else PAPER) + t(158 + k * 30, 135, str(k + 1), 12, "mono", "middle", ONSPOT if k == 3 else INK) for k in range(4))
+                         + note(204, 104, "four phases", "middle")
+                         + "".join(r(282 + (k % 2) * 80, 30 + (k // 2) * 62, 68, 48, PAPER, 4, rx=4) + f'<rect x="{292 + (k % 2) * 80}" y="{46 + (k // 2) * 62}" width="40" height="5" style="{INK}"/><rect x="{292 + (k % 2) * 80}" y="{58 + (k // 2) * 62}" width="28" height="5" style="{INK}"/>' for k in range(5))
+                         + note(356, 254, "packages", "middle")
+                         + r(170, 196, 70, 40, "fill:none", 3, dash="5 5") + cross(205, 216, 12, 4) + note(205, 254, "dead code", "middle")),
+    # signed rules: parsing rules ship as signed packs; a tampered or older pack is refused; secrets in the Keychain;
+    # consent given purpose by purpose
+    "signedrules": lambda: ("".join(r(16, 22 + k * 88, 120, 56, PAPER if k == 0 else "fill:none", 4, dash=None if k == 0 else "6 5", rx=4)
+                                    + t(30, 46 + k * 88, "rules", 13, "mono", fill=INK if k == 0 else MUTED) + t(30, 66 + k * 88, lab, 12, "mono", fill=MUTED)
+                                    + ring(112, 50 + k * 88, 13, 4, SPOT if k == 0 else "fill:none") + (tick(146, 50 + k * 88) if k == 0 else cross(156, 50 + k * 88, 9, 4))
+                                    for k, lab in enumerate(("signed", "tampered", "older")))
+                            + ln("M104 132 L120 146 M112 128 L108 150", 3)
+                            + arrow(176, 50, 214, 70, 4) + phone(218, 30, 92, 180)
+                            + "".join(r(330, 40 + k * 44, 50, 26, PAPER, 3, rx=13) + dot(343 + (24 if on else 0), 53 + k * 44, 9, "fill:var(--art-win)" if on else INK) for k, on in enumerate((True, False, True)))
+                            + note(390, 176, "consent,", "middle") + note(390, 192, "per purpose", "middle")
+                            + key_icon(232, 250, 0.7, 4) + note(300, 256, "Keychain")),
+    # --- RE-News, redrawn ---
+    # a flat score: most of the old salience weight barely moved, so turning the knob couldn't make range
+    "flatscore": lambda: ("".join(r(20, 22 + k * 20, 150 if k < 8 else 150 + (40 if k == 8 else -60), 14, SPOT if k >= 8 else INK, 2) for k in range(10))
+                          + t(30, 270, "85%", 34, "display") + note(118, 270, "near-constant")
+                          + ring(320, 90, 40, 5) + ln("M320 90 L344 60", 5) + "".join(ln(f"M{320 + 46 * math.cos(a):.0f} {90 + 46 * math.sin(a):.0f} L{320 + 54 * math.cos(a):.0f} {90 + 54 * math.sin(a):.0f}", 3) for a in [math.pi * (0.75 + i * 0.25) for i in range(7)])
+                          + note(320, 158, "retune", "middle") + arrow(320, 172, 320, 200, 3)
+                          + ln("M240 226 H400", 4) + note(320, 250, "still flat", "middle")),
+    # the new rule: rank by breadth (how many kinds of source back it); confidence gates, never multiplies;
+    # trajectory is a badge; intensity is an honest null
+    "breadth": lambda: (t(20, 34, "rank by breadth", 16, "display")
+                        + "".join(t(20, 76 + k * 52, f"#{k + 1}", 16, "display") + "".join(dot(66 + j * 22, 70 + k * 52, 8, SPOT if k == 0 else INK) for j in range(n))
+                                  + (r(66 + n * 22, 58 + k * 52, 30, 22, PAPER, 3, rx=11) + t(81 + n * 22, 74 + k * 52, "↗", 14, "mono", "middle") if k < 2 else "")
+                                  for k, n in enumerate((5, 3, 2)))
+                        + ln("M20 214 H250", 2, "4 5", "var(--muted)")
+                        + t(290, 62, "× confidence", 15, "mono", fill=MUTED) + ln("M288 56 H408", 3, colour="var(--live-red)")
+                        + r(290, 92, 130, 40, PAPER, 4, rx=4) + t(304, 117, "gate", 15, "mono") + tick(388, 112)
+                        + t(290, 178, "intensity", 15, "mono") + t(290, 202, "null", 18, "display", fill=MUTED)
+                        + note(20, 250, "dots: kinds of source") + note(20, 268, "↗: trajectory, a badge")),
+    # --- Team Elk and Clucker ---
+    # a chess game in progress: the board, a knight's move dashed in, the piece that moved in red
+    "chess": lambda: (board(115, 20, 220)
+                      + "".join(piece(115 + (i + 0.5) * 27.5, 20 + (j + 0.5) * 27.5, 27.5, k, w) for i, j, k, w in (
+                          (0, 0, "rook", 0), (4, 0, "king", 0), (1, 1, "pawn", 0), (5, 1, "pawn", 0), (6, 1, "pawn", 0),
+                          (0, 6, "pawn", 1), (3, 6, "pawn", 1), (6, 6, "pawn", 1), (5, 7, "rook", 1), (6, 7, "king", 1)))
+                      + ln("M233.1 143.8 V88.8 H260.6", 3, "4 4", "var(--live-red)") + piece(260.6, 88.8, 27.5, "knight", 2)
+                      + note(225, 270, "your move", "middle")),
+    # the team of five, under the club they built the app for; the red one is me
+    "elkteam": lambda: (r(120, 22, 210, 50, INK, 5) + t(225, 56, "CHESS CLUB", 22, "display", "middle", PAPER)
+                     + ln("M225 72 V96 M55 96 H395 M55 96 V112 M140 96 V112 M225 96 V112 M310 96 V112 M395 96 V112", 3)
+                     + "".join(person(55 + i * 85, 136, 1.4, SPOT if i == 1 else PAPER) for i in range(5))
+                     + ln("M20 212 H430", 6) + note(225, 250, "a team of five", "middle")),
+    # my share of the commits: one dot per ten, mine inked in
+    "elkcommits": lambda: commit_dots(70, 400, 10, "~70 / 400", "commits, Nov–Dec 2021"),
+    # --- RoboCup@Home ---
+    # the receptionist task as a state machine: each box a state with what it holds, each arrow what moves it on.
+    # LISTEN, the dialogue side, is the one inked in
+    "statemachine": lambda: (
+        r(10, 50, 110, 70, PAPER, 5, rx=10) + t(65, 80, "WAIT", 18, "display", "middle") + t(65, 104, "guest: none", 12, "mono", "middle", MUTED)
+        + r(170, 50, 110, 70, INK, 5, rx=10) + t(225, 80, "LISTEN", 18, "display", "middle", PAPER) + t(225, 104, "name, drink", 12, "mono", "middle", PAPER)
+        + dot(268, 110, 4, SPOT)
+        + r(330, 50, 110, 70, PAPER, 5, rx=10) + t(385, 80, "GUIDE", 18, "display", "middle") + t(385, 104, "→ living room", 12, "mono", "middle", MUTED)
+        + r(240, 200, 200, 66, PAPER, 5, rx=10) + t(340, 230, "INTRODUCE", 18, "display", "middle") + t(340, 252, "guest → host", 12, "mono", "middle", MUTED)
+        + arrow(122, 85, 166, 85, 4) + note(145, 36, "person at door", "middle")
+        + arrow(282, 85, 326, 85, 4) + note(305, 36, "intent filled", "middle")
+        + ln("M205 122 C205 160 245 160 245 132", 3, "5 6") + arrow(245, 140, 245, 124, 3) + note(225, 176, "no match: ask again", "middle")
+        + arrow(385, 122, 385, 196, 4) + note(378, 166, "arrived", "end")
+        + ln("M238 236 H65 V128", 4) + arrow(65, 140, 65, 124, 4) + note(150, 228, "guest seated", "middle")),
     "switch": lambda: (server(40, 50, 120, 180, 5, (2,)) + note(100, 260, "home lab", "middle") + r(185, 120, 80, 40, PAPER, 5, rx=20) + dot(205, 140, 13, INK)
                        + r(300, 80, 120, 120, PAPER, 5, dash="10 7") + t(360, 148, "opt-in", 15, "mono", "middle")),
     "grey": lambda: ("".join(f'<polygon points="{60 + (i % 4) * 90},{50 + (i // 4) * 90} {130 + (i % 4) * 90},{60 + (i // 4) * 90} {140 + (i % 4) * 90},{130 + (i // 4) * 90} {70 + (i % 4) * 90},{125 + (i // 4) * 90}" style="{INK if seed("map", i) > 0.6 else "fill:var(--tone)"};stroke:var(--ink);stroke-width:3"/>' for i in range(8))
@@ -442,8 +1082,15 @@ ART = {
     # --- SRGAN ---
     "pixels": lambda: ("".join(f'<rect x="{30 + i * 36}" y="{60 + j * 36}" width="36" height="36" style="{INK};opacity:{0.15 + 0.85 * seed("px", i * 5 + j):.2f}"/>' for i in range(5) for j in range(5))
                        + t(225, 160, "4×", 34, "display", "middle") + ring(350, 150, 82, 5) + f'<circle cx="350" cy="150" r="62" style="fill:var(--tone)"/>' + ring(330, 128, 18, 0, INK)),
-    "loss": lambda: (r(30, 50, 160, 160, "fill:var(--tone)", 5) + t(110, 240, "MSE", 18, "display", "middle") + r(260, 50, 160, 160, PAPER, 5)
-                     + "".join(ln(f"M{270 + i * 14} 200 L{290 + i * 14} 60", 2) for i in range(10)) + t(340, 240, "perceptual", 18, "display", "middle") + t(225, 140, "vs", 22, "display", "middle")),
+    # the trade-off: pixel-wise MSE scores higher PSNR but comes out soft; perceptual loss scores lower but looks real.
+    # Left, the two on the trade-off curve; right, the same texture upscaled each way
+    "loss": lambda: (ln("M40 236 V26 M40 236 H236", 4) + ln("M34 34 L40 24 L46 34 M228 230 L238 236 L228 242", 4)
+                     + t(46, 20, "looks real", 13, "mono", fill=MUTED) + t(236, 262, "PSNR", 13, "mono", "end", MUTED)
+                     + ln("M66 60 Q196 70 206 204", 4, "7 6", "var(--muted)")
+                     + dot(66, 60, 10, SPOT) + t(58, 90, "perceptual", 14, "mono") + dot(206, 204, 10) + t(194, 228, "MSE", 14, "mono", "end")
+                     + '<defs><filter id="srgan-blur" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="2.6"/></filter></defs>'
+                     + sr_tile(262, True, "MSE") + sr_tile(356, False, "perceptual")
+                     + note(350, 190, "same image, 4× up", "middle")),
     "gpu": lambda: (r(40, 80, 370, 130, PAPER, 6, rx=6) + "".join(ring(120 + i * 150, 145, 46, 5) + "".join(ln(f"M{120 + i * 150} 145 L{120 + i * 150 + 40 * math.cos(k * 1.05 + i):.0f} {145 + 40 * math.sin(k * 1.05 + i):.0f}", 4) for k in range(6)) for i in range(2))
                     + "".join(r(70 + i * 22, 210, 14, 22, INK, 0) for i in range(14)) + note(225, 276, "Windows, through DirectML", "middle")),
     # --- licence plates ---
@@ -459,9 +1106,13 @@ ART = {
     # --- BlockHub ---
     "vote": lambda: ("".join(r(30 + i * 100, 200, 80, 44, PAPER, 5, rx=22) + (ln(f"M{110 + i * 100} 222 H{130 + i * 100}", 8) if i < 3 else "") for i in range(4))
                      + r(160, 50, 130, 110, PAPER, 6) + ln("M190 80 H260", 8) + doc(186, 22, 78, 70, 3, 6, False) + note(225, 286, "every vote on-chain", "middle")),
-    "trophy": lambda: (f'<path d="M160 50 h130 v40 a65 65 0 0 1 -130 0 z" style="fill:var(--live-red);stroke:var(--ink);stroke-width:6"/>'
+    "trophy": lambda: ('<g transform="translate(-62 0)">' + f'<path d="M160 50 h130 v40 a65 65 0 0 1 -130 0 z" style="fill:var(--live-red);stroke:var(--ink);stroke-width:6"/>'
                        + ln("M160 70 h-30 a30 30 0 0 0 40 50 M290 70 h30 a30 30 0 0 1 -40 50 M225 155 V200 M180 210 H270", 6) + r(170, 210, 110, 34, INK, 4)
-                       + t(225, 108, "1st", 30, "display", "middle", ONSPOT) + note(225, 282, "of 50+ teams", "middle")),
+                       + t(225, 108, "1st", 30, "display", "middle", ONSPOT) + note(225, 282, "of 50+ teams", "middle") + "</g>"
+                       # the prize: a short stack of notes
+                       + "".join(f'<g transform="rotate({-8 + 5 * k} 370 {214 - k * 12})">' + r(318, 192 - k * 12, 104, 46, PAPER, 4, rx=4)
+                                 + ring(370, 215 - k * 12, 13, 3, "fill:none") + t(370, 221 - k * 12, "$", 16, "display", "middle") + "</g>" for k in range(3))
+                       + t(370, 140, "$5,000", 26, "display", "middle") + note(370, 282, "the prize", "middle")),
     # --- CarDesigner ---
     "scan": lambda: (car(60, 90, 330) + "".join(dot(70 + 310 * seed("lid", i), 80 + 100 * seed("lid2", i), 2.2, SPOT if i % 7 == 0 else INK) for i in range(120))
                      + ln("M40 40 L120 90 M40 40 L60 150", 2, "4 5") + r(20, 20, 30, 50, INK, 3, rx=5)),

@@ -95,6 +95,8 @@ colours:
   #   shelf:       { running_band: archive, finished_band: archive }
   #   panels:      { border: archive, caption_box: mark, caption_text: on_mark }
   #   cv:          { paper: paper, border: archive, tabs: archive }
+  #   art:         { win: archive, loss: spot, glow: mark }   in the panel pictures: a win and a loss (the RL agent's +1 / −1),
+  #                                                         and the golden glow round the stick of truth
   # The page itself is paper, ink and muted. Example, under light:
   #   live:
   #     text: "#b03463"     # a darker red for words, so they pass contrast
@@ -113,6 +115,8 @@ colours:
     on_spot: "#ffffff"    # text on red
     live:
       text: "#b03463"     # a darker red for words, so they pass contrast
+    art:
+      win: "#3f8f5a"      # green, since archive is purple in light
   dark:
     paper: "#0c1511"      # green-black
     ink: "#e2ebe5"
@@ -126,6 +130,8 @@ colours:
     spot: "#ff5a5f"
     spot_edge: "#ff5a5f"
     on_spot: "#0c1511"
+    art:
+      glow: "#f2c14e"     # gold, since mark is green in dark
 
 # ---------------------------------------------------------------------------------------------------------------
 # Music

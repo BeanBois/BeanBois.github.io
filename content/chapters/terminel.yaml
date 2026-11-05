@@ -8,11 +8,11 @@ episodes:
     title: A terminal in the browser
     panels:
       - span: 4
-        art: tui
+        art: hello
         caption: The idea
         text: A web terminal for my own analysis, mainly of market data, and for fun. In a Remix front end you keep a dashboard of analyses to create, edit, run and delete. The Python goes to a separate server that runs it and sends back text and matplotlib plots.
       - span: 2
-        art: timeout
+        art: serverless
         caption: The hard part
         text: Running Python in a serverless function. It worked end to end on my machine; live, the host wasn't strong enough. The server's last commits are fix5, fix6.
     next: My own Rust functions, callable from the terminal.

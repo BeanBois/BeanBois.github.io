@@ -129,6 +129,7 @@ PARTS = {
     "shelf": {"running_band": "archive", "finished_band": "archive"},
     "panels": {"border": "archive", "caption_box": "mark", "caption_text": "on_mark"},
     "cv": {"paper": "paper", "border": "archive", "tabs": "archive"},
+    "art": {"win": "archive", "loss": "spot", "glow": "mark"},
 }
 BASE = ("paper", "ink", "tone", "soft", "muted", "music", "archive", "mark", "on_mark", "spot", "spot_edge", "on_spot")
 

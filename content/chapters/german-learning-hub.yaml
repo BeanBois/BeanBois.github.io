@@ -2,12 +2,12 @@
 entry: german-learning-hub
 kana: 独語
 obi: Grammar, then conversation.
-cover: book
+cover: translate
 episodes:
   - n: 1
     title: Learning German
     panels:
       - span: 6
-        art: book
+        art: translate
         caption: The hub
         text: A small toolkit for learning German. Grammar rules on a page, a practice chatbot through OpenAI's API, and a screen translator. Screenshot, pick a region, read it with OCR, put the characters back into lines, and show the translation. I used it on German websites.

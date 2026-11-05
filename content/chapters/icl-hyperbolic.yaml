@@ -36,7 +36,7 @@ episodes:
         caption: From 3D to 2D
         text: The work started on RLBench in 3D and moved within ten days to a 2D game made for the purpose. Trained on Imperial's GPU cluster.
       - span: 3
-        art: set
+        art: fourtasks
         caption: Four tasks
         text: Reach the goal, eat all edibles, push and place, and parking. Pseudo-demonstrations are generated continuously, and a collector records human ones.
       - span: 6
@@ -51,11 +51,11 @@ episodes:
         caption: It lost
         text: 2 of 10 against the baseline's 5 on reach-goal, 1 against 3 on eat-all-edibles, and 0 for both on the two hard tasks.
       - span: 2
-        art: ablate
+        art: probe
         caption: The probe
         text: A linear probe on the hyperbolic embeddings predicts the next action worse than a bigram, 18.5% against 36.6%.
       - span: 3
-        art: retract
+        art: downsample
         caption: My mistake too
         text: In the baseline I downsampled demonstrations evenly instead of keeping the important frames, which made the policies oscillate. The thesis says so.
       - span: 3

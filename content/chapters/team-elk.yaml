@@ -3,24 +3,24 @@ entry: team-elk
 members: [clucker]
 kana: 部活
 obi: Where team work started.
-cover: views
+cover: chess
 episodes:
   - n: 0
     entry: clucker
     title: The warm-up
     panels:
       - span: 6
-        art: views
+        art: chess
         caption: Clucker
         text: King's second-year software engineering warm-up, autumn 2021, done on my own from the course's guided steps. A Django micro-blogging site with login-protected feeds and user pages, tests with fixtures and coverage, and a GitHub Actions workflow.
   - n: 1
     title: Running chess clubs
     panels:
       - span: 4
-        art: tenants
+        art: elkteam
         caption: Team Elk
         text: Then the real small-group project, in a team of five. A Django app for running chess clubs. Apply, get approved, rise from member to officer to owner, hand the club on or disband it. Deployed on Heroku with CI.
       - span: 2
-        art: commits
+        art: elkcommits
         caption: My part
         text: About 70 of its 400 commits, the second most. Views refactored into classes, promote and demote, and a change-password feature with full test coverage.

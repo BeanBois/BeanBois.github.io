@@ -52,11 +52,11 @@ episodes:
     title: What counts as significant
     panels:
       - span: 3
-        art: loss
+        art: flatscore
         caption: A flat score
         text: Measured first. 85% of the old salience weight was near-constant, so retuning couldn't create range.
       - span: 3
-        art: vote
+        art: breadth
         caption: The new rule
         text: Rank by breadth. Confidence gates and grades but is never multiplied in, trajectory is a badge, and intensity is an honest null, because nothing measures it.
       - span: 4

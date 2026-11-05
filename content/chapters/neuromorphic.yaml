@@ -12,7 +12,7 @@ episodes:
     title: The study
     panels:
       - span: 4
-        art: chip
+        art: neuromodule
         caption: The module
         text: A formal independent-study module at Imperial in 2025, one the department warns students off for how demanding it is, with Dr Eiman Kanjo. A review of neuromorphic hardware (Loihi, TrueNorth, SpiNNaker 2), Intel's Lava framework, and learning rules from STDP to surrogate gradients.
       - span: 2
@@ -23,7 +23,7 @@ episodes:
     title: The argument
     panels:
       - span: 3
-        art: federated
+        art: fedbreaks
         caption: What breaks
         text: Federated learning on edge devices scales badly. Every client stores its data, downloads a large model and trains it, and a central server runs the show. The ideal is peer-to-peer, sparse and asynchronous.
       - span: 3
@@ -31,11 +31,11 @@ episodes:
         caption: Why it breaks
         text: The review argues those limits are built into classical computing, which keeps memory apart from compute and needs somewhere for data to be centralised.
       - span: 4
-        art: spikes
+        art: neurocase
         caption: The case
         text: Neuromorphic hardware computes where it stores, talks in sparse binary spikes and keeps no lasting memory of its inputs. That should make it frugal with energy, private (raw data can't be rebuilt from spikes that have gone) and tolerant of faults.
       - span: 2
-        art: book
+        art: strata
         caption: The ground
         text: Nine properties, the hardware from neuron models and memristors to Loihi, TrueNorth and SpiNNaker 2, the software problem, and the learning rules from STDP to reservoir computing.
   - n: 3
@@ -47,10 +47,10 @@ episodes:
         caption: The network
         text: A winner-take-all spiking network in Lava for face-mask classification. Images become Poisson spike trains along a Hilbert curve, and reward-modulated STDP does the learning.
       - span: 3
-        art: federated
+        art: together
         caption: Together
         text: Each device broadcasts its averaged weight changes every 100 updates over HTTP, and the others merge them into their own model.
       - span: 6
-        art: machines
+        art: piresult
         caption: The result
         text: The plan was four Raspberry Pis as cameras in different weather. The model ran out of memory on a Pi 3B, and on a laptop it hadn't converged after 12 hours. Neuromorphic computing on classical hardware isn't ready for this task yet, and the report says so.

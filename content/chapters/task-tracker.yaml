@@ -2,16 +2,16 @@
 entry: task-tracker
 kana: 任務
 obi: Late tasks send email.
-cover: set
+cover: brief
 episodes:
   - n: 1
     title: Built for a team
     panels:
       - span: 3
-        art: set
+        art: brief
         caption: The brief
         text: A favour for an engineering team. I turned their requirements into the product design, built it alone, and they used it.
       - span: 3
-        art: guards
+        art: taskboard
         caption: The app
         text: Token login with admin roles, tasks assigned with files and reviews, checklists with progress, a performance dashboard, and cron jobs that clean up and email when a task runs late.

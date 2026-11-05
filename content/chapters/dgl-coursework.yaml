@@ -8,7 +8,7 @@ episodes:
     title: Graphs
     panels:
       - span: 3
-        art: table
+        art: scratch
         caption: From scratch
         text: Imperial MSc coursework, February 2025. GCN layers written from scratch in PyTorch, made graph-level with sum, mean and max pooling, then a heterogeneous graph whose two node types don't share a feature size.
       - span: 3

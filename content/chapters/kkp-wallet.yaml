@@ -26,37 +26,37 @@ episodes:
         caption: Day one
         text: Money is integer sen and rates integer basis points, with half-to-even rounding applied once. No floating point anywhere.
       - span: 6
-        art: ledger
+        art: judge
         caption: The statement is the judge
         text: A statement counts only if replaying its rows reproduces every balance it prints. Anything else is a claim, and a claim is used by nothing. A screen that can't work a figure out says so instead of showing zero.
       - span: 3
-        art: wall
+        art: modules
         caption: The wall
         text: Kotlin has no package-private, so every boundary worth keeping is its own Gradle module. Thirteen of them, with rules that fail the build, and about 1,200 tests across JVM and iOS.
       - span: 3
-        art: month
+        art: fast
         caption: 26 times faster
         text: The home screen's refresh went from 5.8 s to 221 ms once the log reads were cached.
   - n: 2
     title: What a thief could take
     panels:
       - span: 3
-        art: wall
+        art: nopasscode
         caption: No passcodes
         text: Bank notifications are read strictly. Every figure must appear word for word, a suspected one-time passcode drops the whole message, and a refusal is kept without its text.
       - span: 3
-        art: sen
+        art: signedrules
         caption: Signed rules
         text: The parsing rules ship as signed packs, and a tampered or older pack is refused. Secrets stay in the device Keychain, and consent is given purpose by purpose.
       - span: 6
-        art: ledger
+        art: docs
         caption: Kept in order
         text: Product, design and frontend docs each carry a version, code versions count the readiness groups met on the way to launch, 22 dated decisions record why, and each doc names the code it covers.
   - n: 3
     title: Not yet
     panels:
       - span: 4
-        art: phone
+        art: face
         caption: The face
         text: An interactive, original UI, designed from scratch over four frontend versions.
       - span: 2

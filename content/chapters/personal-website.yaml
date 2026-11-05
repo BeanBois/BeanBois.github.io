@@ -3,40 +3,40 @@ entry: personal-website
 members: [poke-exhibition]
 kana: 本誌
 obi: You are reading it.
-cover: book
+cover: series
 episodes:
   - n: 0
     entry: poke-exhibition
     title: The site before this one
     panels:
       - span: 4
-        art: rooms
+        art: pixeltown
         caption: Poke-Exhibition
         text: My first personal website, 2023 into 2024, hand-built in vanilla JavaScript on a canvas. You walked a character round a tile map like a Pokémon game, with text in a chatbox and your place kept between visits.
       - span: 2
-        art: book
+        art: houseplan
         caption: The rooms
         text: A poems room, and a CS:GO room with the FPS agent's report. Its Pokémon font came back a year later in my IC Hack 25 game.
   - n: 1
     title: A record you can read
     panels:
       - span: 4
-        art: book
+        art: series
         caption: The series
         text: Every project is a volume of a manga series, in four parts by reader, from a hook on the cover to a colophon. Designed by me, built with Claude Code.
       - span: 2
-        art: clock
+        art: nowplaying
         caption: Now playing
         text: The record turns at the tempo of whatever I'm listening to, live. A Cloudflare Worker reads Spotify and finds the tempo from a trust-ordered chain of sources, and the record follows a song change within about five seconds.
       - span: 6
-        art: views
+        art: vinyl
         caption: The vinyl
         text: The record is the one thing that moves. On the cover it sits half out of a square sleeve with the song printed on its rim. On the contents page every project is a sleeve. A click breaks the shelf into screentone, pulls the record out and carries it into the volume, where the tonearm follows how far you've read.
       - span: 3
-        art: guards
+        art: truth
         caption: One source of truth
         text: A knowledge bank of Markdown entries feeds the site and three CVs, through an export that refuses to run if anything private would leak.
       - span: 3
-        art: commits
+        art: ship
         caption: Ship it
         text: A push deploys, design drafts deploy as previews, and the CVs are printed to one-page PDFs at every deploy.

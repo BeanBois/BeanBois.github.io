@@ -16,10 +16,10 @@ episodes:
         caption: Read
         text: Three off-the-shelf OCR engines read it, and the best read is picked by confidence and plate format.
       - span: 4
-        art: scan
+        art: scarce
         caption: Scarce data
         text: 168 Malaysian plates, 400+ foreign ones, 60 hand-picked hard negatives (road signs, billboards, bumpers), and heavy augmentation for light, weather and angle.
       - span: 2
-        art: grey
+        art: bridge
         caption: The weak stage
         text: Character accuracy 0.26, because the OCR wasn't fine-tuned. A plate-tuned CRNN is the next step.

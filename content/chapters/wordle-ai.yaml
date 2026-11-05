@@ -12,7 +12,7 @@ episodes:
         caption: The reward
         text: A learning exercise over four days. Wordle as reinforcement learning, where the reward is information gain, how much a guess narrows the answer against an optimal guess.
       - span: 2
-        art: ablate
+        art: threeplayers
         caption: Three players
         text: A letter-by-position probability table, a DQN, and an LSTM-DQN that reads the guesses so far. Judged by the average number of guesses.
     next: A dictionary agent built on information theory.

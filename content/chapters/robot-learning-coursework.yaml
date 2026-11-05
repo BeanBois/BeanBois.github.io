@@ -12,7 +12,7 @@ episodes:
         caption: Plan
         text: Imperial MSc coursework, February 2025, set by Dr Edward Johns. A two-joint arm reaches a goal around an obstacle. First by planning with the cross-entropy method, tuned until the hand lands within 0.01.
       - span: 3
-        art: robot
+        art: methods
         caption: Learn
         text: Then a neural dynamics model learnt from random play, model-based RL planning through it, replanning after every step (which beat open-loop), and finally behavioural cloning from demonstrations.
     next: The same thread, and the same supervisor, became the thesis.
