@@ -10,23 +10,23 @@ episodes:
     title: Before the rename
     panels:
       - span: 4
-        art: sources
+        art: atlas
         caption: Atlas
         text: Seven weeks, about 155 versions. A pipeline in a day, real data within a week, then six domains of Malaysian news, government, economic and public-opinion signals, each compressed into one citable shape.
       - span: 2
-        art: chars
+        art: evidence
         caption: Evidence, not examples
         text: Retrieval-augmented reasoning, not in-context learning. Signals are immutable; how much each matters is recomputed every run.
       - span: 3
-        art: redteam
+        art: audit
         caption: Auditing myself
         text: An audit of the ingestion, then a critique of the architecture against recent papers. Its biggest risk was silent error upstream of the verifier, so each citation is now graded by removing it.
       - span: 3
-        art: walkforward
+        art: nolinks
         caption: Measure first
         text: The next phase needed links between kinds of source. Measured, there were none, so it was deferred on evidence instead of built.
       - span: 6
-        art: retract
+        art: setaside
         caption: Knowing when to stop
         text: A campaign decision-support side was built, then set aside over the legal and data-protection questions around political profiling, and because the party-attribution chain measured too weak to stand on. What survived became RE-News.
   - n: 1
@@ -41,7 +41,7 @@ episodes:
         caption: The rule
         text: The LLM only fuses signals, never raw documents, into ranked causal chains ("policy X led to Y, so Z feels W"). Every claim in a report resolves to its evidence.
       - span: 2
-        art: switch
+        art: perstage
         caption: Whose model
         text: The model backend can be switched per stage. A local qwen3:32b on the home-lab GPU by default, Claude as an opt-in.
       - span: 6
@@ -60,10 +60,10 @@ episodes:
         caption: The new rule
         text: Rank by breadth. Confidence gates and grades but is never multiplied in, trajectory is a badge, and intensity is an honest null, because nothing measures it.
       - span: 4
-        art: grey
+        art: institutional
         caption: Its own limit
         text: The corpus is 94% institutional. Until the social layer is many times larger, the ranker mostly ranks news volume, not public importance, and it says so.
       - span: 2
-        art: timeout
+        art: failclosed
         caption: Fail closed
         text: A backfill had reported success while writing 917 zero vectors. Now the embedder trips a breaker and the job exits non-zero.

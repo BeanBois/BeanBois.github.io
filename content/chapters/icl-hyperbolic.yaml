@@ -32,7 +32,7 @@ episodes:
     title: A world to test it in
     panels:
       - span: 3
-        art: board
+        art: to2d
         caption: From 3D to 2D
         text: The work started on RLBench in 3D and moved within ten days to a 2D game made for the purpose. Trained on Imperial's GPU cluster.
       - span: 3
@@ -47,7 +47,7 @@ episodes:
     title: The result, and why
     panels:
       - span: 4
-        art: versus
+        art: lost
         caption: It lost
         text: 2 of 10 against the baseline's 5 on reach-goal, 1 against 3 on eat-all-edibles, and 0 for both on the two hard tasks.
       - span: 2
